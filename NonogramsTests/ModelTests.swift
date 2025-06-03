@@ -17,10 +17,10 @@ struct ModelTests {
                                 0b10001,
                                 0b11111
         )
-        #expect(puzzle.sequences(forColumn: 0).elementsEqual([5]))
-        #expect(puzzle.sequences(forColumn: 1).elementsEqual([1, 1]))
-        #expect(puzzle.sequences(forColumn: 2).elementsEqual([1, 1, 1]))
-        #expect(puzzle.sequences(forColumn: 3).elementsEqual([1, 1]))
-        #expect(puzzle.sequences(forColumn: 4).elementsEqual([5]))
+        #expect(puzzle.sequences(forColumn: 0).map { $0.length }.elementsEqual([5]))
+        #expect(puzzle.sequences(forColumn: 1).map { $0.length }.elementsEqual([1, 1]))
+        #expect(puzzle.sequences(forColumn: 2).map { $0.length }.elementsEqual([1, 1, 1]))
+        #expect(puzzle.sequences(forColumn: 3).map { $0.length }.elementsEqual([1, 1]))
+        #expect(puzzle.sequences(forColumn: 4).map { $0.length }.elementsEqual([5]))
     }
 }

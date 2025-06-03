@@ -11,6 +11,15 @@ enum TileState {
     case blocked
 }
 
+struct Sequence: Identifiable {
+    let length: Int
+    let startIndex: Int
+
+    var id: UInt {
+        (0xFFFFFFFF >> (32 - length)) << startIndex
+    }
+}
+
 struct Puzzle {
     let size: Int
     var tiles: [TileState]
@@ -58,39 +67,39 @@ struct Puzzle {
         return true
     }
 
-    func sequences(forRow rowIndex: Int) -> [Int] {
-        var sequences = [Int]()
-        var currentSequence = 0
+    func sequences(forRow rowIndex: Int) -> [Sequence] {
+        var sequences = [Sequence]()
+        var length = 0
         var row = solution[rowIndex]
-        for _ in 0..<size {
+        for columnIndex in 0..<size {
             if row & 1 == 1 {
-                currentSequence += 1
-            } else if currentSequence > 0 {
-                sequences.append(currentSequence)
-                currentSequence = 0
+                length += 1
+            } else if length > 0 {
+                sequences.append(Sequence(length: length, startIndex: columnIndex - length))
+                length = 0
             }
             row >>= 1
         }
-        if currentSequence > 0 {
-            sequences.append(currentSequence)
+        if length > 0 {
+            sequences.append(Sequence(length: length, startIndex: size - length))
         }
         return sequences.reversed()
     }
 
-    func sequences(forColumn columnIndex: Int) -> [Int] {
-        var sequences = [Int]()
-        var currentSequence = 0
+    func sequences(forColumn columnIndex: Int) -> [Sequence] {
+        var sequences = [Sequence]()
+        var length = 0
         let columnBit: UInt = 1 << columnIndex
         for rowIndex in 0..<size {
             if solution[rowIndex] & columnBit > 0 {
-                currentSequence += 1
-            } else if currentSequence > 0 {
-                sequences.append(currentSequence)
-                currentSequence = 0
+                length += 1
+            } else if length > 0 {
+                sequences.append(Sequence(length: length, startIndex: rowIndex - length))
+                length = 0
             }
         }
-        if currentSequence > 0 {
-            sequences.append(currentSequence)
+        if length > 0 {
+            sequences.append(Sequence(length: length, startIndex: size - length))
         }
         return sequences
     }

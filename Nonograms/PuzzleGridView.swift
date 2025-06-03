@@ -41,8 +41,8 @@ struct PuzzleGridView: View {
                 ForEach(0..<puzzle.size, id: \.self) { columnIndex in
                     let isValid = puzzle.validate(column: columnIndex)
                     VStack(spacing: 0) {
-                        ForEach(Array(puzzle.sequences(forColumn: columnIndex).enumerated()), id: \.0) { (_, sequence) in
-                            Text("\(sequence)")
+                        ForEach(puzzle.sequences(forColumn: columnIndex)) { sequence in
+                            Text("\(sequence.length)")
                         }
                     }
                         .gridCellAnchor(.bottom)
@@ -54,8 +54,8 @@ struct PuzzleGridView: View {
                 let isValid = puzzle.validate(row: rowIndex)
                 GridRow {
                     HStack(spacing: 8) {
-                        ForEach(Array(puzzle.sequences(forRow: rowIndex).enumerated()), id: \.0) { (_, sequence) in
-                            Text("\(sequence)")
+                        ForEach(puzzle.sequences(forRow: rowIndex)) { sequence in
+                            Text("\(sequence.length)")
                         }
                     }
                         .gridCellAnchor(.trailing)
