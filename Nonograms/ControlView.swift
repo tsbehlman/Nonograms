@@ -36,7 +36,6 @@ struct ControlView: View {
         HStack {
             ControlIconView(state: $state, control: .filled, icon: "square.fill")
             ControlIconView(state: $state, control: .blocked, icon: "xmark")
-            ControlIconView(state: $state, control: .blank, icon: "eraser")
         }
     }
 }

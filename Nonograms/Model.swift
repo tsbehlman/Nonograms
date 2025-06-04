@@ -56,8 +56,29 @@ struct Puzzle {
         tiles[row * size + column]
     }
 
-    mutating func set(row: Int, column: Int, to state: TileState) {
-        tiles[row * size + column] = state
+    mutating func set(row: Int, column: Int, to newState: TileState) {
+        let tileIndex = row * size + column
+        let currentState = tiles[tileIndex]
+        switch (currentState, newState) {
+        case (.blank, .blocked):
+            tiles[row * size + column] = .blocked
+        case (.blank, .filled):
+            let columnBit: UInt = 1 << column
+            let shouldBeFilled = solution[row] & columnBit > 0
+            if shouldBeFilled {
+                tiles[row * size + column] = .filled
+            } else {
+                tiles[row * size + column] = .blocked
+            }
+        case (.blocked, .blocked):
+            tiles[row * size + column] = .blank
+        case (.blocked, _):
+            break
+        case (.filled, _):
+            break
+        case (_, .blank):
+            break
+        }
     }
 
     func validate(row rowIndex: Int) -> Bool {
