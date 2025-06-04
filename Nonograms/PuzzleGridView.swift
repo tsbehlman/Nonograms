@@ -39,28 +39,26 @@ struct PuzzleGridView: View {
                 Color.clear
                     .frame(width: tileSize, height: tileSize, alignment: .center)
                 ForEach(0..<puzzle.size, id: \.self) { columnIndex in
-                    let isValid = puzzle.validate(column: columnIndex)
                     VStack(spacing: 0) {
                         ForEach(puzzle.sequences(forColumn: columnIndex)) { sequence in
                             Text("\(sequence.length)")
+                                .foregroundStyle(sequence.state == .complete ? Color.secondary : Color.primary)
                         }
                     }
                         .gridCellAnchor(.bottom)
                         .padding(.vertical, 12)
-                        .foregroundStyle(isValid ? Color.secondary : Color.primary)
                 }
             }
             ForEach(0..<puzzle.size, id: \.self) { rowIndex in
-                let isValid = puzzle.validate(row: rowIndex)
                 GridRow {
                     HStack(spacing: 8) {
                         ForEach(puzzle.sequences(forRow: rowIndex)) { sequence in
                             Text("\(sequence.length)")
+                                .foregroundStyle(sequence.state == .complete ? Color.secondary : Color.primary)
                         }
                     }
                         .gridCellAnchor(.trailing)
                         .padding(.horizontal, 12)
-                        .foregroundStyle(isValid ? Color.secondary : Color.primary)
                     ForEach(0..<puzzle.size, id: \.self) { columnIndex in
                         TileView(status: puzzle.tile(row: rowIndex, column: columnIndex))
                             .onTapGesture {

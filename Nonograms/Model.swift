@@ -11,12 +11,30 @@ enum TileState {
     case blocked
 }
 
-struct Sequence: Identifiable {
+enum SequenceState {
+    case missing
+    case complete
+}
+
+struct Sequence: Identifiable, Equatable {
     let length: Int
     let startIndex: Int
+    let state: SequenceState
+
+    var endIndex: Int {
+        startIndex + length
+    }
+
+    var range: Range<Int> {
+        startIndex..<endIndex
+    }
 
     var id: UInt {
         (0xFFFFFFFF >> (32 - length)) << startIndex
+    }
+
+    func with(state: SequenceState) -> Sequence {
+        Sequence(length: length, startIndex: startIndex, state: state)
     }
 }
 
@@ -71,19 +89,50 @@ struct Puzzle {
         var sequences = [Sequence]()
         var length = 0
         var row = solution[rowIndex]
-        for columnIndex in 0..<size {
+        for columnIndex in (0..<size).reversed() {
             if row & 1 == 1 {
                 length += 1
             } else if length > 0 {
-                sequences.append(Sequence(length: length, startIndex: columnIndex - length))
+                sequences.append(Sequence(length: length, startIndex: columnIndex + 1, state: .missing))
                 length = 0
             }
             row >>= 1
         }
         if length > 0 {
-            sequences.append(Sequence(length: length, startIndex: size - length))
+            sequences.append(Sequence(length: length, startIndex: 0, state: .missing))
         }
-        return sequences.reversed()
+        sequences = sequences.reversed()
+
+        var iterator = BidirectionalZippedIterator(sequences.indices, completeSequences(forRow: rowIndex))
+
+        while let (index, completeSequence) = iterator.next() {
+            if sequences[index].range == completeSequence.range {
+                sequences[index] = completeSequence
+            } else if iterator.isAdvancing {
+                iterator.flip()
+            } else {
+                break
+            }
+        }
+
+        return sequences
+    }
+
+    private func completeSequences(forRow rowIndex: Int) -> [Sequence] {
+        var sequences = [Sequence]()
+        var length = 0
+        for columnIndex in 0..<size {
+            if tile(row: rowIndex, column: columnIndex) == .filled {
+                length += 1
+            } else if length > 0 {
+                sequences.append(Sequence(length: length, startIndex: columnIndex - length, state: .complete))
+                length = 0
+            }
+        }
+        if length > 0 {
+            sequences.append(Sequence(length: length, startIndex: size - length, state: .complete))
+        }
+        return sequences
     }
 
     func sequences(forColumn columnIndex: Int) -> [Sequence] {
@@ -94,19 +143,57 @@ struct Puzzle {
             if solution[rowIndex] & columnBit > 0 {
                 length += 1
             } else if length > 0 {
-                sequences.append(Sequence(length: length, startIndex: rowIndex - length))
+                sequences.append(Sequence(length: length, startIndex: rowIndex - length, state: .missing))
                 length = 0
             }
         }
         if length > 0 {
-            sequences.append(Sequence(length: length, startIndex: size - length))
+            sequences.append(Sequence(length: length, startIndex: size - length, state: .missing))
+        }
+
+        var iterator = BidirectionalZippedIterator(sequences.indices, completeSequences(forColumn: columnIndex))
+
+        while let (index, completeSequence) = iterator.next() {
+            if sequences[index].range == completeSequence.range {
+                sequences[index] = completeSequence
+            } else if iterator.isAdvancing {
+                iterator.flip()
+            } else {
+                break
+            }
+        }
+
+        return sequences
+    }
+
+    private func completeSequences(forColumn columnIndex: Int) -> [Sequence] {
+        var sequences = [Sequence]()
+        var length = 0
+        for rowIndex in 0..<size {
+            if tile(row: rowIndex, column: columnIndex) == .filled {
+                length += 1
+            } else if length > 0 {
+                sequences.append(Sequence(length: length, startIndex: rowIndex - length, state: .complete))
+                length = 0
+            }
+        }
+        if length > 0 {
+            sequences.append(Sequence(length: length, startIndex: size - length, state: .complete))
         }
         return sequences
     }
 
     mutating func solve() {
+        fill(data: solution)
+    }
+
+    mutating func fill(_ data: UInt...) {
+        fill(data: data)
+    }
+
+    private mutating func fill(data: [UInt]) {
         var rowIndex = 0
-        for var row in solution {
+        for var row in data {
             for index in (0..<size).reversed() {
                 if row & 1 == 1 {
                     tiles[rowIndex + index] = .filled
