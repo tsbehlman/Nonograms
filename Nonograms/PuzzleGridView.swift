@@ -8,24 +8,59 @@
 import SwiftUI
 
 private let tileSize: CGFloat = 48
+private let sequenceFont = Font.system(size: tileSize / 2, weight: .bold, design: .monospaced)
+
+struct SequenceLabel: View {
+    let sequence: Sequence
+
+    var body: some View {
+        Text("\(sequence.length)")
+            .font(sequenceFont)
+            .foregroundStyle(sequence.state == .complete ? Color.accentColor : Color.primary)
+    }
+}
 
 struct TileView: View {
     let status: TileState
 
     var body: some View {
-        Group {
+        ZStack {
+            Rectangle()
+                .fill(status == .filled ? Color.accentColor : Color(UIColor.systemBackground))
+                .stroke(Color(uiColor: .separator), lineWidth: 1, antialiased: false)
             if status == .blocked {
                 Image(systemName: "xmark")
                     .font(.system(size: tileSize * 0.75, weight: .light))
                     .foregroundStyle(Color.secondary)
-            } else if status == .filled {
-                Color.accentColor
-            } else {
-                Color(UIColor.systemBackground)
             }
         }
         .frame(width: tileSize, height: tileSize, alignment: .center)
-        .border(Color(uiColor: .separator))
+    }
+}
+
+let sequenceGradient = Gradient(stops: [
+    .init(color: Color.accentColor.opacity(0.000), location: 0.0),
+    .init(color: Color.accentColor.opacity(0.125), location: 0.375),
+    .init(color: Color.accentColor.opacity(0.250), location: 1.0),
+])
+
+struct PuzzleTilesView: View {
+    @Binding var puzzle: Puzzle
+    @Binding var selectedState: TileState
+
+    var body: some View {
+        Grid(horizontalSpacing: 0, verticalSpacing: 0) {
+            ForEach(0..<puzzle.size, id: \.self) { rowIndex in
+                GridRow {
+                    ForEach(0..<puzzle.size, id: \.self) { columnIndex in
+                        TileView(status: puzzle.tile(row: rowIndex, column: columnIndex))
+                            .onTapGesture {
+                                puzzle.set(row: rowIndex, column: columnIndex, to: selectedState)
+                            }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -34,38 +69,54 @@ struct PuzzleGridView: View {
     @Binding var selectedState: TileState
 
     var body: some View {
-        Grid(horizontalSpacing: -1, verticalSpacing: -1) {
+        Grid(horizontalSpacing: 0, verticalSpacing: 0) {
             GridRow {
                 Color.clear
-                    .frame(width: tileSize, height: tileSize, alignment: .center)
-                ForEach(0..<puzzle.size, id: \.self) { columnIndex in
-                    VStack(spacing: 0) {
-                        ForEach(puzzle.sequences(forColumn: columnIndex)) { sequence in
-                            Text("\(sequence.length)")
-                                .foregroundStyle(sequence.state == .complete ? Color.secondary : Color.primary)
+                    .gridCellUnsizedAxes([.horizontal, .vertical])
+                EqualStack(axis: .horizontal, itemWidth: .fixed(tileSize)) {
+                    ForEach(0..<puzzle.size, id: \.self) { columnIndex in
+                        ZStack {
+                            if columnIndex.isMultiple(of: 2) {
+                                Rectangle()
+                                    .fill(LinearGradient(gradient: sequenceGradient, startPoint: .top, endPoint: .bottom))
+                            } else {
+                                Rectangle()
+                                    .fill(Color.clear)
+                            }
+                            VStack(spacing: 0) {
+                                Spacer()
+                                ForEach(puzzle.sequences(forColumn: columnIndex)) { sequence in
+                                    SequenceLabel(sequence: sequence)
+                                }
+                            }
+                            .padding(.bottom, 12)
                         }
                     }
-                        .gridCellAnchor(.bottom)
-                        .padding(.vertical, 12)
                 }
             }
-            ForEach(0..<puzzle.size, id: \.self) { rowIndex in
-                GridRow {
-                    HStack(spacing: 8) {
-                        ForEach(puzzle.sequences(forRow: rowIndex)) { sequence in
-                            Text("\(sequence.length)")
-                                .foregroundStyle(sequence.state == .complete ? Color.secondary : Color.primary)
+            GridRow {
+                EqualStack(axis: .vertical, itemHeight: .fixed(tileSize)) {
+                    ForEach(0..<puzzle.size, id: \.self) { rowIndex in
+                        ZStack {
+                            if rowIndex.isMultiple(of: 2) {
+                                Rectangle()
+                                    .fill(LinearGradient(gradient: sequenceGradient, startPoint: .leading, endPoint: .trailing))
+                            } else {
+                                Rectangle()
+                                    .fill(Color.clear)
+                            }
+                            HStack(spacing: 8) {
+                                Spacer()
+                                ForEach(puzzle.sequences(forRow: rowIndex)) { sequence in
+                                    SequenceLabel(sequence: sequence)
+                                }
+                            }
+                            .padding(.trailing, 12)
                         }
                     }
-                        .gridCellAnchor(.trailing)
-                        .padding(.horizontal, 12)
-                    ForEach(0..<puzzle.size, id: \.self) { columnIndex in
-                        TileView(status: puzzle.tile(row: rowIndex, column: columnIndex))
-                            .onTapGesture {
-                                puzzle.set(row: rowIndex, column: columnIndex, to: selectedState)
-                            }
-                    }
                 }
+                PuzzleTilesView(puzzle: $puzzle, selectedState: $selectedState)
+                    .gridCellUnsizedAxes([.horizontal, .vertical])
             }
         }
     }
