@@ -44,6 +44,35 @@ let sequenceGradient = Gradient(stops: [
     .init(color: Color.accentColor.opacity(0.250), location: 1.0),
 ])
 
+struct DraggablePuzzleTilesView: View {
+    @Binding var puzzle: Puzzle
+    @Binding var selectedState: TileState
+
+    enum DragState: Equatable {
+        case inactive
+        case dragging(row: Int, column: Int)
+    }
+
+    @GestureState private var dragState: DragState = .inactive
+
+    var body: some View {
+        let gesture = DragGesture(minimumDistance: 4, coordinateSpace: .local)
+            .updating($dragState) { value, state, transaction in
+                let row = clamp(Int(value.location.y / tileSize), min: 0, max: puzzle.size - 1)
+                let column = clamp(Int(value.location.x / tileSize), min: 0, max: puzzle.size - 1)
+                state = .dragging(row: row, column: column)
+            }
+        PuzzleTilesView(puzzle: $puzzle, selectedState: $selectedState)
+            .highPriorityGesture(gesture)
+            .onChange(of: dragState) {
+                guard case let .dragging(row, column) = dragState,
+                      puzzle.indices.contains(row),
+                      puzzle.indices.contains(column) else { return }
+                puzzle.set(row: row, column: column, to: selectedState)
+            }
+    }
+}
+
 struct PuzzleTilesView: View {
     @Binding var puzzle: Puzzle
     @Binding var selectedState: TileState
@@ -115,7 +144,7 @@ struct PuzzleGridView: View {
                         }
                     }
                 }
-                PuzzleTilesView(puzzle: $puzzle, selectedState: $selectedState)
+                DraggablePuzzleTilesView(puzzle: $puzzle, selectedState: $selectedState)
                     .gridCellUnsizedAxes([.horizontal, .vertical])
             }
         }

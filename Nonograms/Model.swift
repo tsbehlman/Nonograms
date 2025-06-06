@@ -56,6 +56,10 @@ struct Puzzle {
         tiles[row * size + column]
     }
 
+    var indices: Range<Int> {
+        0..<size
+    }
+
     mutating func set(row: Int, column: Int, to newState: TileState) {
         let tileIndex = row * size + column
         let currentState = tiles[tileIndex]
