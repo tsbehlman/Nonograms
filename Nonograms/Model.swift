@@ -67,7 +67,7 @@ struct Puzzle {
         case (.blank, .blocked):
             tiles[row * size + column] = .blocked
         case (.blank, .filled):
-            let columnBit: UInt = 1 << column
+            let columnBit = bit(forColumn: column)
             let shouldBeFilled = solution[row] & columnBit > 0
             if shouldBeFilled {
                 tiles[row * size + column] = .filled
@@ -99,7 +99,7 @@ struct Puzzle {
     }
 
     func validate(column columnIndex: Int) -> Bool {
-        let columnBit: UInt = 1 << columnIndex
+        let columnBit = bit(forColumn: columnIndex)
         for rowIndex in 0..<size {
             let shouldBeFilled = solution[rowIndex] & columnBit > 0
             let isFilled = tile(row: rowIndex, column: columnIndex) == .filled
@@ -163,7 +163,7 @@ struct Puzzle {
     func sequences(forColumn columnIndex: Int) -> [Sequence] {
         var sequences = [Sequence]()
         var length = 0
-        let columnBit: UInt = 1 << columnIndex
+        let columnBit = bit(forColumn: columnIndex)
         for rowIndex in 0..<size {
             if solution[rowIndex] & columnBit > 0 {
                 length += 1
@@ -214,6 +214,10 @@ struct Puzzle {
 
     mutating func fill(_ data: UInt...) {
         fill(data: data)
+    }
+
+    func bit(forColumn columnIndex: Int) -> UInt {
+        1 << (size - columnIndex - 1)
     }
 
     private mutating func fill(data: [UInt]) {
