@@ -128,6 +128,10 @@ struct Puzzle {
         }
         sequences = sequences.reversed()
 
+        if sequences.isEmpty {
+            return [Sequence(length: 0, startIndex: 0, state: .complete)]
+        }
+
         var iterator = BidirectionalZippedIterator(sequences.indices, completeSequences(forRow: rowIndex))
 
         while let (index, completeSequence) = iterator.next() {
@@ -174,6 +178,10 @@ struct Puzzle {
         }
         if length > 0 {
             sequences.append(Sequence(length: length, startIndex: size - length, state: .missing))
+        }
+
+        if sequences.isEmpty {
+            return [Sequence(length: 0, startIndex: 0, state: .complete)]
         }
 
         var iterator = BidirectionalZippedIterator(sequences.indices, completeSequences(forColumn: columnIndex))
