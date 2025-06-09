@@ -8,19 +8,35 @@
 import SwiftUI
 
 struct PuzzleSolveView: View {
-    @State var puzzle = Puzzle(size: 5, solution:
-                                   0b11111,
-                                   0b10001,
-                                   0b10101,
-                                   0b10001,
-                                   0b11111
+//    @State var puzzle = Puzzle(size: 5, solution:
+//                                   0b11111,
+//                                   0b10001,
+//                                   0b10101,
+//                                   0b10001,
+//                                   0b11111
+//    )
+//    @State var solver: Solver = Solver(
+//        rows: [[5], [1, 1], [1, 1, 1], [1, 1], [5]],
+//        columns: [[5], [1, 1], [1, 1, 1], [1, 1], [5]]
+//    )
+    @State var puzzle = Puzzle(size: 6, solution:
+                                   0b111111,
+                                   0b011111,
+                                   0b111100,
+                                   0b110110,
+                                   0b011101,
+                                   0b000000
+    )
+    @State var solver: Solver = Solver(
+        rows: [[6], [5], [4], [2, 2], [3, 1], [0]],
+        columns: [[1, 2], [5], [3, 1], [5], [2, 1], [2, 1]]
     )
     @State var selectedState: TileState = .filled
 
     var body: some View {
         VStack(alignment: .trailing) {
             PuzzleGridView(puzzle: $puzzle, selectedState: $selectedState)
-            ControlView(state: $selectedState)
+            ControlView(state: $selectedState, puzzle: $puzzle, solver: $solver)
         }
     }
 }

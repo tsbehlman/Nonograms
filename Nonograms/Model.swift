@@ -38,6 +38,137 @@ struct Sequence: Identifiable, Equatable {
     }
 }
 
+struct Solver {
+    let rows: [[Int]]
+    let columns: [[Int]]
+
+    var tiles: [TileState]
+    var rowIndex = 0
+    var columnIndex = 0
+    var isSolvingRow = true
+
+    init(rows: [[Int]], columns: [[Int]]) {
+        self.rows = rows
+        self.columns = columns
+        tiles = Array(repeating: .blank, count: rows.count * columns.count)
+    }
+
+    private mutating func attemptSolution() -> Bool {
+        var foundPartialSolution = false
+
+        let sequences = self.sequences
+        let states = self.states
+
+        let sumOfSequences = sequences.reduce(0, +) + max(1, sequences.count) - 1
+        if sumOfSequences == 0 {
+            foundPartialSolution = fill(attempt: states.map { ($0.0, .blocked) })
+        } else if sumOfSequences == length {
+            var index = 0
+            for sequence in sequences {
+                for _ in 0..<sequence {
+                    let (tileIndex, state) = states[index]
+                    if state != .filled {
+                        foundPartialSolution = true
+                        tiles[tileIndex] = .filled
+                    }
+                    index += 1
+                }
+                if index < length {
+                    let (tileIndex, state) = states[index]
+                    if state != .blocked {
+                        foundPartialSolution = true
+                        tiles[tileIndex] = .blocked
+                    }
+                    index += 1
+                }
+            }
+        } else {
+            let tolerance = length - sumOfSequences
+            var index = 0
+            for sequence in sequences {
+                for _ in 0..<tolerance {
+                    index += 1
+                }
+                for _ in 0..<max(0, sequence - tolerance) {
+                    let (tileIndex, state) = states[index]
+                    if state != .filled {
+                        foundPartialSolution = true
+                        tiles[tileIndex] = .filled
+                    }
+                    index += 1
+                }
+                for _ in 0..<tolerance {
+                    index += 1
+                }
+            }
+        }
+
+        if isSolvingRow {
+            rowIndex += 1
+            if rowIndex >= rows.count {
+                rowIndex = 0
+            }
+            isSolvingRow = false
+        } else {
+            columnIndex += 1
+            if columnIndex >= columns.count {
+                columnIndex = 0
+            }
+            isSolvingRow = true
+        }
+        return foundPartialSolution
+    }
+
+    private mutating func fill(attempt: [(Int, TileState)]) -> Bool {
+        var foundPartialSolution = false
+        for (index, newState) in attempt {
+            let state = tiles[index]
+            if state == .blank && state != newState {
+                tiles[index] = newState
+                foundPartialSolution = true
+            }
+        }
+        return foundPartialSolution
+    }
+
+    @discardableResult mutating func step() -> Bool {
+        for _ in 0..<(rows.count + columns.count) {
+            if attemptSolution() {
+                return true
+            }
+        }
+        return false
+    }
+
+    mutating func canSolvePuzzle() -> Bool {
+        while step() {
+            if tiles.allSatisfy({ $0 != .blank }) {
+                return true
+            }
+        }
+        return false
+    }
+
+    var sequences: [Int] {
+        isSolvingRow ? rows[rowIndex] : columns[columnIndex]
+    }
+
+    var length: Int {
+        isSolvingRow ? columns.count : rows.count
+    }
+
+    var states: [(Int, TileState)] {
+        let indices: StrideTo<Int>
+        if isSolvingRow {
+            let startIndex = rowIndex * columns.count
+            indices = stride(from: startIndex, to: startIndex + columns.count, by: 1)
+        } else {
+            indices = stride(from: columnIndex, to: columnIndex + columns.count * rows.count, by: columns.count)
+        }
+        return indices.map { ( $0, tiles[$0]) }
+    }
+}
+
 struct Puzzle {
     let size: Int
     var tiles: [TileState]
