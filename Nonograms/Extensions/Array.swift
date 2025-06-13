@@ -13,4 +13,11 @@ extension Array {
             return nil
         }
     }
+
+    func onlyIndex(where predicate: (Element) throws -> Bool) rethrows -> Int? {
+        if let firstIndex = try self.firstIndex(where: predicate), let lastIndex = try lastIndex(where: predicate), firstIndex == lastIndex {
+            return firstIndex
+        }
+        return nil
+    }
 }

@@ -36,6 +36,10 @@ struct Sequence: Identifiable, Equatable {
     func with(state: SequenceState) -> Sequence {
         Sequence(length: length, startIndex: startIndex, state: state)
     }
+
+    func moving(by offset: Int) -> Sequence {
+        Sequence(length: length, startIndex: startIndex + offset, state: state)
+    }
 }
 
 struct Solver {
@@ -59,21 +63,78 @@ struct Solver {
         let sequences = self.sequences
         let states = self.states
 
-        let sumOfSequences = sequences.reduce(0, +) + max(1, sequences.count) - 1
-        if sumOfSequences == 0 {
+        if sequences.only == 0 {
             foundPartialSolution = fill(attempt: states.map { ($0.0, .blocked) })
-        } else if sumOfSequences == length {
+        } else {
+            var minSequences = [Sequence]()
             var index = 0
-            for sequence in sequences {
-                for _ in 0..<sequence {
-                    let (tileIndex, state) = states[index]
-                    if state != .filled {
-                        foundPartialSolution = true
-                        tiles[tileIndex] = .filled
-                    }
+            for length in sequences {
+                var startIndex = index
+                while index - startIndex < length {
+                    let (_, state) = states[index]
                     index += 1
+                    if state == .blocked {
+                        startIndex = index
+                    }
                 }
-                if index < length {
+                minSequences.append(Sequence(length: length, startIndex: startIndex, state: .missing))
+                index += 1
+            }
+
+            var maxSequences = [Sequence]()
+            index = states.count - 1
+            for length in sequences.reversed() {
+                var endIndex = index
+                while endIndex - index < length {
+                    let (_, state) = states[index]
+                    index -= 1
+                    if state == .blocked {
+                        endIndex = index
+                    }
+                }
+                maxSequences.insert(Sequence(length: length, startIndex: endIndex - length + 1, state: .missing), at: 0)
+                index -= 1
+            }
+
+            var filledRanges = [Range<Int>]()
+            var length = 0
+            index = 0
+            for (_, state) in states {
+                if state == .filled {
+                   length += 1
+                } else if length > 0 {
+                    filledRanges.append((index - length)..<index)
+                    length = 0
+                }
+                index += 1
+            }
+
+            var sequenceBounds = zip(minSequences, maxSequences).map { (minSequence, maxSequence) in
+                minSequence.startIndex..<maxSequence.endIndex
+            }
+
+            for filledRange in filledRanges {
+                if let matchingIndex = sequenceBounds.onlyIndex(where: { $0.contains(filledRange) }) {
+                    let forwardOffset = filledRange.upperBound - minSequences[matchingIndex].endIndex
+                    if forwardOffset > 0 {
+                        for sequenceIndex in matchingIndex..<sequences.count {
+                            minSequences[sequenceIndex] = minSequences[sequenceIndex].moving(by: forwardOffset)
+                            sequenceBounds[sequenceIndex] = minSequences[sequenceIndex].startIndex..<maxSequences[sequenceIndex].endIndex
+                        }
+                    }
+                    let backwardOffset = filledRange.lowerBound - maxSequences[matchingIndex].startIndex
+                    if backwardOffset < 0 {
+                        for sequenceIndex in 0...matchingIndex {
+                            maxSequences[sequenceIndex] = maxSequences[sequenceIndex].moving(by: backwardOffset)
+                            sequenceBounds[sequenceIndex] = minSequences[sequenceIndex].startIndex..<maxSequences[sequenceIndex].endIndex
+                        }
+                    }
+                }
+            }
+
+            index = 0
+            for sequenceBound in sequenceBounds {
+                while index < sequenceBound.lowerBound {
                     let (tileIndex, state) = states[index]
                     if state != .blocked {
                         foundPartialSolution = true
@@ -81,24 +142,42 @@ struct Solver {
                     }
                     index += 1
                 }
+                index = sequenceBound.upperBound
             }
-        } else {
-            let tolerance = length - sumOfSequences
-            var index = 0
-            for sequence in sequences {
-                for _ in 0..<tolerance {
-                    index += 1
+            while index < states.count {
+                let (tileIndex, state) = states[index]
+                if state != .blocked {
+                    foundPartialSolution = true
+                    tiles[tileIndex] = .blocked
                 }
-                for _ in 0..<max(0, sequence - tolerance) {
-                    let (tileIndex, state) = states[index]
-                    if state != .filled {
-                        foundPartialSolution = true
-                        tiles[tileIndex] = .filled
+                index += 1
+            }
+
+            for (minSequence, maxSequence) in zip(minSequences, maxSequences) {
+                if let intersection = minSequence.range.intersection(with: maxSequence.range) {
+                    for index in intersection {
+                        let (tileIndex, state) = states[index]
+                        if state != .filled {
+                            foundPartialSolution = true
+                            tiles[tileIndex] = .filled
+                        }
                     }
-                    index += 1
-                }
-                for _ in 0..<tolerance {
-                    index += 1
+                    if minSequence == maxSequence {
+                        if minSequence.startIndex > 0 {
+                            let (tileIndex, state) = states[minSequence.startIndex - 1]
+                            if state != .blocked {
+                                foundPartialSolution = true
+                                tiles[tileIndex] = .blocked
+                            }
+                        }
+                        if minSequence.endIndex < states.count - 1 {
+                            let (tileIndex, state) = states[minSequence.endIndex]
+                            if state != .blocked {
+                                foundPartialSolution = true
+                                tiles[tileIndex] = .blocked
+                            }
+                        }
+                    }
                 }
             }
         }
