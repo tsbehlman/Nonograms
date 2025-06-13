@@ -37,8 +37,12 @@ struct Sequence: Identifiable, Equatable {
         Sequence(length: length, startIndex: startIndex, state: state)
     }
 
-    func moving(by offset: Int) -> Sequence {
-        Sequence(length: length, startIndex: startIndex + offset, state: state)
+    func moving(toAtLeast minIndex: Int) -> Sequence {
+        Sequence(length: length, startIndex: min(startIndex, minIndex), state: state)
+    }
+
+    func moving(toAtMost maxIndex: Int) -> Sequence {
+        Sequence(length: length, startIndex: max(endIndex, maxIndex) - length, state: state)
     }
 }
 
@@ -108,6 +112,9 @@ struct Solver {
                 }
                 index += 1
             }
+            if length > 0 {
+                filledRanges.append((index - length)..<index)
+            }
 
             var sequenceBounds = zip(minSequences, maxSequences).map { (minSequence, maxSequence) in
                 minSequence.startIndex..<maxSequence.endIndex
@@ -115,18 +122,27 @@ struct Solver {
 
             for filledRange in filledRanges {
                 if let matchingIndex = sequenceBounds.onlyIndex(where: { $0.contains(filledRange) }) {
-                    let forwardOffset = filledRange.upperBound - minSequences[matchingIndex].endIndex
-                    if forwardOffset > 0 {
-                        for sequenceIndex in matchingIndex..<sequences.count {
-                            minSequences[sequenceIndex] = minSequences[sequenceIndex].moving(by: forwardOffset)
-                            sequenceBounds[sequenceIndex] = minSequences[sequenceIndex].startIndex..<maxSequences[sequenceIndex].endIndex
+                    if filledRange.upperBound > minSequences[matchingIndex].endIndex {
+                        var nextPosition = filledRange.upperBound
+                        var newSequence = minSequences[matchingIndex].moving(toAtMost: nextPosition)
+                        minSequences[matchingIndex] = newSequence
+                        sequenceBounds[matchingIndex] = newSequence.startIndex..<maxSequences[matchingIndex].endIndex
+                        for sequenceIndex in (matchingIndex + 1)..<sequences.count {
+                            nextPosition = max(newSequence.endIndex + 1, minSequences[sequenceIndex].startIndex)
+                            newSequence = Sequence(length: minSequences[sequenceIndex].length, startIndex: nextPosition, state: .missing)
+                            minSequences[sequenceIndex] = newSequence
+                            sequenceBounds[sequenceIndex] = newSequence.startIndex..<maxSequences[sequenceIndex].endIndex
                         }
                     }
-                    let backwardOffset = filledRange.lowerBound - maxSequences[matchingIndex].startIndex
-                    if backwardOffset < 0 {
-                        for sequenceIndex in 0...matchingIndex {
-                            maxSequences[sequenceIndex] = maxSequences[sequenceIndex].moving(by: backwardOffset)
-                            sequenceBounds[sequenceIndex] = minSequences[sequenceIndex].startIndex..<maxSequences[sequenceIndex].endIndex
+                    if filledRange.lowerBound < maxSequences[matchingIndex].startIndex {
+                        var nextPosition = filledRange.lowerBound
+                        var newSequence = maxSequences[matchingIndex].moving(toAtLeast: nextPosition)
+                        maxSequences[matchingIndex] = newSequence
+                        for sequenceIndex in (0..<matchingIndex).reversed() {
+                            nextPosition = min(newSequence.startIndex - 1, maxSequences[sequenceIndex].endIndex)
+                            newSequence = Sequence(length: maxSequences[sequenceIndex].length, startIndex: max(0, nextPosition - maxSequences[sequenceIndex].length), state: .missing)
+                            maxSequences[sequenceIndex] = newSequence
+                            sequenceBounds[sequenceIndex] = minSequences[sequenceIndex].startIndex..<newSequence.endIndex
                         }
                     }
                 }
