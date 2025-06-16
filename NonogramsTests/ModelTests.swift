@@ -1,15 +1,15 @@
 //
 //  ModelTests.swift
-//  Nonograms
+//  NonogramsTests
 //
-//  Created by Trevor Behlman on 6/1/25.
+//  Created by Trevor Behlman on 6/15/25.
 //
 
-import Testing
+import XCTest
 @testable import Nonograms
 
-struct ModelTests {
-    @Test func testEmptyRowSequences() throws {
+final class ModelTests: XCTestCase {
+    func testEmptyRowSequences() {
         let puzzle = Puzzle(size: 5, solution:
                                 0b11111,
                                 0b10001,
@@ -17,21 +17,21 @@ struct ModelTests {
                                 0b10001,
                                 0b11111
         )
-        #expect(puzzle.sequences(forRow: 0).elementsEqual([
+        XCTAssertEqual(puzzle.sequences(forRow: 0), [
             Sequence(length: 5, startIndex: 0, state: .missing),
-        ]))
-        #expect(puzzle.sequences(forRow: 1).elementsEqual([
+        ])
+        XCTAssertEqual(puzzle.sequences(forRow: 1), [
             Sequence(length: 1, startIndex: 0, state: .missing),
             Sequence(length: 1, startIndex: 4, state: .missing),
-        ]))
-        #expect(puzzle.sequences(forRow: 2).elementsEqual([
+        ])
+        XCTAssertEqual(puzzle.sequences(forRow: 2), [
             Sequence(length: 1, startIndex: 0, state: .missing),
             Sequence(length: 1, startIndex: 2, state: .missing),
             Sequence(length: 1, startIndex: 4, state: .missing),
-        ]))
+        ])
     }
 
-    @Test func testCompleteRowSequences() throws {
+    func testCompleteRowSequences() {
         var puzzle = Puzzle(size: 5, solution:
                                 0b11111,
                                 0b10001,
@@ -40,21 +40,21 @@ struct ModelTests {
                                 0b11111
         )
         puzzle.solve()
-        #expect(puzzle.sequences(forRow: 0).elementsEqual([
+        XCTAssertEqual(puzzle.sequences(forRow: 0), [
             Sequence(length: 5, startIndex: 0, state: .complete),
-        ]))
-        #expect(puzzle.sequences(forRow: 1).elementsEqual([
+        ])
+        XCTAssertEqual(puzzle.sequences(forRow: 1), [
             Sequence(length: 1, startIndex: 0, state: .complete),
             Sequence(length: 1, startIndex: 4, state: .complete),
-        ]))
-        #expect(puzzle.sequences(forRow: 2).elementsEqual([
+        ])
+        XCTAssertEqual(puzzle.sequences(forRow: 2), [
             Sequence(length: 1, startIndex: 0, state: .complete),
             Sequence(length: 1, startIndex: 2, state: .complete),
             Sequence(length: 1, startIndex: 4, state: .complete),
-        ]))
+        ])
     }
 
-    @Test func testPartialRowSequences() throws {
+    func testPartialRowSequences() {
         var puzzle = Puzzle(size: 5, solution:
                                 0b11111,
                                 0b10001,
@@ -69,28 +69,28 @@ struct ModelTests {
             0b00001,
             0b11011
         )
-        #expect(puzzle.sequences(forRow: 0).elementsEqual([
+        XCTAssertEqual(puzzle.sequences(forRow: 0), [
             Sequence(length: 5, startIndex: 0, state: .missing),
-        ]))
-        #expect(puzzle.sequences(forRow: 1).elementsEqual([
+        ])
+        XCTAssertEqual(puzzle.sequences(forRow: 1), [
             Sequence(length: 1, startIndex: 0, state: .complete),
             Sequence(length: 1, startIndex: 4, state: .missing),
-        ]))
-        #expect(puzzle.sequences(forRow: 2).elementsEqual([
+        ])
+        XCTAssertEqual(puzzle.sequences(forRow: 2), [
             Sequence(length: 1, startIndex: 0, state: .complete),
             Sequence(length: 1, startIndex: 2, state: .missing),
             Sequence(length: 1, startIndex: 4, state: .complete),
-        ]))
-        #expect(puzzle.sequences(forRow: 3).elementsEqual([
+        ])
+        XCTAssertEqual(puzzle.sequences(forRow: 3), [
             Sequence(length: 1, startIndex: 0, state: .missing),
             Sequence(length: 1, startIndex: 4, state: .complete),
-        ]))
-        #expect(puzzle.sequences(forRow: 4).elementsEqual([
+        ])
+        XCTAssertEqual(puzzle.sequences(forRow: 4), [
             Sequence(length: 5, startIndex: 0, state: .missing),
-        ]))
+        ])
     }
 
-    @Test func testPartialColumnSequences() throws {
+    func testPartialColumnSequences() {
         var puzzle = Puzzle(size: 5, solution:
                                 0b11111,
                                 0b10001,
@@ -105,24 +105,24 @@ struct ModelTests {
             0b10001,
             0b10111
         )
-        #expect(puzzle.sequences(forColumn: 0).elementsEqual([
+        XCTAssertEqual(puzzle.sequences(forColumn: 0), [
             Sequence(length: 5, startIndex: 0, state: .missing),
-        ]))
-        #expect(puzzle.sequences(forColumn: 1).elementsEqual([
+        ])
+        XCTAssertEqual(puzzle.sequences(forColumn: 1), [
             Sequence(length: 1, startIndex: 0, state: .complete),
             Sequence(length: 1, startIndex: 4, state: .missing),
-        ]))
-        #expect(puzzle.sequences(forColumn: 2).elementsEqual([
+        ])
+        XCTAssertEqual(puzzle.sequences(forColumn: 2), [
             Sequence(length: 1, startIndex: 0, state: .complete),
             Sequence(length: 1, startIndex: 2, state: .missing),
             Sequence(length: 1, startIndex: 4, state: .complete),
-        ]))
-        #expect(puzzle.sequences(forColumn: 3).elementsEqual([
+        ])
+        XCTAssertEqual(puzzle.sequences(forColumn: 3), [
             Sequence(length: 1, startIndex: 0, state: .missing),
             Sequence(length: 1, startIndex: 4, state: .complete),
-        ]))
-        #expect(puzzle.sequences(forColumn: 4).elementsEqual([
+        ])
+        XCTAssertEqual(puzzle.sequences(forColumn: 4), [
             Sequence(length: 5, startIndex: 0, state: .missing),
-        ]))
+        ])
     }
 }
