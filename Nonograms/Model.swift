@@ -269,13 +269,17 @@ struct Puzzle {
     var tiles: [TileState]
     let solution: [UInt]
 
-    init(size: Int, solution: UInt...) {
+    init(size: Int, solution: [UInt]) {
         assert(size <= 32, "Puzzles larger than 32x32 are not supported")
         assert(solution.count == size, "Puzzles must be square, you must provide data for each row")
 
         self.size = Int(size)
         self.solution = solution
         tiles = Array<TileState>(repeating: .blank, count: Int(size) * Int(size))
+    }
+
+    init(size: Int, solution: UInt...) {
+        self.init(size: size, solution: solution)
     }
 
     func tile(row: Int, column: Int) -> TileState {
