@@ -11,15 +11,15 @@ enum TileState {
     case blocked
 }
 
-enum SequenceState {
+enum SegmentState {
     case missing
     case complete
 }
 
-struct Sequence: Identifiable, Equatable {
+struct Segment: Identifiable, Equatable {
     let length: Int
     let startIndex: Int
-    let state: SequenceState
+    let state: SegmentState
 
     var endIndex: Int {
         startIndex + length
@@ -33,16 +33,16 @@ struct Sequence: Identifiable, Equatable {
         (0xFFFFFFFF >> (32 - length)) << startIndex
     }
 
-    func with(state: SequenceState) -> Sequence {
-        Sequence(length: length, startIndex: startIndex, state: state)
+    func with(state: SegmentState) -> Segment {
+        Segment(length: length, startIndex: startIndex, state: state)
     }
 
-    func moving(toAtLeast minIndex: Int) -> Sequence {
-        Sequence(length: length, startIndex: min(startIndex, minIndex), state: state)
+    func moving(toAtLeast minIndex: Int) -> Segment {
+        Segment(length: length, startIndex: min(startIndex, minIndex), state: state)
     }
 
-    func moving(toAtMost maxIndex: Int) -> Sequence {
-        Sequence(length: length, startIndex: max(endIndex, maxIndex) - length, state: state)
+    func moving(toAtMost maxIndex: Int) -> Segment {
+        Segment(length: length, startIndex: max(endIndex, maxIndex) - length, state: state)
     }
 }
 
@@ -64,15 +64,15 @@ struct Solver {
     private mutating func attemptSolution() -> Bool {
         var foundPartialSolution = false
 
-        let sequences = self.sequences
+        let segments = self.segments
         let states = self.states
 
-        if sequences.only == 0 {
+        if segments.only == 0 {
             foundPartialSolution = fill(attempt: states.map { ($0.0, .blocked) })
         } else {
-            var minSequences = [Sequence]()
+            var minSegments = [Segment]()
             var index = 0
-            for length in sequences {
+            for length in segments {
                 var startIndex = index
                 while index - startIndex < length {
                     let (_, state) = states[index]
@@ -81,13 +81,13 @@ struct Solver {
                         startIndex = index
                     }
                 }
-                minSequences.append(Sequence(length: length, startIndex: startIndex, state: .missing))
+                minSegments.append(Segment(length: length, startIndex: startIndex, state: .missing))
                 index += 1
             }
 
-            var maxSequences = [Sequence]()
+            var maxSegments = [Segment]()
             index = states.count - 1
-            for length in sequences.reversed() {
+            for length in segments.reversed() {
                 var endIndex = index
                 while endIndex - index < length {
                     let (_, state) = states[index]
@@ -96,7 +96,7 @@ struct Solver {
                         endIndex = index
                     }
                 }
-                maxSequences.insert(Sequence(length: length, startIndex: endIndex - length + 1, state: .missing), at: 0)
+                maxSegments.insert(Segment(length: length, startIndex: endIndex - length + 1, state: .missing), at: 0)
                 index -= 1
             }
 
@@ -116,41 +116,41 @@ struct Solver {
                 filledRanges.append((index - length)..<index)
             }
 
-            var sequenceBounds = zip(minSequences, maxSequences).map { (minSequence, maxSequence) in
-                minSequence.startIndex..<maxSequence.endIndex
+            var segmentBounds = zip(minSegments, maxSegments).map { (minSegment, maxSegment) in
+                minSegment.startIndex..<maxSegment.endIndex
             }
 
             for filledRange in filledRanges {
-                if let matchingIndex = sequenceBounds.onlyIndex(where: { $0.contains(filledRange) }) {
-                    if filledRange.upperBound > minSequences[matchingIndex].endIndex {
+                if let matchingIndex = segmentBounds.onlyIndex(where: { $0.contains(filledRange) }) {
+                    if filledRange.upperBound > minSegments[matchingIndex].endIndex {
                         var nextPosition = filledRange.upperBound
-                        var newSequence = minSequences[matchingIndex].moving(toAtMost: nextPosition)
-                        minSequences[matchingIndex] = newSequence
-                        sequenceBounds[matchingIndex] = newSequence.startIndex..<maxSequences[matchingIndex].endIndex
-                        for sequenceIndex in (matchingIndex + 1)..<sequences.count {
-                            nextPosition = max(newSequence.endIndex + 1, minSequences[sequenceIndex].startIndex)
-                            newSequence = Sequence(length: minSequences[sequenceIndex].length, startIndex: nextPosition, state: .missing)
-                            minSequences[sequenceIndex] = newSequence
-                            sequenceBounds[sequenceIndex] = newSequence.startIndex..<maxSequences[sequenceIndex].endIndex
+                        var newSegment = minSegments[matchingIndex].moving(toAtMost: nextPosition)
+                        minSegments[matchingIndex] = newSegment
+                        segmentBounds[matchingIndex] = newSegment.startIndex..<maxSegments[matchingIndex].endIndex
+                        for segmentIndex in (matchingIndex + 1)..<segments.count {
+                            nextPosition = max(newSegment.endIndex + 1, minSegments[segmentIndex].startIndex)
+                            newSegment = Segment(length: minSegments[segmentIndex].length, startIndex: nextPosition, state: .missing)
+                            minSegments[segmentIndex] = newSegment
+                            segmentBounds[segmentIndex] = newSegment.startIndex..<maxSegments[segmentIndex].endIndex
                         }
                     }
-                    if filledRange.lowerBound < maxSequences[matchingIndex].startIndex {
+                    if filledRange.lowerBound < maxSegments[matchingIndex].startIndex {
                         var nextPosition = filledRange.lowerBound
-                        var newSequence = maxSequences[matchingIndex].moving(toAtLeast: nextPosition)
-                        maxSequences[matchingIndex] = newSequence
-                        for sequenceIndex in (0..<matchingIndex).reversed() {
-                            nextPosition = min(newSequence.startIndex - 1, maxSequences[sequenceIndex].endIndex)
-                            newSequence = Sequence(length: maxSequences[sequenceIndex].length, startIndex: max(0, nextPosition - maxSequences[sequenceIndex].length), state: .missing)
-                            maxSequences[sequenceIndex] = newSequence
-                            sequenceBounds[sequenceIndex] = minSequences[sequenceIndex].startIndex..<newSequence.endIndex
+                        var newSegment = maxSegments[matchingIndex].moving(toAtLeast: nextPosition)
+                        maxSegments[matchingIndex] = newSegment
+                        for segmentIndex in (0..<matchingIndex).reversed() {
+                            nextPosition = min(newSegment.startIndex - 1, maxSegments[segmentIndex].endIndex)
+                            newSegment = Segment(length: maxSegments[segmentIndex].length, startIndex: max(0, nextPosition - maxSegments[segmentIndex].length), state: .missing)
+                            maxSegments[segmentIndex] = newSegment
+                            segmentBounds[segmentIndex] = minSegments[segmentIndex].startIndex..<newSegment.endIndex
                         }
                     }
                 }
             }
 
             index = 0
-            for sequenceBound in sequenceBounds {
-                while index < sequenceBound.lowerBound {
+            for segmentBound in segmentBounds {
+                while index < segmentBound.lowerBound {
                     let (tileIndex, state) = states[index]
                     if state != .blocked {
                         foundPartialSolution = true
@@ -158,7 +158,7 @@ struct Solver {
                     }
                     index += 1
                 }
-                index = sequenceBound.upperBound
+                index = segmentBound.upperBound
             }
             while index < states.count {
                 let (tileIndex, state) = states[index]
@@ -169,8 +169,8 @@ struct Solver {
                 index += 1
             }
 
-            for (minSequence, maxSequence) in zip(minSequences, maxSequences) {
-                if let intersection = minSequence.range.intersection(with: maxSequence.range) {
+            for (minSegment, maxSegment) in zip(minSegments, maxSegments) {
+                if let intersection = minSegment.range.intersection(with: maxSegment.range) {
                     for index in intersection {
                         let (tileIndex, state) = states[index]
                         if state != .filled {
@@ -178,16 +178,16 @@ struct Solver {
                             tiles[tileIndex] = .filled
                         }
                     }
-                    if minSequence == maxSequence {
-                        if minSequence.startIndex > 0 {
-                            let (tileIndex, state) = states[minSequence.startIndex - 1]
+                    if minSegment == maxSegment {
+                        if minSegment.startIndex > 0 {
+                            let (tileIndex, state) = states[minSegment.startIndex - 1]
                             if state != .blocked {
                                 foundPartialSolution = true
                                 tiles[tileIndex] = .blocked
                             }
                         }
-                        if minSequence.endIndex < states.count - 1 {
-                            let (tileIndex, state) = states[minSequence.endIndex]
+                        if minSegment.endIndex < states.count - 1 {
+                            let (tileIndex, state) = states[minSegment.endIndex]
                             if state != .blocked {
                                 foundPartialSolution = true
                                 tiles[tileIndex] = .blocked
@@ -244,7 +244,7 @@ struct Solver {
         return false
     }
 
-    var sequences: [Int] {
+    var segments: [Int] {
         isSolvingRow ? rows[rowIndex] : columns[columnIndex]
     }
 
@@ -340,33 +340,33 @@ struct Puzzle {
         return true
     }
 
-    func sequences(forRow rowIndex: Int) -> [Sequence] {
-        var sequences = [Sequence]()
+    func segments(forRow rowIndex: Int) -> [Segment] {
+        var segments = [Segment]()
         var length = 0
         var row = solution[rowIndex]
         for columnIndex in (0..<size).reversed() {
             if row & 1 == 1 {
                 length += 1
             } else if length > 0 {
-                sequences.append(Sequence(length: length, startIndex: columnIndex + 1, state: .missing))
+                segments.append(Segment(length: length, startIndex: columnIndex + 1, state: .missing))
                 length = 0
             }
             row >>= 1
         }
         if length > 0 {
-            sequences.append(Sequence(length: length, startIndex: 0, state: .missing))
+            segments.append(Segment(length: length, startIndex: 0, state: .missing))
         }
-        sequences = sequences.reversed()
+        segments = segments.reversed()
 
-        if sequences.isEmpty {
-            return [Sequence(length: 0, startIndex: 0, state: .complete)]
+        if segments.isEmpty {
+            return [Segment(length: 0, startIndex: 0, state: .complete)]
         }
 
-        var iterator = BidirectionalZippedIterator(sequences.indices, completeSequences(forRow: rowIndex))
+        var iterator = BidirectionalZippedIterator(segments.indices, completeSegments(forRow: rowIndex))
 
-        while let (index, completeSequence) = iterator.next() {
-            if sequences[index].range == completeSequence.range {
-                sequences[index] = completeSequence
+        while let (index, completeSegment) = iterator.next() {
+            if segments[index].range == completeSegment.range {
+                segments[index] = completeSegment
             } else if iterator.isAdvancing {
                 iterator.flip()
             } else {
@@ -374,51 +374,51 @@ struct Puzzle {
             }
         }
 
-        return sequences
+        return segments
     }
 
-    private func completeSequences(forRow rowIndex: Int) -> [Sequence] {
-        var sequences = [Sequence]()
+    private func completeSegments(forRow rowIndex: Int) -> [Segment] {
+        var segments = [Segment]()
         var length = 0
         for columnIndex in 0..<size {
             if tile(row: rowIndex, column: columnIndex) == .filled {
                 length += 1
             } else if length > 0 {
-                sequences.append(Sequence(length: length, startIndex: columnIndex - length, state: .complete))
+                segments.append(Segment(length: length, startIndex: columnIndex - length, state: .complete))
                 length = 0
             }
         }
         if length > 0 {
-            sequences.append(Sequence(length: length, startIndex: size - length, state: .complete))
+            segments.append(Segment(length: length, startIndex: size - length, state: .complete))
         }
-        return sequences
+        return segments
     }
 
-    func sequences(forColumn columnIndex: Int) -> [Sequence] {
-        var sequences = [Sequence]()
+    func segments(forColumn columnIndex: Int) -> [Segment] {
+        var segments = [Segment]()
         var length = 0
         let columnBit = bit(forColumn: columnIndex)
         for rowIndex in 0..<size {
             if solution[rowIndex] & columnBit > 0 {
                 length += 1
             } else if length > 0 {
-                sequences.append(Sequence(length: length, startIndex: rowIndex - length, state: .missing))
+                segments.append(Segment(length: length, startIndex: rowIndex - length, state: .missing))
                 length = 0
             }
         }
         if length > 0 {
-            sequences.append(Sequence(length: length, startIndex: size - length, state: .missing))
+            segments.append(Segment(length: length, startIndex: size - length, state: .missing))
         }
 
-        if sequences.isEmpty {
-            return [Sequence(length: 0, startIndex: 0, state: .complete)]
+        if segments.isEmpty {
+            return [Segment(length: 0, startIndex: 0, state: .complete)]
         }
 
-        var iterator = BidirectionalZippedIterator(sequences.indices, completeSequences(forColumn: columnIndex))
+        var iterator = BidirectionalZippedIterator(segments.indices, completeSegments(forColumn: columnIndex))
 
-        while let (index, completeSequence) = iterator.next() {
-            if sequences[index].range == completeSequence.range {
-                sequences[index] = completeSequence
+        while let (index, completeSegment) = iterator.next() {
+            if segments[index].range == completeSegment.range {
+                segments[index] = completeSegment
             } else if iterator.isAdvancing {
                 iterator.flip()
             } else {
@@ -426,24 +426,24 @@ struct Puzzle {
             }
         }
 
-        return sequences
+        return segments
     }
 
-    private func completeSequences(forColumn columnIndex: Int) -> [Sequence] {
-        var sequences = [Sequence]()
+    private func completeSegments(forColumn columnIndex: Int) -> [Segment] {
+        var segments = [Segment]()
         var length = 0
         for rowIndex in 0..<size {
             if tile(row: rowIndex, column: columnIndex) == .filled {
                 length += 1
             } else if length > 0 {
-                sequences.append(Sequence(length: length, startIndex: rowIndex - length, state: .complete))
+                segments.append(Segment(length: length, startIndex: rowIndex - length, state: .complete))
                 length = 0
             }
         }
         if length > 0 {
-            sequences.append(Sequence(length: length, startIndex: size - length, state: .complete))
+            segments.append(Segment(length: length, startIndex: size - length, state: .complete))
         }
-        return sequences
+        return segments
     }
 
     mutating func solve() {

@@ -16,8 +16,8 @@ class CanSolvePuzzleTestCase: TestCase {
         let puzzle = Puzzle(size: size, solution: solution)
         let range = 0..<puzzle.size
         self.solver = Solver(
-            rows: range.map { puzzle.sequences(forRow: $0).map { $0.length } },
-            columns: range.map { puzzle.sequences(forColumn: $0).map { $0.length } }
+            rows: range.map { puzzle.segments(forRow: $0).map { $0.length } },
+            columns: range.map { puzzle.segments(forColumn: $0).map { $0.length } }
         )
         self.puzzle = puzzle
         super.init(file, line)

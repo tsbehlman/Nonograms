@@ -9,7 +9,7 @@ import XCTest
 @testable import Nonograms
 
 final class ModelTests: XCTestCase {
-    func testEmptyRowSequences() {
+    func testEmptyRowSegments() {
         let puzzle = Puzzle(size: 5, solution:
                                 0b11111,
                                 0b10001,
@@ -17,21 +17,21 @@ final class ModelTests: XCTestCase {
                                 0b10001,
                                 0b11111
         )
-        XCTAssertEqual(puzzle.sequences(forRow: 0), [
-            Sequence(length: 5, startIndex: 0, state: .missing),
+        XCTAssertEqual(puzzle.segments(forRow: 0), [
+            Segment(length: 5, startIndex: 0, state: .missing),
         ])
-        XCTAssertEqual(puzzle.sequences(forRow: 1), [
-            Sequence(length: 1, startIndex: 0, state: .missing),
-            Sequence(length: 1, startIndex: 4, state: .missing),
+        XCTAssertEqual(puzzle.segments(forRow: 1), [
+            Segment(length: 1, startIndex: 0, state: .missing),
+            Segment(length: 1, startIndex: 4, state: .missing),
         ])
-        XCTAssertEqual(puzzle.sequences(forRow: 2), [
-            Sequence(length: 1, startIndex: 0, state: .missing),
-            Sequence(length: 1, startIndex: 2, state: .missing),
-            Sequence(length: 1, startIndex: 4, state: .missing),
+        XCTAssertEqual(puzzle.segments(forRow: 2), [
+            Segment(length: 1, startIndex: 0, state: .missing),
+            Segment(length: 1, startIndex: 2, state: .missing),
+            Segment(length: 1, startIndex: 4, state: .missing),
         ])
     }
 
-    func testCompleteRowSequences() {
+    func testCompleteRowSegments() {
         var puzzle = Puzzle(size: 5, solution:
                                 0b11111,
                                 0b10001,
@@ -40,21 +40,21 @@ final class ModelTests: XCTestCase {
                                 0b11111
         )
         puzzle.solve()
-        XCTAssertEqual(puzzle.sequences(forRow: 0), [
-            Sequence(length: 5, startIndex: 0, state: .complete),
+        XCTAssertEqual(puzzle.segments(forRow: 0), [
+            Segment(length: 5, startIndex: 0, state: .complete),
         ])
-        XCTAssertEqual(puzzle.sequences(forRow: 1), [
-            Sequence(length: 1, startIndex: 0, state: .complete),
-            Sequence(length: 1, startIndex: 4, state: .complete),
+        XCTAssertEqual(puzzle.segments(forRow: 1), [
+            Segment(length: 1, startIndex: 0, state: .complete),
+            Segment(length: 1, startIndex: 4, state: .complete),
         ])
-        XCTAssertEqual(puzzle.sequences(forRow: 2), [
-            Sequence(length: 1, startIndex: 0, state: .complete),
-            Sequence(length: 1, startIndex: 2, state: .complete),
-            Sequence(length: 1, startIndex: 4, state: .complete),
+        XCTAssertEqual(puzzle.segments(forRow: 2), [
+            Segment(length: 1, startIndex: 0, state: .complete),
+            Segment(length: 1, startIndex: 2, state: .complete),
+            Segment(length: 1, startIndex: 4, state: .complete),
         ])
     }
 
-    func testPartialRowSequences() {
+    func testPartialRowSegments() {
         var puzzle = Puzzle(size: 5, solution:
                                 0b11111,
                                 0b10001,
@@ -69,28 +69,28 @@ final class ModelTests: XCTestCase {
             0b00001,
             0b11011
         )
-        XCTAssertEqual(puzzle.sequences(forRow: 0), [
-            Sequence(length: 5, startIndex: 0, state: .missing),
+        XCTAssertEqual(puzzle.segments(forRow: 0), [
+            Segment(length: 5, startIndex: 0, state: .missing),
         ])
-        XCTAssertEqual(puzzle.sequences(forRow: 1), [
-            Sequence(length: 1, startIndex: 0, state: .complete),
-            Sequence(length: 1, startIndex: 4, state: .missing),
+        XCTAssertEqual(puzzle.segments(forRow: 1), [
+            Segment(length: 1, startIndex: 0, state: .complete),
+            Segment(length: 1, startIndex: 4, state: .missing),
         ])
-        XCTAssertEqual(puzzle.sequences(forRow: 2), [
-            Sequence(length: 1, startIndex: 0, state: .complete),
-            Sequence(length: 1, startIndex: 2, state: .missing),
-            Sequence(length: 1, startIndex: 4, state: .complete),
+        XCTAssertEqual(puzzle.segments(forRow: 2), [
+            Segment(length: 1, startIndex: 0, state: .complete),
+            Segment(length: 1, startIndex: 2, state: .missing),
+            Segment(length: 1, startIndex: 4, state: .complete),
         ])
-        XCTAssertEqual(puzzle.sequences(forRow: 3), [
-            Sequence(length: 1, startIndex: 0, state: .missing),
-            Sequence(length: 1, startIndex: 4, state: .complete),
+        XCTAssertEqual(puzzle.segments(forRow: 3), [
+            Segment(length: 1, startIndex: 0, state: .missing),
+            Segment(length: 1, startIndex: 4, state: .complete),
         ])
-        XCTAssertEqual(puzzle.sequences(forRow: 4), [
-            Sequence(length: 5, startIndex: 0, state: .missing),
+        XCTAssertEqual(puzzle.segments(forRow: 4), [
+            Segment(length: 5, startIndex: 0, state: .missing),
         ])
     }
 
-    func testPartialColumnSequences() {
+    func testPartialColumnSegments() {
         var puzzle = Puzzle(size: 5, solution:
                                 0b11111,
                                 0b10001,
@@ -105,24 +105,24 @@ final class ModelTests: XCTestCase {
             0b10001,
             0b10111
         )
-        XCTAssertEqual(puzzle.sequences(forColumn: 0), [
-            Sequence(length: 5, startIndex: 0, state: .missing),
+        XCTAssertEqual(puzzle.segments(forColumn: 0), [
+            Segment(length: 5, startIndex: 0, state: .missing),
         ])
-        XCTAssertEqual(puzzle.sequences(forColumn: 1), [
-            Sequence(length: 1, startIndex: 0, state: .complete),
-            Sequence(length: 1, startIndex: 4, state: .missing),
+        XCTAssertEqual(puzzle.segments(forColumn: 1), [
+            Segment(length: 1, startIndex: 0, state: .complete),
+            Segment(length: 1, startIndex: 4, state: .missing),
         ])
-        XCTAssertEqual(puzzle.sequences(forColumn: 2), [
-            Sequence(length: 1, startIndex: 0, state: .complete),
-            Sequence(length: 1, startIndex: 2, state: .missing),
-            Sequence(length: 1, startIndex: 4, state: .complete),
+        XCTAssertEqual(puzzle.segments(forColumn: 2), [
+            Segment(length: 1, startIndex: 0, state: .complete),
+            Segment(length: 1, startIndex: 2, state: .missing),
+            Segment(length: 1, startIndex: 4, state: .complete),
         ])
-        XCTAssertEqual(puzzle.sequences(forColumn: 3), [
-            Sequence(length: 1, startIndex: 0, state: .missing),
-            Sequence(length: 1, startIndex: 4, state: .complete),
+        XCTAssertEqual(puzzle.segments(forColumn: 3), [
+            Segment(length: 1, startIndex: 0, state: .missing),
+            Segment(length: 1, startIndex: 4, state: .complete),
         ])
-        XCTAssertEqual(puzzle.sequences(forColumn: 4), [
-            Sequence(length: 5, startIndex: 0, state: .missing),
+        XCTAssertEqual(puzzle.segments(forColumn: 4), [
+            Segment(length: 5, startIndex: 0, state: .missing),
         ])
     }
 }

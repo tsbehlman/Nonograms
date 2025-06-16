@@ -8,15 +8,15 @@
 import SwiftUI
 
 private let tileSize: CGFloat = 48
-private let sequenceFont = Font.system(size: tileSize / 2, weight: .bold, design: .monospaced)
+private let segmentFont = Font.system(size: tileSize / 2, weight: .bold, design: .monospaced)
 
-struct SequenceLabel: View {
-    let sequence: Sequence
+struct SegmentLabel: View {
+    let segment: Segment
 
     var body: some View {
-        Text("\(sequence.length)")
-            .font(sequenceFont)
-            .foregroundStyle(sequence.state == .complete ? Color.accentColor : Color.primary)
+        Text("\(segment.length)")
+            .font(segmentFont)
+            .foregroundStyle(segment.state == .complete ? Color.accentColor : Color.primary)
     }
 }
 
@@ -38,7 +38,7 @@ struct TileView: View {
     }
 }
 
-let sequenceGradient = Gradient(stops: [
+let segmentGradient = Gradient(stops: [
     .init(color: Color.accentColor.opacity(0.000), location: 0.0),
     .init(color: Color.accentColor.opacity(0.125), location: 0.375),
     .init(color: Color.accentColor.opacity(0.250), location: 1.0),
@@ -107,15 +107,15 @@ struct PuzzleGridView: View {
                         ZStack {
                             if columnIndex.isMultiple(of: 2) {
                                 Rectangle()
-                                    .fill(LinearGradient(gradient: sequenceGradient, startPoint: .top, endPoint: .bottom))
+                                    .fill(LinearGradient(gradient: segmentGradient, startPoint: .top, endPoint: .bottom))
                             } else {
                                 Rectangle()
                                     .fill(Color.clear)
                             }
                             VStack(spacing: 0) {
                                 Spacer()
-                                ForEach(puzzle.sequences(forColumn: columnIndex)) { sequence in
-                                    SequenceLabel(sequence: sequence)
+                                ForEach(puzzle.segments(forColumn: columnIndex)) { segment in
+                                    SegmentLabel(segment: segment)
                                 }
                             }
                             .padding(.bottom, 12)
@@ -129,15 +129,15 @@ struct PuzzleGridView: View {
                         ZStack {
                             if rowIndex.isMultiple(of: 2) {
                                 Rectangle()
-                                    .fill(LinearGradient(gradient: sequenceGradient, startPoint: .leading, endPoint: .trailing))
+                                    .fill(LinearGradient(gradient: segmentGradient, startPoint: .leading, endPoint: .trailing))
                             } else {
                                 Rectangle()
                                     .fill(Color.clear)
                             }
                             HStack(spacing: 8) {
                                 Spacer()
-                                ForEach(puzzle.sequences(forRow: rowIndex)) { sequence in
-                                    SequenceLabel(sequence: sequence)
+                                ForEach(puzzle.segments(forRow: rowIndex)) { segment in
+                                    SegmentLabel(segment: segment)
                                 }
                             }
                             .padding(.trailing, 12)
