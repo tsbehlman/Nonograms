@@ -61,21 +61,18 @@ struct Solver {
         tiles = Array(repeating: .blank, count: rows.count * columns.count)
     }
 
-    private mutating func attemptSolution() -> Bool {
-        var foundPartialSolution = false
+    private mutating func makeAttempt(from initialStates: [TileState], forLengths lengths: [Int]) -> [TileState] {
+        var states = initialStates
 
-        let segments = self.segments
-        let states = self.states
-
-        if segments.only == 0 {
-            foundPartialSolution = fill(attempt: states.map { ($0.0, .blocked) })
+        if lengths.only == 0 {
+            return Array(repeating: .blocked, count: states.count)
         } else {
             var minSegments = [Segment]()
             var index = 0
-            for length in segments {
+            for length in lengths {
                 var startIndex = index
                 while index - startIndex < length {
-                    let (_, state) = states[index]
+                    let state = states[index]
                     index += 1
                     if state == .blocked {
                         startIndex = index
@@ -87,10 +84,10 @@ struct Solver {
 
             var maxSegments = [Segment]()
             index = states.count - 1
-            for length in segments.reversed() {
+            for length in lengths.reversed() {
                 var endIndex = index
                 while endIndex - index < length {
-                    let (_, state) = states[index]
+                    let state = states[index]
                     index -= 1
                     if state == .blocked {
                         endIndex = index
@@ -103,7 +100,7 @@ struct Solver {
             var filledRanges = [Range<Int>]()
             var length = 0
             index = 0
-            for (_, state) in states {
+            for state in states {
                 if state == .filled {
                    length += 1
                 } else if length > 0 {
@@ -127,7 +124,7 @@ struct Solver {
                         var newSegment = minSegments[matchingIndex].moving(toAtMost: nextPosition)
                         minSegments[matchingIndex] = newSegment
                         segmentBounds[matchingIndex] = newSegment.startIndex..<maxSegments[matchingIndex].endIndex
-                        for segmentIndex in (matchingIndex + 1)..<segments.count {
+                        for segmentIndex in (matchingIndex + 1)..<lengths.count {
                             nextPosition = max(newSegment.endIndex + 1, minSegments[segmentIndex].startIndex)
                             newSegment = Segment(length: minSegments[segmentIndex].length, startIndex: nextPosition, state: .missing)
                             minSegments[segmentIndex] = newSegment
@@ -151,50 +148,57 @@ struct Solver {
             index = 0
             for segmentBound in segmentBounds {
                 while index < segmentBound.lowerBound {
-                    let (tileIndex, state) = states[index]
-                    if state != .blocked {
-                        foundPartialSolution = true
-                        tiles[tileIndex] = .blocked
-                    }
+                    states[index] = .blocked
                     index += 1
                 }
                 index = segmentBound.upperBound
             }
             while index < states.count {
-                let (tileIndex, state) = states[index]
-                if state != .blocked {
-                    foundPartialSolution = true
-                    tiles[tileIndex] = .blocked
-                }
+                states[index] = .blocked
                 index += 1
             }
 
             for (minSegment, maxSegment) in zip(minSegments, maxSegments) {
                 if let intersection = minSegment.range.intersection(with: maxSegment.range) {
                     for index in intersection {
-                        let (tileIndex, state) = states[index]
-                        if state != .filled {
-                            foundPartialSolution = true
-                            tiles[tileIndex] = .filled
-                        }
+                        states[index] = .filled
                     }
                     if minSegment == maxSegment {
                         if minSegment.startIndex > 0 {
-                            let (tileIndex, state) = states[minSegment.startIndex - 1]
-                            if state != .blocked {
-                                foundPartialSolution = true
-                                tiles[tileIndex] = .blocked
-                            }
+                            states[minSegment.startIndex - 1] = .blocked
                         }
                         if minSegment.endIndex < states.count - 1 {
-                            let (tileIndex, state) = states[minSegment.endIndex]
-                            if state != .blocked {
-                                foundPartialSolution = true
-                                tiles[tileIndex] = .blocked
-                            }
+                            states[minSegment.endIndex] = .blocked
                         }
                     }
                 }
+            }
+        }
+
+        return states
+    }
+
+    private mutating func attemptSolution() -> Bool {
+        var foundPartialSolution = false
+
+        let lengths: [Int]
+        let indices: [Int]
+        if isSolvingRow {
+            lengths = rows[rowIndex]
+            let startIndex = rowIndex * columns.count
+            indices = Array(stride(from: startIndex, to: startIndex + columns.count, by: 1))
+        } else {
+            lengths = columns[columnIndex]
+            indices = Array(stride(from: columnIndex, to: columnIndex + columns.count * rows.count, by: columns.count))
+        }
+
+        let oldStates = indices.map { tiles[$0] }
+        let newStates = makeAttempt(from: oldStates, forLengths: lengths)
+
+        for (stateIndex, tileIndex) in indices.enumerated() {
+            if newStates[stateIndex] != oldStates[stateIndex] {
+                foundPartialSolution = true
+                tiles[tileIndex] = newStates[stateIndex]
             }
         }
 
@@ -210,18 +214,6 @@ struct Solver {
                 columnIndex = 0
             }
             isSolvingRow = true
-        }
-        return foundPartialSolution
-    }
-
-    private mutating func fill(attempt: [(Int, TileState)]) -> Bool {
-        var foundPartialSolution = false
-        for (index, newState) in attempt {
-            let state = tiles[index]
-            if state == .blank && state != newState {
-                tiles[index] = newState
-                foundPartialSolution = true
-            }
         }
         return foundPartialSolution
     }
@@ -242,25 +234,6 @@ struct Solver {
             }
         }
         return false
-    }
-
-    var segments: [Int] {
-        isSolvingRow ? rows[rowIndex] : columns[columnIndex]
-    }
-
-    var length: Int {
-        isSolvingRow ? columns.count : rows.count
-    }
-
-    var states: [(Int, TileState)] {
-        let indices: StrideTo<Int>
-        if isSolvingRow {
-            let startIndex = rowIndex * columns.count
-            indices = stride(from: startIndex, to: startIndex + columns.count, by: 1)
-        } else {
-            indices = stride(from: columnIndex, to: columnIndex + columns.count * rows.count, by: columns.count)
-        }
-        return indices.map { ( $0, tiles[$0]) }
     }
 }
 
