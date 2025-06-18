@@ -7,7 +7,6 @@
 
 import SwiftUI
 
-@main
 struct NonogramsApp: App {
     var body: some Scene {
         WindowGroup {
@@ -15,3 +14,23 @@ struct NonogramsApp: App {
         }
     }
 }
+
+@main
+struct NonogramsMain {
+    static func main() {
+#if DEBUG
+        guard !(BuildChecker.areTestsRunning() || BuildChecker.arePreviewsRunning()) else {
+            return TestApp.main()
+        }
+#endif
+        NonogramsApp.main()
+    }
+}
+
+#if DEBUG
+struct TestApp: App {
+    var body: some Scene {
+        WindowGroup {}
+    }
+}
+#endif
