@@ -36,14 +36,6 @@ struct Segment: Identifiable, Equatable {
     func with(state: SegmentState) -> Segment {
         Segment(length: length, startIndex: startIndex, state: state)
     }
-
-    func moving(toAtLeast minIndex: Int) -> Segment {
-        Segment(length: length, startIndex: min(startIndex, minIndex), state: state)
-    }
-
-    func moving(toAtMost maxIndex: Int) -> Segment {
-        Segment(length: length, startIndex: max(endIndex, maxIndex) - length, state: state)
-    }
 }
 
 struct Solver {
@@ -67,7 +59,7 @@ struct Solver {
         if lengths.only == 0 {
             return Array(repeating: .blocked, count: states.count)
         } else {
-            var minSegments = [Segment]()
+            var minRanges = [Range<Int>]()
             var index = 0
             for length in lengths {
                 var startIndex = index
@@ -78,11 +70,11 @@ struct Solver {
                         startIndex = index
                     }
                 }
-                minSegments.append(Segment(length: length, startIndex: startIndex, state: .missing))
+                minRanges.append(startIndex..<(startIndex + length))
                 index += 1
             }
 
-            var maxSegments = [Segment]()
+            var maxRanges = [Range<Int>]()
             index = states.count - 1
             for length in lengths.reversed() {
                 var endIndex = index
@@ -93,82 +85,70 @@ struct Solver {
                         endIndex = index
                     }
                 }
-                maxSegments.insert(Segment(length: length, startIndex: endIndex - length + 1, state: .missing), at: 0)
+                maxRanges.insert((endIndex - length + 1)..<(endIndex + 1), at: 0)
                 index -= 1
             }
 
             var filledRanges = [Range<Int>]()
-            var length = 0
+            var filledLength = 0
             index = 0
             for state in states {
                 if state == .filled {
-                   length += 1
-                } else if length > 0 {
-                    filledRanges.append((index - length)..<index)
-                    length = 0
+                    filledLength += 1
+                } else if filledLength > 0 {
+                    filledRanges.append((index - filledLength)..<index)
+                    filledLength = 0
                 }
                 index += 1
             }
-            if length > 0 {
-                filledRanges.append((index - length)..<index)
+            if filledLength > 0 {
+                filledRanges.append((index - filledLength)..<index)
             }
 
-            var segmentBounds = zip(minSegments, maxSegments).map { (minSegment, maxSegment) in
-                minSegment.startIndex..<maxSegment.endIndex
+            var rangeBounds = zip(minRanges, maxRanges).map { (minRange, maxRange) in
+                minRange.lowerBound..<maxRange.upperBound
             }
 
             for filledRange in filledRanges {
-                if let matchingIndex = segmentBounds.onlyIndex(where: { $0.contains(filledRange) }) {
-                    if filledRange.upperBound > minSegments[matchingIndex].endIndex {
-                        var nextPosition = filledRange.upperBound
-                        var newSegment = minSegments[matchingIndex].moving(toAtMost: nextPosition)
-                        minSegments[matchingIndex] = newSegment
-                        segmentBounds[matchingIndex] = newSegment.startIndex..<maxSegments[matchingIndex].endIndex
-                        for segmentIndex in (matchingIndex + 1)..<lengths.count {
-                            nextPosition = max(newSegment.endIndex + 1, minSegments[segmentIndex].startIndex)
-                            newSegment = Segment(length: minSegments[segmentIndex].length, startIndex: nextPosition, state: .missing)
-                            minSegments[segmentIndex] = newSegment
-                            segmentBounds[segmentIndex] = newSegment.startIndex..<maxSegments[segmentIndex].endIndex
-                        }
+                if let matchingIndex = rangeBounds.onlyIndex(where: { $0.contains(filledRange) }) {
+                    var minRange = minRanges[matchingIndex]
+                    var maxRange = maxRanges[matchingIndex]
+                    if filledRange.upperBound > minRange.upperBound {
+                        minRange = minRange.moving(toAtMost: filledRange.upperBound)
                     }
-                    if filledRange.lowerBound < maxSegments[matchingIndex].startIndex {
-                        var nextPosition = filledRange.lowerBound
-                        var newSegment = maxSegments[matchingIndex].moving(toAtLeast: nextPosition)
-                        maxSegments[matchingIndex] = newSegment
-                        for segmentIndex in (0..<matchingIndex).reversed() {
-                            nextPosition = min(newSegment.startIndex - 1, maxSegments[segmentIndex].endIndex)
-                            newSegment = Segment(length: maxSegments[segmentIndex].length, startIndex: max(0, nextPosition - maxSegments[segmentIndex].length), state: .missing)
-                            maxSegments[segmentIndex] = newSegment
-                            segmentBounds[segmentIndex] = minSegments[segmentIndex].startIndex..<newSegment.endIndex
-                        }
+                    if filledRange.lowerBound < maxRange.lowerBound {
+                        maxRange = maxRange.moving(toAtLeast: filledRange.lowerBound)
                     }
+                    minRanges[matchingIndex] = minRange
+                    maxRanges[matchingIndex] = maxRange
+                    rangeBounds[matchingIndex] = minRange.lowerBound..<maxRange.upperBound
                 }
             }
 
             index = 0
-            for segmentBound in segmentBounds {
-                while index < segmentBound.lowerBound {
+            for rangeBound in rangeBounds {
+                while index < rangeBound.lowerBound {
                     states[index] = .blocked
                     index += 1
                 }
-                index = segmentBound.upperBound
+                index = rangeBound.upperBound
             }
             while index < states.count {
                 states[index] = .blocked
                 index += 1
             }
 
-            for (minSegment, maxSegment) in zip(minSegments, maxSegments) {
-                if let intersection = minSegment.range.intersection(with: maxSegment.range) {
+            for (minRange, maxRange) in zip(minRanges, maxRanges) {
+                if let intersection = minRange.intersection(with: maxRange) {
                     for index in intersection {
                         states[index] = .filled
                     }
-                    if minSegment == maxSegment {
-                        if minSegment.startIndex > 0 {
-                            states[minSegment.startIndex - 1] = .blocked
+                    if minRange == maxRange {
+                        if minRange.lowerBound > 0 {
+                            states[minRange.lowerBound - 1] = .blocked
                         }
-                        if minSegment.endIndex < states.count - 1 {
-                            states[minSegment.endIndex] = .blocked
+                        if minRange.upperBound < states.count - 1 {
+                            states[minRange.upperBound] = .blocked
                         }
                     }
                 }
