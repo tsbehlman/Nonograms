@@ -41,11 +41,7 @@ struct Segment: Identifiable, Equatable {
 struct Solver {
     let rows: [[Int]]
     let columns: [[Int]]
-
     var tiles: [TileState]
-    var rowIndex = 0
-    var columnIndex = 0
-    var isSolvingRow = true
 
     init(rows: [[Int]], columns: [[Int]]) {
         self.rows = rows
@@ -158,19 +154,8 @@ struct Solver {
         return states
     }
 
-    private mutating func attemptSolution() -> Bool {
+    private mutating func attemptSolution(forLengths lengths: [Int], at indices: some Sequence<Int>) -> Bool {
         var foundPartialSolution = false
-
-        let lengths: [Int]
-        let indices: [Int]
-        if isSolvingRow {
-            lengths = rows[rowIndex]
-            let startIndex = rowIndex * columns.count
-            indices = Array(stride(from: startIndex, to: startIndex + columns.count, by: 1))
-        } else {
-            lengths = columns[columnIndex]
-            indices = Array(stride(from: columnIndex, to: columnIndex + columns.count * rows.count, by: columns.count))
-        }
 
         let oldStates = indices.map { tiles[$0] }
         let newStates = makeAttempt(from: oldStates, forLengths: lengths)
@@ -182,38 +167,41 @@ struct Solver {
             }
         }
 
-        if isSolvingRow {
-            rowIndex += 1
-            if rowIndex >= rows.count {
-                rowIndex = 0
-            }
-            isSolvingRow = false
-        } else {
-            columnIndex += 1
-            if columnIndex >= columns.count {
-                columnIndex = 0
-            }
-            isSolvingRow = true
-        }
         return foundPartialSolution
     }
 
-    @discardableResult mutating func step() -> Bool {
-        for _ in 0..<(rows.count + columns.count) {
-            if attemptSolution() {
+    @discardableResult mutating func step(startingAt tileIndex: Int = 0) -> Int? {
+        for tileIndex in (tileIndex..<tiles.count).concat(0..<tileIndex) where tiles[tileIndex] == .blank {
+            let rowIndex = tileIndex / columns.count
+            if attemptSolution(forLengths: rows[rowIndex], at: indices(forRow: rowIndex)) {
+                return tileIndex
+            }
+            let columnIndex = tileIndex % columns.count
+            if attemptSolution(forLengths: columns[columnIndex], at: indices(forColumn: columnIndex)) {
+                return tileIndex
+            }
+        }
+        return nil
+    }
+
+    mutating func canSolvePuzzle() -> Bool {
+        var index = 0
+        while let nextIndex = step(startingAt: index) {
+            if tiles.allSatisfy({ $0 != .blank }) {
                 return true
             }
+            index = nextIndex
         }
         return false
     }
 
-    mutating func canSolvePuzzle() -> Bool {
-        while step() {
-            if tiles.allSatisfy({ $0 != .blank }) {
-                return true
-            }
-        }
-        return false
+    func indices(forRow rowIndex: Int) -> StrideTo<Int> {
+        let startIndex = rowIndex * columns.count
+        return stride(from: startIndex, to: startIndex + columns.count, by: 1)
+    }
+
+    func indices(forColumn columnIndex: Int) -> StrideTo<Int> {
+        return stride(from: columnIndex, to: columnIndex + columns.count * rows.count, by: columns.count)
     }
 }
 
