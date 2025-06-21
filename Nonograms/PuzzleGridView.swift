@@ -30,6 +30,10 @@ struct SegmentLabels: View {
         (puzzle.size + 1) / 2
     }
 
+    var labelSize: CGFloat {
+        segmentFontSize * CGFloat(maxSegments)
+    }
+
     var segments: [Segment] {
         axis == .horizontal
             ? puzzle.segments(forRow: index)
@@ -38,16 +42,17 @@ struct SegmentLabels: View {
 
     var body: some View {
         Stack(axis, spacing: 0) {
-            let segments = self.segments
-            ForEach(Array(segments.count..<maxSegments), id: \.self) { _ in
-                Spacer()
-                    .frame(width: segmentFontSize, height: segmentFontSize, alignment: .center)
-            }
+            Spacer()
             ForEach(segments) { segment in
                 SegmentLabel(segment: segment)
-                    .frame(width: segmentFontSize, height: segmentFontSize, alignment: .center)
+                    .frame(minWidth: segmentFontSize, minHeight: segmentFontSize, maxHeight: segmentFontSize, alignment: .center)
             }
         }
+        .frame(
+            width: axis == .horizontal ? labelSize : tileSize,
+            height: axis == .horizontal ? tileSize : labelSize,
+            alignment: axis == .horizontal ? .trailing : .bottom
+        )
         .padding(axis == .horizontal ? .trailing : .bottom, segmentFontSize / 2)
     }
 }
