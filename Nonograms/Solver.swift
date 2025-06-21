@@ -166,12 +166,11 @@ struct Solver {
         return false
     }
 
-    func indices(forRow rowIndex: Int) -> StrideTo<Int> {
-        let startIndex = rowIndex * columns.count
-        return stride(from: startIndex, to: startIndex + columns.count, by: 1)
+    func indices(forRow rowIndex: Int) -> some Sequence<Int> {
+        tiles.gridIndices(forRow: rowIndex, width: columns.count)
     }
 
-    func indices(forColumn columnIndex: Int) -> StrideTo<Int> {
-        return stride(from: columnIndex, to: columnIndex + columns.count * rows.count, by: columns.count)
+    func indices(forColumn columnIndex: Int) -> some Sequence<Int> {
+        tiles.gridIndices(forColumn: columnIndex, width: columns.count)
     }
 }
