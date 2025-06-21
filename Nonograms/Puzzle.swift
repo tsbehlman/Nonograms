@@ -64,7 +64,7 @@ struct Puzzle {
         0..<size
     }
 
-    mutating func set(row: Int, column: Int, to newState: TileState) {
+    mutating func set(row: Int, column: Int, to newState: TileState, holding: Bool = false) {
         let tileIndex = row * size + column
         let currentState = tiles[tileIndex]
         switch (currentState, newState) {
@@ -79,6 +79,10 @@ struct Puzzle {
                 tiles[row * size + column] = .blocked
             }
         case (.blocked, .blocked):
+            if !holding {
+                tiles[row * size + column] = .blank
+            }
+        case (.blocked, .blank):
             tiles[row * size + column] = .blank
         case (.blocked, _):
             break
