@@ -47,12 +47,7 @@ struct ControlView: View {
         HStack {
             ControlButton(icon: "arrow.2.circlepath", isActive: false)
                 .onTapGesture {
-                    let size = 6
-                    puzzle = makeSolvablePuzzle(ofSize: size)
-                    solver = Solver(
-                        rows: (0..<size).map { puzzle.segments(forRow: $0).map { $0.length } },
-                        columns: (0..<size).map { puzzle.segments(forColumn: $0).map { $0.length } }
-                    )
+                    generateNewPuzzle()
                 }
             Spacer()
             ControlButton(icon: "questionmark", isActive: false)
@@ -65,6 +60,18 @@ struct ControlView: View {
             ControlIconView(state: $state, control: .filled, icon: "square.fill")
             ControlIconView(state: $state, control: .blocked, icon: "xmark")
         }
+        .onAppear {
+            generateNewPuzzle()
+        }
+    }
+
+    func generateNewPuzzle() {
+        let size = 5
+        puzzle = makeSolvablePuzzle(ofSize: size)
+        solver = Solver(
+            rows: (0..<size).map { puzzle.segments(forRow: $0).map { $0.length } },
+            columns: (0..<size).map { puzzle.segments(forColumn: $0).map { $0.length } }
+        )
     }
 }
 
