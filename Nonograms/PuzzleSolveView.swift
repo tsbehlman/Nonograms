@@ -22,8 +22,8 @@ struct PuzzleSolveView: View {
 
     var body: some View {
         EqualStack(axis: .vertical, spacing: 16) {
-            PuzzleGridView(puzzle: $puzzle) { row, column in
-                puzzle.set(row: row, column: column, to: selectedState)
+            PuzzleGridView(puzzle: $puzzle, selectedState: $selectedState) { row, column, state in
+                puzzle.set(row: row, column: column, to: state ?? selectedState, holding: state != nil)
                 solver.set(row: row, column: column, to: puzzle.tile(row: row, column: column))
             }
             ControlView(state: $selectedState, puzzle: $puzzle, solver: $solver)

@@ -78,11 +78,12 @@ let segmentGradient = Gradient(stops: [
 
 struct DraggablePuzzleTilesView: View {
     @Binding var puzzle: Puzzle
-    let fill: (Int, Int) -> Void
+    @Binding var selectedState: TileState
+    let fill: (Int, Int, TileState?) -> Void
 
     enum DragState: Equatable {
         case inactive
-        case dragging(row: Int, column: Int)
+        case dragging(row: Int, column: Int, state: TileState)
     }
 
     @GestureState private var dragState: DragState = .inactive
@@ -92,22 +93,28 @@ struct DraggablePuzzleTilesView: View {
             .updating($dragState) { value, state, transaction in
                 let row = clamp(Int(value.location.y / tileSize), min: 0, max: puzzle.size - 1)
                 let column = clamp(Int(value.location.x / tileSize), min: 0, max: puzzle.size - 1)
-                state = .dragging(row: row, column: column)
+                var tileState = selectedState
+                if case let .dragging(_, _, currentState) = state {
+                    tileState = currentState
+                } else if puzzle.tile(row: row, column: column) == selectedState {
+                    tileState = .blank
+                }
+                state = .dragging(row: row, column: column, state: tileState)
             }
         PuzzleTilesView(puzzle: $puzzle, fill: fill)
             .highPriorityGesture(gesture)
             .onChange(of: dragState) {
-                guard case let .dragging(row, column) = dragState,
+                guard case let .dragging(row, column, state) = dragState,
                       puzzle.indices.contains(row),
                       puzzle.indices.contains(column) else { return }
-                fill(row, column)
+                fill(row, column, state)
             }
     }
 }
 
 struct PuzzleTilesView: View {
     @Binding var puzzle: Puzzle
-    let fill: (Int, Int) -> Void
+    let fill: (Int, Int, TileState?) -> Void
 
     var body: some View {
         Grid(horizontalSpacing: 0, verticalSpacing: 0) {
@@ -116,7 +123,7 @@ struct PuzzleTilesView: View {
                     ForEach(0..<puzzle.size, id: \.self) { columnIndex in
                         TileView(status: puzzle.tile(row: rowIndex, column: columnIndex))
                             .onTapGesture {
-                                fill(rowIndex, columnIndex)
+                                fill(rowIndex, columnIndex, nil)
                             }
                     }
                 }
@@ -127,7 +134,8 @@ struct PuzzleTilesView: View {
 
 struct PuzzleGridView: View {
     @Binding var puzzle: Puzzle
-    let fill: (Int, Int) -> Void
+    @Binding var selectedState: TileState
+    let fill: (Int, Int, TileState?) -> Void
 
     var body: some View {
         Grid(horizontalSpacing: 0, verticalSpacing: 0) {
@@ -164,7 +172,7 @@ struct PuzzleGridView: View {
                         }
                     }
                 }
-                DraggablePuzzleTilesView(puzzle: $puzzle, fill: fill)
+                DraggablePuzzleTilesView(puzzle: $puzzle, selectedState: $selectedState, fill: fill)
                     .gridCellUnsizedAxes([.horizontal, .vertical])
             }
         }
@@ -181,8 +189,8 @@ struct PuzzleGridView: View {
     )
     @Previewable @State var selectedState = TileState.filled
 
-    PuzzleGridView(puzzle: $puzzle) { row, column in
-        puzzle.set(row: row, column: column, to: selectedState)
+    PuzzleGridView(puzzle: $puzzle, selectedState: $selectedState) { row, column, state in
+        puzzle.set(row: row, column: column, to: state ?? selectedState, holding: state != nil)
     }
         .onAppear {
             puzzle.solve()
