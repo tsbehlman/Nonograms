@@ -8,6 +8,7 @@
 import Foundation
 
 private let minTargetFillRate = 0.375
+private let maxTargetFillRate = 0.625
 
 extension IndexSet {
     func randomIndex() -> Element {
@@ -27,7 +28,9 @@ func makeSolvablePuzzle(ofSize size: Int) -> Puzzle {
     var tiles: [TileState] = Array(repeating: .blank, count: numTiles)
     var indexSet = IndexSet(integersIn: tiles.indices)
 
-    for _ in 0..<Int(Double(numTiles) * minTargetFillRate) {
+    let targetFillRate = Double.random(in: minTargetFillRate..<maxTargetFillRate)
+
+    for _ in 0..<Int(Double(numTiles) * targetFillRate) {
         let index = indexSet.randomIndex()
         indexSet.remove(index)
         tiles[index] = .filled
