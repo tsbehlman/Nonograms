@@ -23,23 +23,12 @@ struct PuzzleSolveView: View {
     @State var selectedState: TileState = .filled
 
     var body: some View {
-        VStack(alignment: .trailing) {
-            ControlButton(icon: "arrow.2.circlepath", isActive: false)
-                .onTapGesture {
-                    let size = 6
-                    puzzle = makeSolvablePuzzle(ofSize: size)
-                    solver = Solver(
-                        rows: (0..<size).map { puzzle.segments(forRow: $0).map { $0.length } },
-                        columns: (0..<size).map { puzzle.segments(forColumn: $0).map { $0.length } }
-                    )
-                }
-            Spacer()
+        EqualStack(axis: .vertical, spacing: 16) {
             PuzzleGridView(puzzle: $puzzle) { row, column in
                 puzzle.set(row: row, column: column, to: selectedState)
                 solver.set(row: row, column: column, to: puzzle.tile(row: row, column: column))
             }
             ControlView(state: $selectedState, puzzle: $puzzle, solver: $solver)
-            Spacer()
         }
         .padding()
     }

@@ -46,6 +46,16 @@ struct ControlView: View {
 
     var body: some View {
         HStack {
+            ControlButton(icon: "arrow.2.circlepath", isActive: false)
+                .onTapGesture {
+                    let size = 6
+                    puzzle = makeSolvablePuzzle(ofSize: size)
+                    solver = Solver(
+                        rows: (0..<size).map { puzzle.segments(forRow: $0).map { $0.length } },
+                        columns: (0..<size).map { puzzle.segments(forColumn: $0).map { $0.length } }
+                    )
+                }
+            Spacer()
             ControlButton(icon: "questionmark", isActive: false)
                 .onTapGesture {
                     solver.step()
