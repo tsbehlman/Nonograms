@@ -49,6 +49,10 @@ struct Solver {
         tiles = Array(repeating: .blank, count: rows.count * columns.count)
     }
 
+    mutating func set(row: Int, column: Int, to newState: TileState) {
+        tiles[row * columns.count + column] = newState
+    }
+
     private mutating func makeAttempt(from initialStates: [TileState], forLengths lengths: [Int]) -> [TileState] {
         var states = initialStates
 

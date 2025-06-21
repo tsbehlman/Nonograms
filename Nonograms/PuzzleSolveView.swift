@@ -35,7 +35,10 @@ struct PuzzleSolveView: View {
 
     var body: some View {
         VStack(alignment: .trailing) {
-            PuzzleGridView(puzzle: $puzzle, selectedState: $selectedState)
+            PuzzleGridView(puzzle: $puzzle) { row, column in
+                puzzle.set(row: row, column: column, to: selectedState)
+                solver.set(row: row, column: column, to: puzzle.tile(row: row, column: column))
+            }
             ControlView(state: $selectedState, puzzle: $puzzle, solver: $solver)
         }
     }
