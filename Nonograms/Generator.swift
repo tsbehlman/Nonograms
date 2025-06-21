@@ -91,13 +91,13 @@ private func solution(forTiles tiles: [TileState], size: Int) -> [UInt] {
     var solution: [UInt] = []
 
     var tileIndex = 0
-    for rowIndex in 0..<size {
+    for _ in 0..<size {
         var row: UInt = 0
-        for columnIndex in 0..<size {
+        for _ in 0..<size {
+            row = row << 1
             if tiles[tileIndex] == .filled {
                 row |= 1
             }
-            row = row << 1
             tileIndex += 1
         }
         solution.append(row)
