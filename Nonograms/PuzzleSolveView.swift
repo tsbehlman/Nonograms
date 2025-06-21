@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct PuzzleSolveView: View {
+    @StateObject var keyboardObserver = KeyboardObserver()
     @State var puzzle = Puzzle(size: 6, solution:
                                    0b111111,
                                    0b011111,
@@ -42,6 +43,13 @@ struct PuzzleSolveView: View {
             Spacer()
         }
         .padding()
+        .onChange(of: keyboardObserver.modifiers.contains(.option)) { _, isOptionPressed in
+            if isOptionPressed {
+                selectedState = .blocked
+            } else {
+                selectedState = .filled
+            }
+        }
     }
 }
 
