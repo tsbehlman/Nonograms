@@ -8,7 +8,8 @@
 import SwiftUI
 
 private let tileSize: CGFloat = 48
-private let segmentFont = Font.system(size: tileSize / 2, weight: .bold, design: .monospaced)
+private let segmentFontSize = tileSize / 2
+private let segmentFont = Font.system(size: segmentFontSize, weight: .bold, design: .monospaced)
 
 struct SegmentLabel: View {
     let segment: Segment
@@ -17,6 +18,37 @@ struct SegmentLabel: View {
         Text("\(segment.length)")
             .font(segmentFont)
             .foregroundStyle(segment.state == .complete ? Color.accentColor : Color.primary)
+    }
+}
+
+struct SegmentLabels: View {
+    let puzzle: Puzzle
+    let axis: Axis
+    let index: Int
+
+    var maxSegments: Int {
+        (puzzle.size + 1) / 2
+    }
+
+    var segments: [Segment] {
+        axis == .horizontal
+            ? puzzle.segments(forRow: index)
+            : puzzle.segments(forColumn: index)
+    }
+
+    var body: some View {
+        Stack(axis, spacing: 0) {
+            let segments = self.segments
+            ForEach(Array(segments.count..<maxSegments), id: \.self) { _ in
+                Spacer()
+                    .frame(width: segmentFontSize, height: segmentFontSize, alignment: .center)
+            }
+            ForEach(segments) { segment in
+                SegmentLabel(segment: segment)
+                    .frame(width: segmentFontSize, height: segmentFontSize, alignment: .center)
+            }
+        }
+        .padding(axis == .horizontal ? .trailing : .bottom, segmentFontSize / 2)
     }
 }
 
@@ -112,13 +144,7 @@ struct PuzzleGridView: View {
                                 Rectangle()
                                     .fill(Color.clear)
                             }
-                            VStack(spacing: 0) {
-                                Spacer()
-                                ForEach(puzzle.segments(forColumn: columnIndex)) { segment in
-                                    SegmentLabel(segment: segment)
-                                }
-                            }
-                            .padding(.bottom, 12)
+                            SegmentLabels(puzzle: puzzle, axis: .vertical, index: columnIndex)
                         }
                     }
                 }
@@ -134,13 +160,7 @@ struct PuzzleGridView: View {
                                 Rectangle()
                                     .fill(Color.clear)
                             }
-                            HStack(spacing: 8) {
-                                Spacer()
-                                ForEach(puzzle.segments(forRow: rowIndex)) { segment in
-                                    SegmentLabel(segment: segment)
-                                }
-                            }
-                            .padding(.trailing, 12)
+                            SegmentLabels(puzzle: puzzle, axis: .horizontal, index: rowIndex)
                         }
                     }
                 }
