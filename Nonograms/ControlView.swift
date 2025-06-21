@@ -39,6 +39,7 @@ struct ControlIconView: View {
 }
 
 struct ControlView: View {
+    @StateObject var keyboardObserver = KeyboardObserver()
     @Binding var state: TileState
     @Binding var puzzle: Puzzle
     @Binding var solver: Solver
@@ -54,6 +55,13 @@ struct ControlView: View {
                 }
             ControlIconView(state: $state, control: .filled, icon: "square.fill")
             ControlIconView(state: $state, control: .blocked, icon: "xmark")
+        }
+        .onChange(of: keyboardObserver.modifiers.contains(.option)) { _, isOptionPressed in
+            if isOptionPressed {
+                state = .blocked
+            } else {
+                state = .filled
+            }
         }
     }
 }
