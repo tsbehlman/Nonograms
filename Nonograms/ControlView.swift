@@ -46,10 +46,20 @@ struct ControlView: View {
 
     var body: some View {
         HStack {
-            ControlButton(icon: "arrow.2.circlepath", isActive: false)
-                .onTapGesture {
-                    generateNewPuzzle()
+            Menu {
+                Button {
+                    generateNewPuzzle(ofSize: 5)
+                } label: {
+                    Text("5x5")
                 }
+                Button {
+                    generateNewPuzzle(ofSize: 10)
+                } label: {
+                    Text("10x10")
+                }
+            } label: {
+                ControlButton(icon: "arrow.2.circlepath", isActive: false)
+            }
             Spacer()
             ControlButton(icon: "questionmark", isActive: false)
                 .onTapGesture {
@@ -73,8 +83,7 @@ struct ControlView: View {
         }
     }
 
-    func generateNewPuzzle() {
-        let size = 5
+    func generateNewPuzzle(ofSize size: Int = 5) {
         puzzle = makeSolvablePuzzle(ofSize: size)
         solver = Solver(
             rows: (0..<size).map { puzzle.segments(forRow: $0).map { $0.length } },

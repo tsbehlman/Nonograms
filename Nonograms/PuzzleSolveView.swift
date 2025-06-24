@@ -8,16 +8,8 @@
 import SwiftUI
 
 struct PuzzleSolveView: View {
-    @State var puzzle = Puzzle(size: 5, solution:
-                               0b00000,
-                               0b00000,
-                               0b00000,
-                               0b00000,
-                               0b00000)
-    @State var solver: Solver = Solver(
-        rows: [[0], [0], [0], [0], [0]],
-        columns: [[0], [0], [0], [0], [0]]
-    )
+    @State var puzzle = Puzzle(size: 1, solution: 1)
+    @State var solver: Solver = Solver(rows: [[1]], columns: [[1]])
     @State var selectedState: TileState = .filled
 
     var body: some View {
