@@ -8,6 +8,7 @@
 import SwiftUI
 
 private let tileSize: CGFloat = 48
+private let majorTileSize = tileSize * 5
 private let segmentFontSize = tileSize / 2
 private let segmentFont = Font.system(size: segmentFontSize, weight: .bold, design: .monospaced)
 
@@ -61,17 +62,17 @@ struct TileView: View {
     let status: TileState
 
     var body: some View {
-        ZStack {
-            Rectangle()
-                .fill(status == .filled ? Color.accentColor : Color(UIColor.systemBackground))
-                .stroke(Color(uiColor: .separator), lineWidth: 1, antialiased: false)
+        Group {
             if status == .blocked {
                 Image(systemName: "xmark")
                     .font(.system(size: tileSize * 0.75, weight: .light))
                     .foregroundStyle(Color.secondary)
+            } else {
+                Rectangle()
+                    .fill(status == .filled ? Color.accentColor : Color(UIColor.systemBackground))
             }
         }
-        .frame(width: tileSize, height: tileSize, alignment: .center)
+            .frame(width: tileSize, height: tileSize, alignment: .center)
     }
 }
 
@@ -122,17 +123,45 @@ struct PuzzleTilesView: View {
     let fill: (Int, Int, TileState?) -> Void
 
     var body: some View {
-        Grid(horizontalSpacing: 0, verticalSpacing: 0) {
-            ForEach(0..<puzzle.size, id: \.self) { rowIndex in
-                GridRow {
-                    ForEach(0..<puzzle.size, id: \.self) { columnIndex in
-                        TileView(status: puzzle.tile(row: rowIndex, column: columnIndex))
-                            .onTapGesture {
-                                fill(rowIndex, columnIndex, nil)
-                            }
+        ZStack {
+            Grid(horizontalSpacing: 0, verticalSpacing: 0) {
+                ForEach(0..<puzzle.size, id: \.self) { rowIndex in
+                    GridRow {
+                        ForEach(0..<puzzle.size, id: \.self) { columnIndex in
+                            TileView(status: puzzle.tile(row: rowIndex, column: columnIndex))
+                                .onTapGesture {
+                                    fill(rowIndex, columnIndex, nil)
+                                }
+                        }
                     }
                 }
             }
+
+            Path { path in
+                let edge = CGFloat(puzzle.size) * tileSize
+                for x in stride(from: 0, through: edge, by: tileSize) {
+                    path.move(to: CGPointMake(x, 0))
+                    path.addLine(to: CGPointMake(x, edge))
+                }
+                for y in stride(from: 0, through: edge, by: tileSize) {
+                    path.move(to: CGPointMake(0, y))
+                    path.addLine(to: CGPointMake(edge, y))
+                }
+            }
+                .stroke(Color.primary.opacity(0.25), lineWidth: 1, antialiased: false)
+
+            Path { path in
+                let edge = CGFloat(puzzle.size) * tileSize
+                for x in stride(from: 0, through: edge, by: majorTileSize) {
+                    path.move(to: CGPointMake(x, 0))
+                    path.addLine(to: CGPointMake(x, edge))
+                }
+                for y in stride(from: 0, through: edge, by: majorTileSize) {
+                    path.move(to: CGPointMake(0, y))
+                    path.addLine(to: CGPointMake(edge, y))
+                }
+            }
+                .stroke(Color.primary.opacity(1), lineWidth: 1, antialiased: false)
         }
     }
 }

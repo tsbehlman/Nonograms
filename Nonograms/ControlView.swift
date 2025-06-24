@@ -17,7 +17,7 @@ struct ControlButton: View {
         ZStack {
             Circle()
                 .fill(isActive ? Color.accentColor : Color(UIColor.systemBackground))
-                .stroke(Color(UIColor.separator))
+                .stroke(Color.primary.opacity(0.25))
             Image(systemName: icon)
                 .foregroundStyle(isActive ? Color(UIColor.label.onFill) : Color.primary)
         }
