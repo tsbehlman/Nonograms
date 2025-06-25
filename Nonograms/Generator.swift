@@ -36,75 +36,22 @@ func makeSolvablePuzzle(ofSize size: Int) -> Puzzle {
         tiles[index] = .filled
     }
 
-    while !makesSolvablePuzzle(tiles: tiles, size: size) {
+    var puzzle = Puzzle(size: size, solution: tiles)
+
+    while !isSolvable(puzzle) {
         let index = indexSet.randomIndex()
         indexSet.remove(index)
         tiles[index] = .filled
+        puzzle = Puzzle(size: size, solution: tiles)
     }
 
-    return Puzzle(size: size, solution: solution(forTiles: tiles, size: size))
+    return puzzle
 }
 
-private func makesSolvablePuzzle(tiles: [TileState], size: Int) -> Bool {
-    let rows = (0..<size).map { rowIndex in
-        let states = tiles.gridIndices(forRow: rowIndex, width: size).map { tiles[$0] }
-
-        var lengths: [Int] = []
-        var length = 0
-        for state in states {
-            if state == .filled {
-                length += 1
-            } else if length > 0 {
-                lengths.append(length)
-                length = 0
-            }
-        }
-        if length > 0 {
-            lengths.append(length)
-        }
-
-        return lengths
-    }
-
-    let columns = (0..<size).map { rowIndex in
-        let states = tiles.gridIndices(forColumn: rowIndex, width: size).map { tiles[$0] }
-
-        var lengths: [Int] = []
-        var length = 0
-        for state in states {
-            if state == .filled {
-                length += 1
-            } else if length > 0 {
-                lengths.append(length)
-                length = 0
-            }
-        }
-        if length > 0 {
-            lengths.append(length)
-        }
-
-        return lengths
-    }
-
-    var solver = Solver(rows: rows, columns: columns)
+private func isSolvable(_ puzzle: Puzzle) -> Bool {
+    var solver = Solver(
+        rows: (0..<puzzle.size).map { puzzle.segments(forRow: $0).map { $0.length } },
+        columns: (0..<puzzle.size).map { puzzle.segments(forColumn: $0).map { $0.length } }
+    )
     return solver.canSolvePuzzle()
-}
-
-private func solution(forTiles tiles: [TileState], size: Int) -> [UInt] {
-    var solution: [UInt] = []
-
-    var tileIndex = 0
-    for _ in 0..<size {
-        var row: UInt = 0
-        for _ in 0..<size {
-            row = row << 1
-            if tiles[tileIndex] == .filled {
-                row |= 1
-            }
-            tileIndex += 1
-        }
-        solution.append(row)
-    }
-
-    return solution
 }

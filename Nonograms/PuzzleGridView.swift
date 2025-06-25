@@ -214,7 +214,7 @@ struct PuzzleGridView: View {
 }
 
 #Preview {
-    @Previewable @State var puzzle = Puzzle(size: 5, solution:
+    @Previewable @State var puzzle = Puzzle(size: 5, data:
                                    0b11111,
                                    0b10001,
                                    0b10101,

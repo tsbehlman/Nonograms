@@ -10,7 +10,7 @@ import XCTest
 
 final class ModelTests: XCTestCase {
     func testEmptyRowSegments() {
-        let puzzle = Puzzle(size: 5, solution:
+        let puzzle = Puzzle(size: 5, data:
                                 0b11111,
                                 0b10001,
                                 0b10101,
@@ -32,7 +32,7 @@ final class ModelTests: XCTestCase {
     }
 
     func testCompleteRowSegments() {
-        var puzzle = Puzzle(size: 5, solution:
+        var puzzle = Puzzle(size: 5, data:
                                 0b11111,
                                 0b10001,
                                 0b10101,
@@ -55,7 +55,7 @@ final class ModelTests: XCTestCase {
     }
 
     func testPartialRowSegments() {
-        var puzzle = Puzzle(size: 5, solution:
+        var puzzle = Puzzle(size: 5, data:
                                 0b11111,
                                 0b10001,
                                 0b10101,
@@ -91,7 +91,7 @@ final class ModelTests: XCTestCase {
     }
 
     func testPartialColumnSegments() {
-        var puzzle = Puzzle(size: 5, solution:
+        var puzzle = Puzzle(size: 5, data:
                                 0b11111,
                                 0b10001,
                                 0b10101,

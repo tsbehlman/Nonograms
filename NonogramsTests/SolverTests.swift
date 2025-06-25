@@ -13,7 +13,7 @@ class CanSolvePuzzleTestCase: TestCase {
     var solver: Solver
 
     init(_ size: Int, _ solution: UInt..., file: StaticString = #file, line: UInt = #line) {
-        let puzzle = Puzzle(size: size, solution: solution)
+        let puzzle = Puzzle(size: size, data: solution)
         let range = 0..<puzzle.size
         self.solver = Solver(
             rows: range.map { puzzle.segments(forRow: $0).map { $0.length } },

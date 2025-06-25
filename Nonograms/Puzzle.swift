@@ -41,19 +41,25 @@ struct Segment: Identifiable, Equatable {
 struct Puzzle {
     let size: Int
     var tiles: [TileState]
-    let solution: [UInt]
+    let solution: [TileState]
 
-    init(size: Int, solution: [UInt]) {
-        assert(size <= 32, "Puzzles larger than 32x32 are not supported")
-        assert(solution.count == size, "Puzzles must be square, you must provide data for each row")
-
-        self.size = Int(size)
+    init(size: Int, solution: [TileState]) {
+        self.size = size
         self.solution = solution
-        tiles = Array<TileState>(repeating: .blank, count: Int(size) * Int(size))
+        self.tiles = Array<TileState>(repeating: .blank, count: Int(size) * Int(size))
     }
 
-    init(size: Int, solution: UInt...) {
+    init(size: Int, data: [UInt]) {
+        assert(size <= 32, "Puzzles larger than 32x32 are not supported")
+        assert(data.count == size, "Puzzles must be square, you must provide data for each row")
+
+        var solution = Array<TileState>(repeating: .blank, count: Int(size) * Int(size))
+        fillTiles(&solution, with: data, size: size)
         self.init(size: size, solution: solution)
+    }
+
+    init(size: Int, data: UInt...) {
+        self.init(size: size, data: data)
     }
 
     func tile(row: Int, column: Int) -> TileState {
@@ -71,19 +77,17 @@ struct Puzzle {
         case (.blank, .blocked):
             tiles[row * size + column] = .blocked
         case (.blank, .filled):
-            let columnBit = bit(forColumn: column)
-            let shouldBeFilled = solution[row] & columnBit > 0
-            if shouldBeFilled {
-                tiles[row * size + column] = .filled
+            if solution[tileIndex] == .filled {
+                tiles[tileIndex] = .filled
             } else {
-                tiles[row * size + column] = .blocked
+                tiles[tileIndex] = .blocked
             }
         case (.blocked, .blocked):
             if !holding {
-                tiles[row * size + column] = .blank
+                tiles[tileIndex] = .blank
             }
         case (.blocked, .blank):
-            tiles[row * size + column] = .blank
+            tiles[tileIndex] = .blank
         case (.blocked, _):
             break
         case (.filled, _):
@@ -93,43 +97,17 @@ struct Puzzle {
         }
     }
 
-    func validate(row rowIndex: Int) -> Bool {
-        var row = solution[rowIndex]
-        for columnIndex in (0..<size).reversed() {
-            let shouldBeFilled = row & 1 == 1
-            let isFilled = tile(row: rowIndex, column: columnIndex) == .filled
-            if shouldBeFilled != isFilled {
-                return false
-            }
-            row >>= 1
-        }
-        return true
-    }
-
-    func validate(column columnIndex: Int) -> Bool {
-        let columnBit = bit(forColumn: columnIndex)
-        for rowIndex in 0..<size {
-            let shouldBeFilled = solution[rowIndex] & columnBit > 0
-            let isFilled = tile(row: rowIndex, column: columnIndex) == .filled
-            if shouldBeFilled != isFilled {
-                return false
-            }
-        }
-        return true
-    }
-
     func segments(forRow rowIndex: Int) -> [Segment] {
         var segments = [Segment]()
         var length = 0
-        var row = solution[rowIndex]
         for columnIndex in (0..<size).reversed() {
-            if row & 1 == 1 {
+            let tileIndex = rowIndex * size + columnIndex
+            if solution[tileIndex] == .filled {
                 length += 1
             } else if length > 0 {
                 segments.append(Segment(length: length, startIndex: columnIndex + 1, state: .missing))
                 length = 0
             }
-            row >>= 1
         }
         if length > 0 {
             segments.append(Segment(length: length, startIndex: 0, state: .missing))
@@ -175,9 +153,9 @@ struct Puzzle {
     func segments(forColumn columnIndex: Int) -> [Segment] {
         var segments = [Segment]()
         var length = 0
-        let columnBit = bit(forColumn: columnIndex)
         for rowIndex in 0..<size {
-            if solution[rowIndex] & columnBit > 0 {
+            let tileIndex = rowIndex * size + columnIndex
+            if solution[tileIndex] == .filled {
                 length += 1
             } else if length > 0 {
                 segments.append(Segment(length: length, startIndex: rowIndex - length, state: .missing))
@@ -225,29 +203,29 @@ struct Puzzle {
     }
 
     mutating func solve() {
-        fill(data: solution)
+        tiles = solution
     }
 
     mutating func fill(_ data: UInt...) {
-        fill(data: data)
+        fillTiles(&tiles, with: data, size: size)
     }
 
     func bit(forColumn columnIndex: Int) -> UInt {
         1 << (size - columnIndex - 1)
     }
+}
 
-    private mutating func fill(data: [UInt]) {
-        var rowIndex = 0
-        for var row in data {
-            for index in (0..<size).reversed() {
-                if row & 1 == 1 {
-                    tiles[rowIndex + index] = .filled
-                } else {
-                    tiles[rowIndex + index] = .blocked
-                }
-                row >>= 1
+private func fillTiles(_ tiles: inout [TileState], with data: [UInt], size: Int) {
+    var rowIndex = 0
+    for var row in data {
+        for index in (0..<size).reversed() {
+            if row & 1 == 1 {
+                tiles[rowIndex + index] = .filled
+            } else {
+                tiles[rowIndex + index] = .blocked
             }
-            rowIndex += size
+            row >>= 1
         }
+        rowIndex += size
     }
 }

@@ -94,7 +94,7 @@ struct ControlView: View {
 
 #Preview {
     @Previewable @State var state: TileState = .filled
-    @Previewable @State var puzzle = Puzzle(size: 1, solution: 0b0)
+    @Previewable @State var puzzle = Puzzle(size: 1, data: 0b0)
     @Previewable @State var solver = Solver(rows: [], columns: [])
     ControlView(state: $state, puzzle: $puzzle, solver: $solver)
 }

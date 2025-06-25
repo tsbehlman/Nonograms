@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct PuzzleSolveView: View {
-    @State var puzzle = Puzzle(size: 1, solution: 1)
+    @State var puzzle = Puzzle(size: 1, data: 1)
     @State var solver: Solver = Solver(rows: [[1]], columns: [[1]])
     @State var selectedState: TileState = .filled
 
