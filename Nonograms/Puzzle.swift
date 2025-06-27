@@ -66,7 +66,11 @@ struct Puzzle {
         tiles[row * size + column]
     }
 
-    var indices: Range<Int> {
+    var rowIndices: Range<Int> {
+        0..<size
+    }
+
+    var columnIndices: Range<Int> {
         0..<size
     }
 
@@ -97,31 +101,47 @@ struct Puzzle {
         }
     }
 
-    private func segments(in tileIndices: some Sequence<Int>) -> [Segment] {
-        var tileIndices = ArraySlice(tileIndices)
-
-        var segments = [Segment]()
+    private func segmentRanges(in tileIndices: some Sequence<Int>) -> [Range<Int>] {
+        var ranges = [Range<Int>]()
         var startIndex = 0
-        var length = 0
+        var endIndex = 0
         for tileIndex in tileIndices {
             if solution[tileIndex] == .filled {
-                length += 1
-            } else if length > 0 {
-                segments.append(Segment(length: length, startIndex: startIndex, state: .missing))
-                startIndex += length + 1
-                length = 0
+                endIndex += 1
+            } else if endIndex > startIndex {
+                ranges.append(startIndex..<endIndex)
+                startIndex = endIndex + 1
+                endIndex = startIndex
             } else {
                 startIndex += 1
+                endIndex = startIndex
             }
         }
-        if length > 0 {
-            segments.append(Segment(length: length, startIndex: startIndex, state: .missing))
+        if endIndex > startIndex {
+            ranges.append(startIndex..<endIndex)
+        }
+
+        return ranges
+    }
+
+    func segmentRanges(forRow rowIndex: Int) -> [Range<Int>] {
+        segmentRanges(in: solution.gridIndices(forRow: rowIndex, width: size))
+    }
+
+    func segmentRanges(forColumn columnIndex: Int) -> [Range<Int>] {
+        segmentRanges(in: solution.gridIndices(forColumn: columnIndex, width: size))
+    }
+
+    private func segments(in tileIndices: some Sequence<Int>) -> [Segment] {
+        var segments = segmentRanges(in: tileIndices).map {
+            Segment(length: $0.length, startIndex: $0.lowerBound, state: .missing)
         }
 
         if segments.isEmpty {
-            return [Segment(length: 0, startIndex: 0, state: .complete)]
+            segments.append(Segment(length: 0, startIndex: 0, state: .complete))
         }
 
+        var tileIndices = ArraySlice(tileIndices)
         var lastTile: TileState = .blocked
         var segmentIndex = segments.startIndex
         while !tileIndices.isEmpty {

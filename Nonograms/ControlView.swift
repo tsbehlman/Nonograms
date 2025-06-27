@@ -86,8 +86,8 @@ struct ControlView: View {
     func generateNewPuzzle(ofSize size: Int = 5) {
         puzzle = makeSolvablePuzzle(ofSize: size)
         solver = Solver(
-            rows: (0..<size).map { puzzle.segments(forRow: $0).map { $0.length } },
-            columns: (0..<size).map { puzzle.segments(forColumn: $0).map { $0.length } }
+            rows: puzzle.rowIndices.map { puzzle.segmentRanges(forRow: $0).map { $0.length } },
+            columns: puzzle.columnIndices.map { puzzle.segmentRanges(forColumn: $0).map { $0.length } }
         )
     }
 }

@@ -111,8 +111,8 @@ struct DraggablePuzzleTilesView: View {
             .highPriorityGesture(gesture)
             .onChange(of: dragState) {
                 guard case let .dragging(row, column, state) = dragState,
-                      puzzle.indices.contains(row),
-                      puzzle.indices.contains(column) else { return }
+                      puzzle.rowIndices.contains(row),
+                      puzzle.columnIndices.contains(column) else { return }
                 fill(row, column, state)
             }
     }

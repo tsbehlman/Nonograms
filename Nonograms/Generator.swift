@@ -50,8 +50,8 @@ func makeSolvablePuzzle(ofSize size: Int) -> Puzzle {
 
 private func isSolvable(_ puzzle: Puzzle) -> Bool {
     var solver = Solver(
-        rows: (0..<puzzle.size).map { puzzle.segments(forRow: $0).map { $0.length } },
-        columns: (0..<puzzle.size).map { puzzle.segments(forColumn: $0).map { $0.length } }
+        rows: (0..<puzzle.size).map { puzzle.segmentRanges(forRow: $0).map { $0.length } },
+        columns: (0..<puzzle.size).map { puzzle.segmentRanges(forColumn: $0).map { $0.length } }
     )
     return solver.canSolvePuzzle()
 }
