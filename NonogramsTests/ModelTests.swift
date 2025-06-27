@@ -14,7 +14,7 @@ final class ModelTests: XCTestCase {
                                 0b11111,
                                 0b10001,
                                 0b10101,
-                                0b10001,
+                                0b11001,
                                 0b11111
         )
         XCTAssertEqual(puzzle.segments(forRow: 0), [
@@ -27,6 +27,10 @@ final class ModelTests: XCTestCase {
         XCTAssertEqual(puzzle.segments(forRow: 2), [
             Segment(length: 1, startIndex: 0, state: .missing),
             Segment(length: 1, startIndex: 2, state: .missing),
+            Segment(length: 1, startIndex: 4, state: .missing),
+        ])
+        XCTAssertEqual(puzzle.segments(forRow: 3), [
+            Segment(length: 2, startIndex: 0, state: .missing),
             Segment(length: 1, startIndex: 4, state: .missing),
         ])
     }

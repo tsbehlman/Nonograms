@@ -29,4 +29,12 @@ extension Array {
     func gridIndices(forColumn columnIndex: Int, width: Int) -> some Sequence<Int> {
         return stride(from: columnIndex, to: count, by: width)
     }
+
+    func gridItems(forRow rowIndex: Int, width: Int) -> some Sequence<Element> {
+        gridIndices(forRow: rowIndex, width: width).lazy.map { self[$0] }
+    }
+
+    func gridItems(forColumn columnIndex: Int, width: Int) -> some Sequence<Element> {
+        gridIndices(forColumn: columnIndex, width: width).lazy.map { self[$0] }
+    }
 }

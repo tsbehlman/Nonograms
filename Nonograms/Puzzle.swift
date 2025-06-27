@@ -99,20 +99,22 @@ struct Puzzle {
 
     func segments(forRow rowIndex: Int) -> [Segment] {
         var segments = [Segment]()
+        var startIndex = 0
         var length = 0
-        for columnIndex in (0..<size).reversed() {
-            let tileIndex = rowIndex * size + columnIndex
-            if solution[tileIndex] == .filled {
+        for tile in solution.gridItems(forRow: rowIndex, width: size) {
+            if tile == .filled {
                 length += 1
             } else if length > 0 {
-                segments.append(Segment(length: length, startIndex: columnIndex + 1, state: .missing))
+                segments.append(Segment(length: length, startIndex: startIndex, state: .missing))
+                startIndex += length + 1
                 length = 0
+            } else {
+                startIndex += 1
             }
         }
         if length > 0 {
-            segments.append(Segment(length: length, startIndex: 0, state: .missing))
+            segments.append(Segment(length: length, startIndex: startIndex, state: .missing))
         }
-        segments = segments.reversed()
 
         if segments.isEmpty {
             return [Segment(length: 0, startIndex: 0, state: .complete)]
@@ -135,35 +137,42 @@ struct Puzzle {
 
     private func completeSegments(forRow rowIndex: Int) -> [Segment] {
         var segments = [Segment]()
+        var startIndex = 0
         var length = 0
-        for columnIndex in 0..<size {
-            if tile(row: rowIndex, column: columnIndex) == .filled {
+        for tile in tiles.gridItems(forRow: rowIndex, width: size) {
+            if tile == .filled {
                 length += 1
             } else if length > 0 {
-                segments.append(Segment(length: length, startIndex: columnIndex - length, state: .complete))
+                segments.append(Segment(length: length, startIndex: startIndex, state: .complete))
+                startIndex += length + 1
                 length = 0
+            } else {
+                startIndex += 1
             }
         }
         if length > 0 {
-            segments.append(Segment(length: length, startIndex: size - length, state: .complete))
+            segments.append(Segment(length: length, startIndex: startIndex, state: .complete))
         }
         return segments
     }
 
     func segments(forColumn columnIndex: Int) -> [Segment] {
         var segments = [Segment]()
+        var startIndex = 0
         var length = 0
-        for rowIndex in 0..<size {
-            let tileIndex = rowIndex * size + columnIndex
-            if solution[tileIndex] == .filled {
+        for tile in solution.gridItems(forColumn: columnIndex, width: size) {
+            if tile == .filled {
                 length += 1
             } else if length > 0 {
-                segments.append(Segment(length: length, startIndex: rowIndex - length, state: .missing))
+                segments.append(Segment(length: length, startIndex: startIndex, state: .missing))
+                startIndex += length + 1
                 length = 0
+            } else {
+                startIndex += 1
             }
         }
         if length > 0 {
-            segments.append(Segment(length: length, startIndex: size - length, state: .missing))
+            segments.append(Segment(length: length, startIndex: startIndex, state: .missing))
         }
 
         if segments.isEmpty {
@@ -187,17 +196,21 @@ struct Puzzle {
 
     private func completeSegments(forColumn columnIndex: Int) -> [Segment] {
         var segments = [Segment]()
+        var startIndex = 0
         var length = 0
-        for rowIndex in 0..<size {
-            if tile(row: rowIndex, column: columnIndex) == .filled {
+        for tile in tiles.gridItems(forColumn: columnIndex, width: size) {
+            if tile == .filled {
                 length += 1
             } else if length > 0 {
-                segments.append(Segment(length: length, startIndex: rowIndex - length, state: .complete))
+                segments.append(Segment(length: length, startIndex: startIndex, state: .complete))
+                startIndex += length + 1
                 length = 0
+            } else {
+                startIndex += 1
             }
         }
         if length > 0 {
-            segments.append(Segment(length: length, startIndex: size - length, state: .complete))
+            segments.append(Segment(length: length, startIndex: startIndex, state: .complete))
         }
         return segments
     }
