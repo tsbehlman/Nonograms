@@ -21,12 +21,12 @@ extension Array {
         return nil
     }
 
-    func gridIndices(forRow rowIndex: Int, width: Int) -> some Sequence<Int> {
+    func gridIndices(forRow rowIndex: Int, width: Int) -> StrideTo<Int> {
         let startIndex = rowIndex * width
         return stride(from: startIndex, to: startIndex + width, by: 1)
     }
 
-    func gridIndices(forColumn columnIndex: Int, width: Int) -> some Sequence<Int> {
+    func gridIndices(forColumn columnIndex: Int, width: Int) -> StrideTo<Int> {
         return stride(from: columnIndex, to: count, by: width)
     }
 

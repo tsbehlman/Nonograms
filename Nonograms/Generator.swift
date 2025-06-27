@@ -25,7 +25,7 @@ extension IndexSet {
 
 func makeSolvablePuzzle(ofSize size: Int) -> Puzzle {
     let numTiles = size * size
-    var tiles: [TileState] = Array(repeating: .blank, count: numTiles)
+    var tiles: [TileState] = Array(repeating: .blocked, count: numTiles)
     var indexSet = IndexSet(integersIn: tiles.indices)
 
     let targetFillRate = Double.random(in: minTargetFillRate..<maxTargetFillRate)

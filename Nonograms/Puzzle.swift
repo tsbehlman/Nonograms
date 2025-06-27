@@ -97,12 +97,14 @@ struct Puzzle {
         }
     }
 
-    func segments(forRow rowIndex: Int) -> [Segment] {
+    private func segments(in tileIndices: some Sequence<Int>) -> [Segment] {
+        var tileIndices = ArraySlice(tileIndices)
+
         var segments = [Segment]()
         var startIndex = 0
         var length = 0
-        for tile in solution.gridItems(forRow: rowIndex, width: size) {
-            if tile == .filled {
+        for tileIndex in tileIndices {
+            if solution[tileIndex] == .filled {
                 length += 1
             } else if length > 0 {
                 segments.append(Segment(length: length, startIndex: startIndex, state: .missing))
@@ -120,99 +122,45 @@ struct Puzzle {
             return [Segment(length: 0, startIndex: 0, state: .complete)]
         }
 
-        var iterator = BidirectionalZippedIterator(segments.indices, completeSegments(forRow: rowIndex))
-
-        while let (index, completeSegment) = iterator.next() {
-            if segments[index].range == completeSegment.range {
-                segments[index] = completeSegment
-            } else if iterator.isAdvancing {
-                iterator.flip()
-            } else {
-                break
+        var lastTile: TileState = .blocked
+        var segmentIndex = segments.startIndex
+        while !tileIndices.isEmpty {
+            let tileIndex = tileIndices.removeFirst()
+            let nextTile = tiles[tileIndex]
+            guard solution[tileIndex] == nextTile else { break }
+            let isClosingSegment = nextTile == .blocked && lastTile == .filled
+            let isLastSegment = nextTile == .filled && tileIndices.isEmpty
+            if isClosingSegment || isLastSegment {
+                segments[segmentIndex] = segments[segmentIndex].with(state: .complete)
+                segmentIndex += 1
             }
+            lastTile = nextTile
+        }
+
+        lastTile = .blocked
+        segmentIndex = segments.endIndex - 1
+        while !tileIndices.isEmpty {
+            let tileIndex = tileIndices.removeLast()
+            let nextTile = tiles[tileIndex]
+            guard solution[tileIndex] == nextTile else { break }
+            if nextTile == .blank {
+                break
+            } else if nextTile == .blocked && lastTile == .filled {
+                segments[segmentIndex] = segments[segmentIndex].with(state: .complete)
+                segmentIndex -= 1
+            }
+            lastTile = nextTile
         }
 
         return segments
     }
 
-    private func completeSegments(forRow rowIndex: Int) -> [Segment] {
-        var segments = [Segment]()
-        var startIndex = 0
-        var length = 0
-        for tile in tiles.gridItems(forRow: rowIndex, width: size) {
-            if tile == .filled {
-                length += 1
-            } else if length > 0 {
-                segments.append(Segment(length: length, startIndex: startIndex, state: .complete))
-                startIndex += length + 1
-                length = 0
-            } else {
-                startIndex += 1
-            }
-        }
-        if length > 0 {
-            segments.append(Segment(length: length, startIndex: startIndex, state: .complete))
-        }
-        return segments
+    func segments(forRow rowIndex: Int) -> [Segment] {
+        segments(in: solution.gridIndices(forRow: rowIndex, width: size))
     }
 
     func segments(forColumn columnIndex: Int) -> [Segment] {
-        var segments = [Segment]()
-        var startIndex = 0
-        var length = 0
-        for tile in solution.gridItems(forColumn: columnIndex, width: size) {
-            if tile == .filled {
-                length += 1
-            } else if length > 0 {
-                segments.append(Segment(length: length, startIndex: startIndex, state: .missing))
-                startIndex += length + 1
-                length = 0
-            } else {
-                startIndex += 1
-            }
-        }
-        if length > 0 {
-            segments.append(Segment(length: length, startIndex: startIndex, state: .missing))
-        }
-
-        if segments.isEmpty {
-            return [Segment(length: 0, startIndex: 0, state: .complete)]
-        }
-
-        var iterator = BidirectionalZippedIterator(segments.indices, completeSegments(forColumn: columnIndex))
-
-        while let (index, completeSegment) = iterator.next() {
-            if segments[index].range == completeSegment.range {
-                segments[index] = completeSegment
-            } else if iterator.isAdvancing {
-                iterator.flip()
-            } else {
-                break
-            }
-        }
-
-        return segments
-    }
-
-    private func completeSegments(forColumn columnIndex: Int) -> [Segment] {
-        var segments = [Segment]()
-        var startIndex = 0
-        var length = 0
-        for tile in tiles.gridItems(forColumn: columnIndex, width: size) {
-            if tile == .filled {
-                length += 1
-            } else if length > 0 {
-                segments.append(Segment(length: length, startIndex: startIndex, state: .complete))
-                startIndex += length + 1
-                length = 0
-            } else {
-                startIndex += 1
-            }
-        }
-        if length > 0 {
-            segments.append(Segment(length: length, startIndex: startIndex, state: .complete))
-        }
-        return segments
+        segments(in: solution.gridIndices(forColumn: columnIndex, width: size))
     }
 
     mutating func solve() {
