@@ -17,24 +17,24 @@ enum SegmentState {
 }
 
 struct Segment: Identifiable, Equatable {
-    let length: Int
-    let startIndex: Int
+    let range: Range<Int>
     let state: SegmentState
 
-    var endIndex: Int {
-        startIndex + length
+    init(_ range: Range<Int>, state: SegmentState) {
+        self.range = range
+        self.state = state
     }
 
-    var range: Range<Int> {
-        startIndex..<endIndex
+    init(length: Int, startIndex: Int, state: SegmentState) {
+        self.init(startIndex..<(startIndex + length), state: state)
     }
 
     var id: UInt {
-        (0xFFFFFFFF >> (32 - length)) << startIndex
+        (0xFFFFFFFF >> (32 - range.length)) << range.lowerBound
     }
 
     func with(state: SegmentState) -> Segment {
-        Segment(length: length, startIndex: startIndex, state: state)
+        Segment(range, state: state)
     }
 }
 
@@ -134,11 +134,11 @@ struct Puzzle {
 
     private func segments(in tileIndices: some Sequence<Int>) -> [Segment] {
         var segments = segmentRanges(in: tileIndices).map {
-            Segment(length: $0.length, startIndex: $0.lowerBound, state: .missing)
+            Segment($0, state: .missing)
         }
 
         if segments.isEmpty {
-            segments.append(Segment(length: 0, startIndex: 0, state: .complete))
+            segments.append(Segment(0..<0, state: .complete))
         }
 
         var tileIndices = ArraySlice(tileIndices)

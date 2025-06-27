@@ -16,7 +16,7 @@ struct SegmentLabel: View {
     let segment: Segment
 
     var body: some View {
-        Text("\(segment.length)")
+        Text("\(segment.range.length)")
             .font(segmentFont)
             .foregroundStyle(segment.state == .complete ? Color.accentColor : Color.primary)
     }
