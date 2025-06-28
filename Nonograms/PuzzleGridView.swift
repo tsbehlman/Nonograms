@@ -161,7 +161,7 @@ struct PuzzleTilesView: View {
                     path.addLine(to: CGPointMake(edge, y))
                 }
             }
-                .stroke(Color.primary.opacity(1), lineWidth: 1, antialiased: false)
+            .stroke(Color.primary.opacity(1), style: StrokeStyle(lineWidth: 1, lineCap: .square), antialiased: false)
         }
     }
 }
