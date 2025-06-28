@@ -45,7 +45,7 @@ struct ControlView: View {
     @Binding var solver: Solver
 
     var body: some View {
-        HStack {
+        HStack(spacing: 12) {
             Menu {
                 Button {
                     generateNewPuzzle(ofSize: 5)
@@ -60,7 +60,6 @@ struct ControlView: View {
             } label: {
                 ControlButton(icon: "arrow.2.circlepath", isActive: false)
             }
-            Spacer()
             ControlButton(icon: "questionmark", isActive: false)
                 .onTapGesture {
                     solver.step()
@@ -68,6 +67,7 @@ struct ControlView: View {
                         puzzle.tiles[index] = tile
                     }
                 }
+            Spacer()
             ControlIconView(state: $state, control: .filled, icon: "square.fill")
             ControlIconView(state: $state, control: .blocked, icon: "xmark")
         }
