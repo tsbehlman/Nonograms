@@ -26,6 +26,7 @@ struct PannableView<Content: View>: View {
             .onScrollGeometryChange(for: CGPoint.self, of: \.contentOffset) {
                 offset = $1
             }
+            .scrollClipDisabled()
     }
 }
 

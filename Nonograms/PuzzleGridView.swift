@@ -185,27 +185,25 @@ struct PuzzleGridView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack(alignment: .bottom, spacing: 0) {
-                Color.clear
-                    .frame(width: segmentSize, height: segmentSize)
-                OffsetView(axis: .horizontal, offset: $offset) {
-                    EqualStack(axis: .horizontal, itemWidth: .fixed(tileSize)) {
-                        ForEach(0..<puzzle.size, id: \.self) { columnIndex in
-                            ZStack {
-                                if columnIndex.isMultiple(of: 2) {
-                                    Rectangle()
-                                        .fill(LinearGradient(gradient: segmentGradient, startPoint: .top, endPoint: .bottom))
-                                } else {
-                                    Rectangle()
-                                        .fill(Color.clear)
-                                }
-                                SegmentLabels(puzzle: puzzle, axis: .vertical, index: columnIndex, size: labelSize)
+            OffsetView(axis: .horizontal, offset: $offset) {
+                EqualStack(axis: .horizontal, itemWidth: .fixed(tileSize)) {
+                    ForEach(0..<puzzle.size, id: \.self) { columnIndex in
+                        ZStack {
+                            if columnIndex.isMultiple(of: 2) {
+                                Rectangle()
+                                    .fill(LinearGradient(gradient: segmentGradient, startPoint: .top, endPoint: .bottom))
+                            } else {
+                                Rectangle()
+                                    .fill(Color.clear)
                             }
+                            SegmentLabels(puzzle: puzzle, axis: .vertical, index: columnIndex, size: labelSize)
                         }
                     }
                 }
-                    .frame(maxWidth: puzzleSize, minHeight: segmentSize, maxHeight: segmentSize)
+                    .padding(.leading, segmentSize)
             }
+                .frame(maxWidth: puzzleSize + segmentSize, minHeight: segmentSize, maxHeight: segmentSize)
+                .zIndex(1)
             HStack(alignment: .top, spacing: 0) {
                 OffsetView(axis: .vertical, offset: $offset) {
                     EqualStack(axis: .vertical, itemHeight: .fixed(tileSize)) {
@@ -224,12 +222,16 @@ struct PuzzleGridView: View {
                     }
                 }
                     .frame(minWidth: segmentSize, maxWidth: segmentSize, maxHeight: puzzleSize)
+                    .zIndex(1)
                 PannableView(scrollEnabled: mode.tileState == nil, fitsView: $fitsView, offset: $offset) {
                     DraggablePuzzleTilesView(puzzle: $puzzle, mode: $mode, fill: fill)
                 }
                     .frame(maxWidth: puzzleSize, maxHeight: puzzleSize)
+                    .zIndex(0)
             }
         }
+            .padding(1)
+            .clipped()
     }
 }
 
