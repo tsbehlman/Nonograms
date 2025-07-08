@@ -70,6 +70,11 @@ struct ControlView: View {
                 mode = .fill(.filled)
             }
         }
+        .onChange(of: fitsView) { _, fitsView in
+            if fitsView, case .move = mode {
+                mode = .fill(.blocked)
+            }
+        }
         .onAppear {
             generateNewPuzzle()
         }
