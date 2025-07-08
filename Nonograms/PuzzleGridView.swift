@@ -11,6 +11,7 @@ private let tileSize: CGFloat = 48
 private let majorTileSize = tileSize * 5
 private let segmentFontSize = tileSize / 2
 private let segmentFont = Font.system(size: segmentFontSize, weight: .bold, design: .monospaced)
+private let segmentPadding = segmentFontSize / 2
 
 struct SegmentLabel: View {
     let segment: Segment
@@ -26,14 +27,7 @@ struct SegmentLabels: View {
     let puzzle: Puzzle
     let axis: Axis
     let index: Int
-
-    var maxSegments: Int {
-        (puzzle.size + 1) / 2
-    }
-
-    var labelSize: CGFloat {
-        segmentFontSize * CGFloat(maxSegments)
-    }
+    let size: CGFloat
 
     var segments: [Segment] {
         axis == .horizontal
@@ -50,11 +44,11 @@ struct SegmentLabels: View {
             }
         }
         .frame(
-            width: axis == .horizontal ? labelSize : tileSize,
-            height: axis == .horizontal ? tileSize : labelSize,
+            width: axis == .horizontal ? size : tileSize,
+            height: axis == .horizontal ? tileSize : size,
             alignment: axis == .horizontal ? .trailing : .bottom
         )
-        .padding(axis == .horizontal ? .trailing : .bottom, segmentFontSize / 2)
+        .padding(axis == .horizontal ? .trailing : .bottom, segmentPadding)
     }
 }
 
@@ -85,6 +79,7 @@ let segmentGradient = Gradient(stops: [
 struct DraggablePuzzleTilesView: View {
     @Binding var puzzle: Puzzle
     @Binding var selectedState: TileState
+    @Binding var scrollEnabled: Bool
     let fill: (Int, Int, TileState?) -> Void
 
     enum DragState: Equatable {
@@ -108,7 +103,7 @@ struct DraggablePuzzleTilesView: View {
                 state = .dragging(row: row, column: column, state: tileState)
             }
         PuzzleTilesView(puzzle: $puzzle, fill: fill)
-            .highPriorityGesture(gesture)
+            .highPriorityGesture(gesture, isEnabled: !scrollEnabled)
             .onChange(of: dragState) {
                 guard case let .dragging(row, column, state) = dragState,
                       puzzle.rowIndices.contains(row),
@@ -169,45 +164,76 @@ struct PuzzleTilesView: View {
 struct PuzzleGridView: View {
     @Binding var puzzle: Puzzle
     @Binding var selectedState: TileState
+    @Binding var scrollEnabled: Bool
+    @Binding var fitsView: Bool
+    @Binding var offset: CGPoint
     let fill: (Int, Int, TileState?) -> Void
 
+    var maxSegments: Int {
+        (puzzle.size + 1) / 2
+    }
+
+    var labelSize: CGFloat {
+        segmentFontSize * CGFloat(maxSegments)
+    }
+
+    var segmentSize: CGFloat {
+        labelSize + segmentPadding
+    }
+
+    var puzzleSize: CGFloat {
+        tileSize * CGFloat(puzzle.size)
+    }
+
     var body: some View {
-        Grid(horizontalSpacing: 0, verticalSpacing: 0) {
-            GridRow {
+        VStack(spacing: 0) {
+            HStack(alignment: .bottom, spacing: 0) {
                 Color.clear
-                    .gridCellUnsizedAxes([.horizontal, .vertical])
-                EqualStack(axis: .horizontal, itemWidth: .fixed(tileSize)) {
-                    ForEach(0..<puzzle.size, id: \.self) { columnIndex in
-                        ZStack {
-                            if columnIndex.isMultiple(of: 2) {
-                                Rectangle()
-                                    .fill(LinearGradient(gradient: segmentGradient, startPoint: .top, endPoint: .bottom))
-                            } else {
-                                Rectangle()
-                                    .fill(Color.clear)
+                    .frame(width: segmentSize, height: segmentSize)
+                OffsetView(axis: .horizontal, offset: $offset) {
+                    EqualStack(axis: .horizontal, itemWidth: .fixed(tileSize)) {
+                        ForEach(0..<puzzle.size, id: \.self) { columnIndex in
+                            ZStack {
+                                if columnIndex.isMultiple(of: 2) {
+                                    Rectangle()
+                                        .fill(LinearGradient(gradient: segmentGradient, startPoint: .top, endPoint: .bottom))
+                                } else {
+                                    Rectangle()
+                                        .fill(Color.clear)
+                                }
+                                SegmentLabels(puzzle: puzzle, axis: .vertical, index: columnIndex, size: labelSize)
                             }
-                            SegmentLabels(puzzle: puzzle, axis: .vertical, index: columnIndex)
                         }
                     }
                 }
+                    .frame(maxWidth: puzzleSize, minHeight: segmentSize, maxHeight: segmentSize)
             }
-            GridRow {
-                EqualStack(axis: .vertical, itemHeight: .fixed(tileSize)) {
-                    ForEach(0..<puzzle.size, id: \.self) { rowIndex in
-                        ZStack {
-                            if rowIndex.isMultiple(of: 2) {
-                                Rectangle()
-                                    .fill(LinearGradient(gradient: segmentGradient, startPoint: .leading, endPoint: .trailing))
-                            } else {
-                                Rectangle()
-                                    .fill(Color.clear)
+            HStack(alignment: .top, spacing: 0) {
+                OffsetView(axis: .vertical, offset: $offset) {
+                    EqualStack(axis: .vertical, itemHeight: .fixed(tileSize)) {
+                        ForEach(0..<puzzle.size, id: \.self) { rowIndex in
+                            ZStack {
+                                if rowIndex.isMultiple(of: 2) {
+                                    Rectangle()
+                                        .fill(LinearGradient(gradient: segmentGradient, startPoint: .leading, endPoint: .trailing))
+                                } else {
+                                    Rectangle()
+                                        .fill(Color.clear)
+                                }
+                                SegmentLabels(puzzle: puzzle, axis: .horizontal, index: rowIndex, size: labelSize)
                             }
-                            SegmentLabels(puzzle: puzzle, axis: .horizontal, index: rowIndex)
                         }
                     }
                 }
-                DraggablePuzzleTilesView(puzzle: $puzzle, selectedState: $selectedState, fill: fill)
-                    .gridCellUnsizedAxes([.horizontal, .vertical])
+                    .frame(minWidth: segmentSize, maxWidth: segmentSize, maxHeight: puzzleSize)
+                PannableView(scrollEnabled: $scrollEnabled, fitsView: $fitsView, offset: $offset) {
+                    DraggablePuzzleTilesView(puzzle: $puzzle, selectedState: $selectedState, scrollEnabled: $scrollEnabled) { row, column, state in
+                        if !scrollEnabled {
+                            fill(row, column, state)
+                        }
+                    }
+                }
+                    .frame(maxWidth: puzzleSize, maxHeight: puzzleSize)
             }
         }
     }
@@ -222,8 +248,11 @@ struct PuzzleGridView: View {
                                    0b11111
     )
     @Previewable @State var selectedState = TileState.filled
+    @Previewable @State var scrollEnabled: Bool = true
+    @Previewable @State var fitsView: Bool = false
+    @Previewable @State var offset: CGPoint = .zero
 
-    PuzzleGridView(puzzle: $puzzle, selectedState: $selectedState) { row, column, state in
+    PuzzleGridView(puzzle: $puzzle, selectedState: $selectedState, scrollEnabled: $scrollEnabled, fitsView: $fitsView, offset: $offset) { row, column, state in
         puzzle.set(row: row, column: column, to: state ?? selectedState, holding: state != nil)
     }
         .onAppear {

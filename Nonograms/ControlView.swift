@@ -11,20 +11,25 @@ struct ControlIconView: View {
     @Binding var state: TileState
     let control: TileState
     let icon: String
+    let disabled: Bool
 
     var body: some View {
-        ControlButton(icon: icon, active: state == control, disabled: false)
+        ControlButton(icon: icon, active: state == control, disabled: disabled)
             .onTapGesture {
-                state = control
+                if !disabled {
+                    state = control
+                }
             }
     }
 }
 
 struct ControlView: View {
     @StateObject var keyboardObserver = KeyboardObserver()
-    @Binding var state: TileState
     @Binding var puzzle: Puzzle
     @Binding var solver: Solver
+    @Binding var state: TileState
+    @Binding var scrollEnabled: Bool
+    @Binding var fitsView: Bool
 
     var body: some View {
         HStack(spacing: 12) {
@@ -50,8 +55,14 @@ struct ControlView: View {
                     }
                 }
             Spacer()
-            ControlIconView(state: $state, control: .filled, icon: "square.fill")
-            ControlIconView(state: $state, control: .blocked, icon: "xmark")
+            ControlButton(icon: "arrow.up.and.down.and.arrow.left.and.right", active: !fitsView && scrollEnabled, disabled: fitsView)
+                .onTapGesture {
+                    if !fitsView {
+                        scrollEnabled = !scrollEnabled
+                    }
+                }
+            ControlIconView(state: $state, control: .filled, icon: "square.fill", disabled: scrollEnabled)
+            ControlIconView(state: $state, control: .blocked, icon: "xmark", disabled: scrollEnabled)
         }
         .onChange(of: keyboardObserver.modifiers.contains(.option)) { _, isOptionPressed in
             if isOptionPressed {
@@ -78,5 +89,8 @@ struct ControlView: View {
     @Previewable @State var state: TileState = .filled
     @Previewable @State var puzzle = Puzzle(size: 1, data: 0b0)
     @Previewable @State var solver = Solver(rows: [], columns: [])
-    ControlView(state: $state, puzzle: $puzzle, solver: $solver)
+    @Previewable @State var scrollEnabled: Bool = true
+    @Previewable @State var fitsView: Bool = false
+
+    ControlView(puzzle: $puzzle, solver: $solver, state: $state, scrollEnabled: $scrollEnabled, fitsView: $fitsView)
 }
