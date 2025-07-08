@@ -7,31 +7,13 @@
 
 import SwiftUI
 
-let controlSize: CGFloat = 48
-
-struct ControlButton: View {
-    let icon: String
-    let isActive: Bool
-
-    var body: some View {
-        ZStack {
-            Circle()
-                .fill(isActive ? Color.accentColor : Color(UIColor.systemBackground))
-                .stroke(Color.primary.opacity(0.25))
-            Image(systemName: icon)
-                .foregroundStyle(isActive ? Color(UIColor.label.onFill) : Color.primary)
-        }
-            .frame(width: 48, height: 48, alignment: .center)
-    }
-}
-
 struct ControlIconView: View {
     @Binding var state: TileState
     let control: TileState
     let icon: String
 
     var body: some View {
-        ControlButton(icon: icon, isActive: state == control)
+        ControlButton(icon: icon, active: state == control, disabled: false)
             .onTapGesture {
                 state = control
             }
@@ -58,9 +40,9 @@ struct ControlView: View {
                     Text("10x10")
                 }
             } label: {
-                ControlButton(icon: "arrow.2.circlepath", isActive: false)
+                ControlButton(icon: "arrow.2.circlepath", active: false, disabled: false)
             }
-            ControlButton(icon: "questionmark", isActive: false)
+            ControlButton(icon: "questionmark", active: false, disabled: false)
                 .onTapGesture {
                     solver.step()
                     for (index, tile) in solver.tiles.enumerated() {
