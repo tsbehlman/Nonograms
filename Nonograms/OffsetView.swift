@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct OffsetView<Content: View>: View {
-    var axis: Axis
-    @Binding var offset: CGPoint
+    let axis: Axis
+    let offset: CGPoint
     @ViewBuilder var content: Content
 
     var body: some View {

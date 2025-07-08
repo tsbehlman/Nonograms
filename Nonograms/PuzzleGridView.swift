@@ -7,11 +7,11 @@
 
 import SwiftUI
 
-private let tileSize: CGFloat = 48
+private let tileSize: CGFloat = 42
 private let majorTileSize = tileSize * 5
 private let segmentFontSize = tileSize / 2
 private let segmentFont = Font.system(size: segmentFontSize, weight: .bold, design: .monospaced)
-private let segmentPadding = segmentFontSize / 2
+private let segmentPadding = segmentFontSize / 3
 
 struct SegmentLabel: View {
     let segment: Segment
@@ -53,6 +53,46 @@ struct SegmentLabels: View {
     }
 }
 
+let segmentGradient = Gradient(stops: [
+    .init(color: Color.accentColor.opacity(0.000), location: 0.0),
+    .init(color: Color.accentColor.opacity(0.125), location: 0.375),
+    .init(color: Color.accentColor.opacity(0.250), location: 1.0),
+])
+
+struct SegmentsView: View {
+    let axis: Axis
+    let puzzle: Puzzle
+    let offset: CGPoint
+    let labelSize: CGFloat
+    let segmentSize: CGFloat
+    let puzzleSize: CGFloat
+
+    var body: some View {
+        let axisOffset = axis == .horizontal ? offset.y : offset.x
+        let opacity = 0.5 + 0.5 * max(0, min(1.0 - axisOffset / segmentSize, 1))
+
+        EqualStack(
+            axis: axis,
+            itemWidth: axis == .horizontal ? .fixed(tileSize) : .flexible,
+            itemHeight: axis == .horizontal ? .flexible : .fixed(tileSize)
+        ) {
+            ForEach(0..<puzzle.size, id: \.self) { index in
+                ZStack {
+                    if index.isMultiple(of: 2) {
+                        Rectangle()
+                            .fill(LinearGradient(
+                                gradient: segmentGradient,
+                                startPoint: axis == .horizontal ? .top : .leading,
+                                endPoint: axis == .horizontal ? .bottom : .trailing
+                            ).opacity(opacity))
+                    }
+                    SegmentLabels(puzzle: puzzle, axis: axis.opposing, index: index, size: labelSize)
+                }
+            }
+        }
+    }
+}
+
 struct TileView: View {
     let status: TileState
 
@@ -70,12 +110,6 @@ struct TileView: View {
             .frame(width: tileSize, height: tileSize, alignment: .center)
     }
 }
-
-let segmentGradient = Gradient(stops: [
-    .init(color: Color.accentColor.opacity(0.000), location: 0.0),
-    .init(color: Color.accentColor.opacity(0.125), location: 0.375),
-    .init(color: Color.accentColor.opacity(0.250), location: 1.0),
-])
 
 struct DraggablePuzzleTilesView: View {
     @Binding var puzzle: Puzzle
@@ -168,68 +202,34 @@ struct PuzzleGridView: View {
     @Binding var offset: CGPoint
     let fill: (Int, Int, TileState?) -> Void
 
-    var maxSegments: Int {
-        (puzzle.size + 1) / 2
-    }
-
-    var labelSize: CGFloat {
-        segmentFontSize * CGFloat(maxSegments)
-    }
-
-    var segmentSize: CGFloat {
-        labelSize + segmentPadding
-    }
-
-    var puzzleSize: CGFloat {
-        tileSize * CGFloat(puzzle.size)
-    }
-
     var body: some View {
-        VStack(spacing: 0) {
-            OffsetView(axis: .horizontal, offset: $offset) {
-                EqualStack(axis: .horizontal, itemWidth: .fixed(tileSize)) {
-                    ForEach(0..<puzzle.size, id: \.self) { columnIndex in
-                        ZStack {
-                            if columnIndex.isMultiple(of: 2) {
-                                Rectangle()
-                                    .fill(LinearGradient(gradient: segmentGradient, startPoint: .top, endPoint: .bottom))
-                            } else {
-                                Rectangle()
-                                    .fill(Color.clear)
-                            }
-                            SegmentLabels(puzzle: puzzle, axis: .vertical, index: columnIndex, size: labelSize)
-                        }
-                    }
-                }
-                    .padding(.leading, segmentSize)
+        let maxSegments = (puzzle.size + 1) / 2
+        let labelSize = segmentFontSize * CGFloat(maxSegments)
+        let segmentSize = labelSize + segmentPadding
+        let puzzleSize = tileSize * CGFloat(puzzle.size)
+
+        ZStack {
+            PannableView(scrollEnabled: mode.tileState == nil, fitsView: $fitsView, offset: $offset) {
+                DraggablePuzzleTilesView(puzzle: $puzzle, mode: $mode, fill: fill)
+                    .padding([.leading, .top], segmentSize)
             }
-                .frame(maxWidth: puzzleSize + segmentSize, minHeight: segmentSize, maxHeight: segmentSize)
-                .zIndex(1)
-            HStack(alignment: .top, spacing: 0) {
-                OffsetView(axis: .vertical, offset: $offset) {
-                    EqualStack(axis: .vertical, itemHeight: .fixed(tileSize)) {
-                        ForEach(0..<puzzle.size, id: \.self) { rowIndex in
-                            ZStack {
-                                if rowIndex.isMultiple(of: 2) {
-                                    Rectangle()
-                                        .fill(LinearGradient(gradient: segmentGradient, startPoint: .leading, endPoint: .trailing))
-                                } else {
-                                    Rectangle()
-                                        .fill(Color.clear)
-                                }
-                                SegmentLabels(puzzle: puzzle, axis: .horizontal, index: rowIndex, size: labelSize)
-                            }
-                        }
+                .frame(maxWidth: puzzleSize + segmentSize, maxHeight: puzzleSize + segmentSize)
+            VStack(spacing: 0) {
+                OffsetView(axis: .horizontal, offset: offset) {
+                    SegmentsView(axis: .horizontal, puzzle: puzzle, offset: offset, labelSize: labelSize, segmentSize: segmentSize, puzzleSize: puzzleSize)
+                        .padding(.leading, segmentSize)
+                }
+                    .frame(maxWidth: puzzleSize + segmentSize, maxHeight: segmentSize)
+                HStack(alignment: .top, spacing: 0) {
+                    OffsetView(axis: .vertical, offset: offset) {
+                        SegmentsView(axis: .vertical, puzzle: puzzle, offset: offset, labelSize: labelSize, segmentSize: segmentSize, puzzleSize: puzzleSize)
                     }
+                        .frame(maxWidth: segmentSize, maxHeight: puzzleSize)
+                    Spacer()
+                        .frame(maxWidth: puzzleSize, maxHeight: puzzleSize)
                 }
-                    .frame(minWidth: segmentSize, maxWidth: segmentSize, maxHeight: puzzleSize)
-                    .zIndex(1)
-                PannableView(scrollEnabled: mode.tileState == nil, fitsView: $fitsView, offset: $offset) {
-                    DraggablePuzzleTilesView(puzzle: $puzzle, mode: $mode, fill: fill)
-                }
-                    .frame(maxWidth: puzzleSize, maxHeight: puzzleSize)
-                    .zIndex(0)
             }
+                .allowsHitTesting(false)
         }
             .padding(1)
             .clipped()
