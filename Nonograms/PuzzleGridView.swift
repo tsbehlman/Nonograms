@@ -20,6 +20,7 @@ struct SegmentLabel: View {
         Text("\(segment.range.length)")
             .font(segmentFont)
             .foregroundStyle(segment.state == .complete ? Color.accentColor : Color.primary)
+            .stroke(.white, width: 0.625)
     }
 }
 
