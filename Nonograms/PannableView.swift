@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct PannableView<Content: View>: View {
-    @Binding var scrollEnabled: Bool
+    let scrollEnabled: Bool
     @Binding var fitsView: Bool
     @Binding var offset: CGPoint
     @ViewBuilder var content: Content
@@ -44,7 +44,7 @@ func checkerboard(_ size: CGFloat, color: Color = .gray) -> Image {
     @Previewable @State var offset: CGPoint = .zero
 
     VStack {
-        PannableView(scrollEnabled: $scrollEnabled, fitsView: $fitsView, offset: $offset) {
+        PannableView(scrollEnabled: scrollEnabled, fitsView: $fitsView, offset: $offset) {
             Rectangle()
                 .frame(width: 600, height: 600)
                 .foregroundStyle(ImagePaint.image(checkerboard(16)))

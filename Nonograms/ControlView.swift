@@ -8,16 +8,16 @@
 import SwiftUI
 
 struct ControlIconView: View {
-    @Binding var state: TileState
+    @Binding var mode: InteractionMode
     let control: TileState
     let icon: String
     let disabled: Bool
 
     var body: some View {
-        ControlButton(icon: icon, active: state == control, disabled: disabled)
+        ControlButton(icon: icon, active: mode.tileState == control, disabled: disabled)
             .onTapGesture {
                 if !disabled {
-                    state = control
+                    mode = .fill(control)
                 }
             }
     }
@@ -27,8 +27,7 @@ struct ControlView: View {
     @StateObject var keyboardObserver = KeyboardObserver()
     @Binding var puzzle: Puzzle
     @Binding var solver: Solver
-    @Binding var state: TileState
-    @Binding var scrollEnabled: Bool
+    @Binding var mode: InteractionMode
     @Binding var fitsView: Bool
 
     var body: some View {
@@ -55,20 +54,20 @@ struct ControlView: View {
                     }
                 }
             Spacer()
-            ControlButton(icon: "arrow.up.and.down.and.arrow.left.and.right", active: !fitsView && scrollEnabled, disabled: fitsView)
+            ControlButton(icon: "arrow.up.and.down.and.arrow.left.and.right", active: !fitsView && mode.tileState == nil, disabled: fitsView)
                 .onTapGesture {
                     if !fitsView {
-                        scrollEnabled = !scrollEnabled
+                        mode = .move
                     }
                 }
-            ControlIconView(state: $state, control: .filled, icon: "square.fill", disabled: scrollEnabled)
-            ControlIconView(state: $state, control: .blocked, icon: "xmark", disabled: scrollEnabled)
+            ControlIconView(mode: $mode, control: .filled, icon: "square.fill", disabled: false)
+            ControlIconView(mode: $mode, control: .blocked, icon: "xmark", disabled: false)
         }
         .onChange(of: keyboardObserver.modifiers.contains(.option)) { _, isOptionPressed in
             if isOptionPressed {
-                state = .blocked
+                mode = .fill(.blocked)
             } else {
-                state = .filled
+                mode = .fill(.filled)
             }
         }
         .onAppear {
@@ -86,11 +85,10 @@ struct ControlView: View {
 }
 
 #Preview {
-    @Previewable @State var state: TileState = .filled
+    @Previewable @State var mode: InteractionMode = .fill(.filled)
     @Previewable @State var puzzle = Puzzle(size: 1, data: 0b0)
     @Previewable @State var solver = Solver(rows: [], columns: [])
-    @Previewable @State var scrollEnabled: Bool = true
     @Previewable @State var fitsView: Bool = false
 
-    ControlView(puzzle: $puzzle, solver: $solver, state: $state, scrollEnabled: $scrollEnabled, fitsView: $fitsView)
+    ControlView(puzzle: $puzzle, solver: $solver, mode: $mode, fitsView: $fitsView)
 }

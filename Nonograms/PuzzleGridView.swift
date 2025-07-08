@@ -78,8 +78,7 @@ let segmentGradient = Gradient(stops: [
 
 struct DraggablePuzzleTilesView: View {
     @Binding var puzzle: Puzzle
-    @Binding var selectedState: TileState
-    @Binding var scrollEnabled: Bool
+    @Binding var mode: InteractionMode
     let fill: (Int, Int, TileState?) -> Void
 
     enum DragState: Equatable {
@@ -92,18 +91,18 @@ struct DraggablePuzzleTilesView: View {
     var body: some View {
         let gesture = DragGesture(minimumDistance: 4, coordinateSpace: .local)
             .updating($dragState) { value, state, transaction in
+                guard var tileState = mode.tileState else { return }
                 let row = clamp(Int(value.location.y / tileSize), min: 0, max: puzzle.size - 1)
                 let column = clamp(Int(value.location.x / tileSize), min: 0, max: puzzle.size - 1)
-                var tileState = selectedState
                 if case let .dragging(_, _, currentState) = state {
                     tileState = currentState
-                } else if puzzle.tile(row: row, column: column) == selectedState {
+                } else if puzzle.tile(row: row, column: column) == mode.tileState {
                     tileState = .blank
                 }
                 state = .dragging(row: row, column: column, state: tileState)
             }
         PuzzleTilesView(puzzle: $puzzle, fill: fill)
-            .highPriorityGesture(gesture, isEnabled: !scrollEnabled)
+            .highPriorityGesture(gesture, isEnabled: mode.tileState != nil)
             .onChange(of: dragState) {
                 guard case let .dragging(row, column, state) = dragState,
                       puzzle.rowIndices.contains(row),
@@ -163,8 +162,7 @@ struct PuzzleTilesView: View {
 
 struct PuzzleGridView: View {
     @Binding var puzzle: Puzzle
-    @Binding var selectedState: TileState
-    @Binding var scrollEnabled: Bool
+    @Binding var mode: InteractionMode
     @Binding var fitsView: Bool
     @Binding var offset: CGPoint
     let fill: (Int, Int, TileState?) -> Void
@@ -226,12 +224,8 @@ struct PuzzleGridView: View {
                     }
                 }
                     .frame(minWidth: segmentSize, maxWidth: segmentSize, maxHeight: puzzleSize)
-                PannableView(scrollEnabled: $scrollEnabled, fitsView: $fitsView, offset: $offset) {
-                    DraggablePuzzleTilesView(puzzle: $puzzle, selectedState: $selectedState, scrollEnabled: $scrollEnabled) { row, column, state in
-                        if !scrollEnabled {
-                            fill(row, column, state)
-                        }
-                    }
+                PannableView(scrollEnabled: mode.tileState == nil, fitsView: $fitsView, offset: $offset) {
+                    DraggablePuzzleTilesView(puzzle: $puzzle, mode: $mode, fill: fill)
                 }
                     .frame(maxWidth: puzzleSize, maxHeight: puzzleSize)
             }
@@ -247,13 +241,12 @@ struct PuzzleGridView: View {
                                    0b10001,
                                    0b11111
     )
-    @Previewable @State var selectedState = TileState.filled
-    @Previewable @State var scrollEnabled: Bool = true
+    @Previewable @State var mode: InteractionMode = .fill(.filled)
     @Previewable @State var fitsView: Bool = false
     @Previewable @State var offset: CGPoint = .zero
 
-    PuzzleGridView(puzzle: $puzzle, selectedState: $selectedState, scrollEnabled: $scrollEnabled, fitsView: $fitsView, offset: $offset) { row, column, state in
-        puzzle.set(row: row, column: column, to: state ?? selectedState, holding: state != nil)
+    PuzzleGridView(puzzle: $puzzle, mode: $mode, fitsView: $fitsView, offset: $offset) { row, column, state in
+        puzzle.set(row: row, column: column, to: state ?? mode.tileState!, holding: state != nil)
     }
         .onAppear {
             puzzle.solve()
