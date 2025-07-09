@@ -29,6 +29,7 @@ struct ControlView: View {
     @Binding var solver: Solver
     @Binding var mode: InteractionMode
     @Binding var fitsView: Bool
+    @Binding var isSolved: Bool
 
     var body: some View {
         HStack(spacing: 12) {
@@ -86,6 +87,7 @@ struct ControlView: View {
             rows: puzzle.rowIndices.map { puzzle.segmentRanges(forRow: $0).map { $0.length } },
             columns: puzzle.columnIndices.map { puzzle.segmentRanges(forColumn: $0).map { $0.length } }
         )
+        isSolved = false
     }
 }
 
@@ -94,6 +96,7 @@ struct ControlView: View {
     @Previewable @State var puzzle = Puzzle(size: 1, data: 0b0)
     @Previewable @State var solver = Solver(rows: [], columns: [])
     @Previewable @State var fitsView: Bool = false
+    @Previewable @State var isSolved: Bool = false
 
-    ControlView(puzzle: $puzzle, solver: $solver, mode: $mode, fitsView: $fitsView)
+    ControlView(puzzle: $puzzle, solver: $solver, mode: $mode, fitsView: $fitsView, isSolved: $isSolved)
 }

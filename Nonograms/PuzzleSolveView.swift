@@ -28,6 +28,7 @@ struct PuzzleSolveView: View {
     @State var scrollEnabled: Bool = false
     @State var fitsView: Bool = false
     @State var offset: CGPoint = .zero
+    @State var isSolved = false
 
     var body: some View {
         VStack(spacing: 16) {
@@ -36,8 +37,13 @@ struct PuzzleSolveView: View {
                 guard case let .fill(selectedState) = mode else { return }
                 puzzle.set(row: row, column: column, to: state ?? selectedState, holding: state != nil)
                 solver.set(row: row, column: column, to: puzzle.tile(row: row, column: column))
+                if state ?? selectedState == .filled && puzzle.isSolved() {
+                    isSolved = true
+                    puzzle.solve()
+                }
             }
-            ControlView(puzzle: $puzzle, solver: $solver, mode: $mode, fitsView: $fitsView)
+            .environment(\.puzzleColor, isSolved ? .green.mix(with: .primary, by: 0.125) : .accentColor)
+            ControlView(puzzle: $puzzle, solver: $solver, mode: $mode, fitsView: $fitsView, isSolved: $isSolved)
                 .padding()
             Spacer()
         }

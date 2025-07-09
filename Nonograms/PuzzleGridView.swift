@@ -16,10 +16,12 @@ private let segmentPadding = segmentFontSize / 3
 struct SegmentLabel: View {
     let segment: Segment
 
+    @Environment(\.puzzleColor) var puzzleColor: Color
+
     var body: some View {
         Text("\(segment.range.length)")
             .font(segmentFont)
-            .foregroundStyle(segment.state == .complete ? Color.accentColor : Color.primary)
+            .foregroundStyle(segment.state == .complete ? puzzleColor : Color.primary)
             .stroke(.white, width: 0.625)
     }
 }
@@ -53,12 +55,6 @@ struct SegmentLabels: View {
     }
 }
 
-let segmentGradient = Gradient(stops: [
-    .init(color: Color.accentColor.opacity(0.000), location: 0.0),
-    .init(color: Color.accentColor.opacity(0.125), location: 0.375),
-    .init(color: Color.accentColor.opacity(0.250), location: 1.0),
-])
-
 struct SegmentsView: View {
     let axis: Axis
     let puzzle: Puzzle
@@ -67,9 +63,16 @@ struct SegmentsView: View {
     let segmentSize: CGFloat
     let puzzleSize: CGFloat
 
+    @Environment(\.puzzleColor) var puzzleColor: Color
+
     var body: some View {
         let axisOffset = axis == .horizontal ? offset.y : offset.x
         let opacity = 0.5 + 0.5 * max(0, min(1.0 - axisOffset / segmentSize, 1))
+        let segmentGradient = Gradient(stops: [
+            .init(color: puzzleColor.opacity(0.000 * opacity), location: 0.0),
+            .init(color: puzzleColor.opacity(0.125 * opacity), location: 0.375),
+            .init(color: puzzleColor.opacity(0.250 * opacity), location: 1.0),
+        ])
 
         EqualStack(
             axis: axis,
@@ -84,7 +87,7 @@ struct SegmentsView: View {
                                 gradient: segmentGradient,
                                 startPoint: axis == .horizontal ? .top : .leading,
                                 endPoint: axis == .horizontal ? .bottom : .trailing
-                            ).opacity(opacity))
+                            ))
                     }
                     SegmentLabels(puzzle: puzzle, axis: axis.opposing, index: index, size: labelSize)
                 }
@@ -96,6 +99,8 @@ struct SegmentsView: View {
 struct TileView: View {
     let status: TileState
 
+    @Environment(\.puzzleColor) var puzzleColor: Color
+
     var body: some View {
         Group {
             if status == .blocked {
@@ -104,7 +109,7 @@ struct TileView: View {
                     .foregroundStyle(Color.secondary)
             } else {
                 Rectangle()
-                    .fill(status == .filled ? Color.accentColor : Color(UIColor.systemBackground))
+                    .fill(status == .filled ? puzzleColor : Color(UIColor.systemBackground))
             }
         }
             .frame(width: tileSize, height: tileSize, alignment: .center)

@@ -183,16 +183,18 @@ struct Puzzle {
         segments(in: solution.gridIndices(forColumn: columnIndex, width: size))
     }
 
+    func isSolved() -> Bool {
+        zip(tiles, solution).allSatisfy { actual, expected in
+            expected != .filled || actual == .filled
+        }
+    }
+
     mutating func solve() {
         tiles = solution
     }
 
     mutating func fill(_ data: UInt...) {
         fillTiles(&tiles, with: data, size: size)
-    }
-
-    func bit(forColumn columnIndex: Int) -> UInt {
-        1 << (size - columnIndex - 1)
     }
 }
 
