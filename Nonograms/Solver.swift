@@ -33,7 +33,7 @@ struct Solver {
                 while index - startIndex < length {
                     let state = states[index]
                     index += 1
-                    if state == .blocked {
+                    if state.isBlocked {
                         startIndex = index
                     }
                 }
@@ -48,7 +48,7 @@ struct Solver {
                 while endIndex - index < length {
                     let state = states[index]
                     index -= 1
-                    if state == .blocked {
+                    if state.isBlocked {
                         endIndex = index
                     }
                 }
@@ -134,7 +134,9 @@ struct Solver {
         for (stateIndex, tileIndex) in indices.enumerated() {
             if newStates[stateIndex] != oldStates[stateIndex] {
                 foundPartialSolution = true
-                tiles[tileIndex] = newStates[stateIndex]
+                if tiles[tileIndex] != .error {
+                    tiles[tileIndex] = newStates[stateIndex]
+                }
             }
         }
 

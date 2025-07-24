@@ -103,10 +103,10 @@ struct TileView: View {
 
     var body: some View {
         Group {
-            if status == .blocked {
+            if status.isBlocked {
                 Image(systemName: "xmark")
                     .font(.system(size: tileSize * 0.75, weight: .light))
-                    .foregroundStyle(Color.secondary)
+                    .foregroundStyle(status == .error ? Color.red.opacity(0.75) : Color.secondary)
             } else {
                 Rectangle()
                     .fill(status == .filled ? puzzleColor : Color(UIColor.systemBackground))

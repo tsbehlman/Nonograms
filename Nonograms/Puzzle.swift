@@ -9,6 +9,11 @@ enum TileState {
     case blank
     case filled
     case blocked
+    case error
+
+    var isBlocked: Bool {
+        return self == .blocked || self == .error
+    }
 }
 
 enum SegmentState {
@@ -84,7 +89,7 @@ struct Puzzle {
             if solution[tileIndex] == .filled {
                 tiles[tileIndex] = .filled
             } else {
-                tiles[tileIndex] = .blocked
+                tiles[tileIndex] = .error
             }
         case (.blocked, .blocked):
             if !holding {
@@ -92,7 +97,11 @@ struct Puzzle {
             }
         case (.blocked, .blank):
             tiles[tileIndex] = .blank
+        case (_, .error):
+            tiles[tileIndex] = .error
         case (.blocked, _):
+            break
+        case (.error, _):
             break
         case (.filled, _):
             break
@@ -147,8 +156,8 @@ struct Puzzle {
         while !tileIndices.isEmpty {
             let tileIndex = tileIndices.removeFirst()
             let nextTile = tiles[tileIndex]
-            guard solution[tileIndex] == nextTile else { break }
-            let isClosingSegment = nextTile == .blocked && lastTile == .filled
+            guard solution[tileIndex] == nextTile || (solution[tileIndex].isBlocked && nextTile.isBlocked) else { break }
+            let isClosingSegment = nextTile.isBlocked && lastTile == .filled
             let isLastSegment = nextTile == .filled && tileIndices.isEmpty
             if isClosingSegment || isLastSegment {
                 segments[segmentIndex] = segments[segmentIndex].with(state: .complete)
@@ -165,7 +174,7 @@ struct Puzzle {
             guard solution[tileIndex] == nextTile else { break }
             if nextTile == .blank {
                 break
-            } else if nextTile == .blocked && lastTile == .filled {
+            } else if nextTile.isBlocked && lastTile == .filled {
                 segments[segmentIndex] = segments[segmentIndex].with(state: .complete)
                 segmentIndex -= 1
             }
@@ -190,7 +199,13 @@ struct Puzzle {
     }
 
     mutating func solve() {
-        tiles = solution
+        for (index, (current, solved)) in zip(tiles, solution).enumerated() {
+            if solved == .filled {
+                tiles[index] = .filled
+            } else if current != .error {
+                tiles[index] = .blocked
+            }
+        }
     }
 
     mutating func fill(_ data: UInt...) {
