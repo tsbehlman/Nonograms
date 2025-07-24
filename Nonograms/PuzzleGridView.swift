@@ -68,10 +68,13 @@ struct SegmentsView: View {
     var body: some View {
         let axisOffset = axis == .horizontal ? offset.y : offset.x
         let opacity = 0.5 + 0.5 * max(0, min(1.0 - axisOffset / segmentSize, 1))
+        let overScroll = Swift.max(0.0, -axisOffset)
+        let size = labelSize + segmentPadding
+        let overscrollMultiplier = size / (size + overScroll)
         let segmentGradient = Gradient(stops: [
-            .init(color: puzzleColor.opacity(0.000 * opacity), location: 0.0),
-            .init(color: puzzleColor.opacity(0.125 * opacity), location: 0.375),
-            .init(color: puzzleColor.opacity(0.250 * opacity), location: 1.0),
+            .init(color: puzzleColor.opacity(0.000 * opacity), location: 0.000 * overscrollMultiplier),
+            .init(color: puzzleColor.opacity(0.125 * opacity), location: 0.375 * overscrollMultiplier),
+            .init(color: puzzleColor.opacity(0.250 * opacity), location: 1.000 * overscrollMultiplier),
         ])
 
         EqualStack(
@@ -90,6 +93,7 @@ struct SegmentsView: View {
                             ))
                     }
                     SegmentLabels(puzzle: puzzle, axis: axis.opposing, index: index, size: labelSize)
+                        .padding(axis == .horizontal ? .top : .leading, overScroll)
                 }
             }
         }
@@ -233,6 +237,7 @@ struct PuzzleGridView: View {
                     Spacer()
                         .frame(maxWidth: puzzleSize, maxHeight: puzzleSize)
                 }
+                    .clipped()
             }
                 .allowsHitTesting(false)
         }

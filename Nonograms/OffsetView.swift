@@ -19,6 +19,5 @@ struct OffsetView<Content: View>: View {
                 height: axis == .vertical ? -offset.y : 0,
             ))
         }
-            .clipped()
     }
 }
