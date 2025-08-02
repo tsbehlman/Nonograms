@@ -14,9 +14,10 @@ struct PuzzleMetrics {
     let segmentFont: Font
     let segmentPadding: CGFloat
 
-    init() {
+    init(size: Int) {
+        let majorTileCount = [5, 4, 3, 2].first { size.isMultiple(of: $0) } ?? size
         tileSize = 42
-        majorTileSize = tileSize * 5
+        majorTileSize = tileSize * CGFloat(majorTileCount)
         segmentFontSize = tileSize / 2
         segmentFont = Font.system(size: segmentFontSize, weight: .bold, design: .monospaced)
         segmentPadding = segmentFontSize / 3
@@ -24,11 +25,12 @@ struct PuzzleMetrics {
 }
 
 struct PuzzleMetricsProvider<Content: View>: View {
+    let puzzle: Puzzle
     @ViewBuilder let content: () -> Content
 
     var body: some View {
         content()
-            .environment(\.puzzleMetrics, PuzzleMetrics())
+            .environment(\.puzzleMetrics, PuzzleMetrics(size: puzzle.size))
     }
 }
 

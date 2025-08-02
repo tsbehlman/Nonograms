@@ -33,7 +33,7 @@ struct PuzzleSolveView: View {
     var body: some View {
         VStack(spacing: 16) {
             Spacer()
-            PuzzleMetricsProvider {
+            PuzzleMetricsProvider(puzzle: puzzle) {
                 PuzzleGridView(puzzle: $puzzle, mode: $mode, fitsView: $fitsView, offset: $offset) { row, column, state in
                     guard case let .fill(selectedState) = mode else { return }
                     puzzle.set(row: row, column: column, to: state ?? selectedState, holding: state != nil)

@@ -40,6 +40,11 @@ struct ControlView: View {
                     Text("5x5")
                 }
                 Button {
+                    generateNewPuzzle(ofSize: 8)
+                } label: {
+                    Text("8x8")
+                }
+                Button {
                     generateNewPuzzle(ofSize: 10)
                 } label: {
                     Text("10x10")
