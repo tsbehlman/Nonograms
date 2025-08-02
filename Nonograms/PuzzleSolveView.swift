@@ -33,13 +33,15 @@ struct PuzzleSolveView: View {
     var body: some View {
         VStack(spacing: 16) {
             Spacer()
-            PuzzleGridView(puzzle: $puzzle, mode: $mode, fitsView: $fitsView, offset: $offset) { row, column, state in
-                guard case let .fill(selectedState) = mode else { return }
-                puzzle.set(row: row, column: column, to: state ?? selectedState, holding: state != nil)
-                solver.set(row: row, column: column, to: puzzle.tile(row: row, column: column))
-                if state ?? selectedState == .filled && puzzle.isSolved() {
-                    isSolved = true
-                    puzzle.solve()
+            PuzzleMetricsProvider {
+                PuzzleGridView(puzzle: $puzzle, mode: $mode, fitsView: $fitsView, offset: $offset) { row, column, state in
+                    guard case let .fill(selectedState) = mode else { return }
+                    puzzle.set(row: row, column: column, to: state ?? selectedState, holding: state != nil)
+                    solver.set(row: row, column: column, to: puzzle.tile(row: row, column: column))
+                    if state ?? selectedState == .filled && puzzle.isSolved() {
+                        isSolved = true
+                        puzzle.solve()
+                    }
                 }
             }
             .environment(\.puzzleColor, isSolved ? .green.mix(with: .primary, by: 0.125) : .accentColor)

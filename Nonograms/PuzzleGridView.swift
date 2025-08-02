@@ -7,20 +7,40 @@
 
 import SwiftUI
 
-private let tileSize: CGFloat = 42
-private let majorTileSize = tileSize * 5
-private let segmentFontSize = tileSize / 2
-private let segmentFont = Font.system(size: segmentFontSize, weight: .bold, design: .monospaced)
-private let segmentPadding = segmentFontSize / 3
+struct PuzzleMetrics {
+    let tileSize: CGFloat
+    let majorTileSize: CGFloat
+    let segmentFontSize: CGFloat
+    let segmentFont: Font
+    let segmentPadding: CGFloat
+
+    init() {
+        tileSize = 42
+        majorTileSize = tileSize * 5
+        segmentFontSize = tileSize / 2
+        segmentFont = Font.system(size: segmentFontSize, weight: .bold, design: .monospaced)
+        segmentPadding = segmentFontSize / 3
+    }
+}
+
+struct PuzzleMetricsProvider<Content: View>: View {
+    @ViewBuilder let content: () -> Content
+
+    var body: some View {
+        content()
+            .environment(\.puzzleMetrics, PuzzleMetrics())
+    }
+}
 
 struct SegmentLabel: View {
     let segment: Segment
 
-    @Environment(\.puzzleColor) var puzzleColor: Color
+    @Environment(\.puzzleColor) var puzzleColor
+    @Environment(\.puzzleMetrics) var puzzleMetrics
 
     var body: some View {
         Text("\(segment.range.length)")
-            .font(segmentFont)
+            .font(puzzleMetrics.segmentFont)
             .foregroundStyle(segment.state == .complete ? puzzleColor : Color.primary)
             .stroke(.white, width: 0.625)
     }
@@ -31,6 +51,8 @@ struct SegmentLabels: View {
     let axis: Axis
     let index: Int
     let size: CGFloat
+
+    @Environment(\.puzzleMetrics) var puzzleMetrics
 
     var segments: [Segment] {
         axis == .horizontal
@@ -43,15 +65,15 @@ struct SegmentLabels: View {
             Spacer()
             ForEach(segments) { segment in
                 SegmentLabel(segment: segment)
-                    .frame(minWidth: segmentFontSize, minHeight: segmentFontSize, maxHeight: segmentFontSize, alignment: .center)
+                    .frame(minWidth: puzzleMetrics.segmentFontSize, minHeight: puzzleMetrics.segmentFontSize, maxHeight: puzzleMetrics.segmentFontSize, alignment: .center)
             }
         }
         .frame(
-            width: axis == .horizontal ? size : tileSize,
-            height: axis == .horizontal ? tileSize : size,
+            width: axis == .horizontal ? size : puzzleMetrics.tileSize,
+            height: axis == .horizontal ? puzzleMetrics.tileSize : size,
             alignment: axis == .horizontal ? .trailing : .bottom
         )
-        .padding(axis == .horizontal ? .trailing : .bottom, segmentPadding)
+        .padding(axis == .horizontal ? .trailing : .bottom, puzzleMetrics.segmentPadding)
     }
 }
 
@@ -63,13 +85,14 @@ struct SegmentsView: View {
     let segmentSize: CGFloat
     let puzzleSize: CGFloat
 
-    @Environment(\.puzzleColor) var puzzleColor: Color
+    @Environment(\.puzzleColor) var puzzleColor
+    @Environment(\.puzzleMetrics) var puzzleMetrics
 
     var body: some View {
         let axisOffset = axis == .horizontal ? offset.y : offset.x
         let opacity = 0.5 + 0.5 * max(0, min(1.0 - axisOffset / segmentSize, 1))
         let overScroll = Swift.max(0.0, -axisOffset)
-        let size = labelSize + segmentPadding
+        let size = labelSize + puzzleMetrics.segmentPadding
         let overscrollMultiplier = size / (size + overScroll)
         let segmentGradient = Gradient(stops: [
             .init(color: puzzleColor.opacity(0.000 * opacity), location: 0.000 * overscrollMultiplier),
@@ -79,8 +102,8 @@ struct SegmentsView: View {
 
         EqualStack(
             axis: axis,
-            itemWidth: axis == .horizontal ? .fixed(tileSize) : .flexible,
-            itemHeight: axis == .horizontal ? .flexible : .fixed(tileSize)
+            itemWidth: axis == .horizontal ? .fixed(puzzleMetrics.tileSize) : .flexible,
+            itemHeight: axis == .horizontal ? .flexible : .fixed(puzzleMetrics.tileSize)
         ) {
             ForEach(0..<puzzle.size, id: \.self) { index in
                 ZStack {
@@ -104,19 +127,20 @@ struct TileView: View {
     let status: TileState
 
     @Environment(\.puzzleColor) var puzzleColor: Color
+    @Environment(\.puzzleMetrics) var puzzleMetrics
 
     var body: some View {
         Group {
             if status.isBlocked {
                 Image(systemName: "xmark")
-                    .font(.system(size: tileSize * 0.75, weight: .light))
+                    .font(.system(size: puzzleMetrics.tileSize * 0.75, weight: .light))
                     .foregroundStyle(status == .error ? Color.red.opacity(0.75) : Color.secondary)
             } else {
                 Rectangle()
                     .fill(status == .filled ? puzzleColor : Color(UIColor.systemBackground))
             }
         }
-            .frame(width: tileSize, height: tileSize, alignment: .center)
+        .frame(width: puzzleMetrics.tileSize, height: puzzleMetrics.tileSize, alignment: .center)
     }
 }
 
@@ -131,13 +155,14 @@ struct DraggablePuzzleTilesView: View {
     }
 
     @GestureState private var dragState: DragState = .inactive
+    @Environment(\.puzzleMetrics) var puzzleMetrics
 
     var body: some View {
         let gesture = DragGesture(minimumDistance: 4, coordinateSpace: .local)
             .updating($dragState) { value, state, transaction in
                 guard var tileState = mode.tileState else { return }
-                let row = clamp(Int(value.location.y / tileSize), min: 0, max: puzzle.size - 1)
-                let column = clamp(Int(value.location.x / tileSize), min: 0, max: puzzle.size - 1)
+                let row = clamp(Int(value.location.y / puzzleMetrics.tileSize), min: 0, max: puzzle.size - 1)
+                let column = clamp(Int(value.location.x / puzzleMetrics.tileSize), min: 0, max: puzzle.size - 1)
                 if case let .dragging(_, _, currentState) = state {
                     tileState = currentState
                 } else if puzzle.tile(row: row, column: column) == mode.tileState {
@@ -160,6 +185,8 @@ struct PuzzleTilesView: View {
     @Binding var puzzle: Puzzle
     let fill: (Int, Int, TileState?) -> Void
 
+    @Environment(\.puzzleMetrics) var puzzleMetrics
+
     var body: some View {
         ZStack {
             Grid(horizontalSpacing: 0, verticalSpacing: 0) {
@@ -176,12 +203,12 @@ struct PuzzleTilesView: View {
             }
 
             Path { path in
-                let edge = CGFloat(puzzle.size) * tileSize
-                for x in stride(from: 0, through: edge, by: tileSize) {
+                let edge = CGFloat(puzzle.size) * puzzleMetrics.tileSize
+                for x in stride(from: 0, through: edge, by: puzzleMetrics.tileSize) {
                     path.move(to: CGPointMake(x, 0))
                     path.addLine(to: CGPointMake(x, edge))
                 }
-                for y in stride(from: 0, through: edge, by: tileSize) {
+                for y in stride(from: 0, through: edge, by: puzzleMetrics.tileSize) {
                     path.move(to: CGPointMake(0, y))
                     path.addLine(to: CGPointMake(edge, y))
                 }
@@ -189,12 +216,12 @@ struct PuzzleTilesView: View {
                 .stroke(Color.primary.opacity(0.25), lineWidth: 1, antialiased: false)
 
             Path { path in
-                let edge = CGFloat(puzzle.size) * tileSize
-                for x in stride(from: 0, through: edge, by: majorTileSize) {
+                let edge = CGFloat(puzzle.size) * puzzleMetrics.tileSize
+                for x in stride(from: 0, through: edge, by: puzzleMetrics.majorTileSize) {
                     path.move(to: CGPointMake(x, 0))
                     path.addLine(to: CGPointMake(x, edge))
                 }
-                for y in stride(from: 0, through: edge, by: majorTileSize) {
+                for y in stride(from: 0, through: edge, by: puzzleMetrics.majorTileSize) {
                     path.move(to: CGPointMake(0, y))
                     path.addLine(to: CGPointMake(edge, y))
                 }
@@ -211,11 +238,13 @@ struct PuzzleGridView: View {
     @Binding var offset: CGPoint
     let fill: (Int, Int, TileState?) -> Void
 
+    @Environment(\.puzzleMetrics) var puzzleMetrics
+
     var body: some View {
         let maxSegments = (puzzle.size + 1) / 2
-        let labelSize = segmentFontSize * CGFloat(maxSegments)
-        let segmentSize = labelSize + segmentPadding
-        let puzzleSize = tileSize * CGFloat(puzzle.size)
+        let labelSize = puzzleMetrics.segmentFontSize * CGFloat(maxSegments)
+        let segmentSize = labelSize + puzzleMetrics.segmentPadding
+        let puzzleSize = puzzleMetrics.tileSize * CGFloat(puzzle.size)
 
         ZStack {
             PannableView(scrollEnabled: mode.tileState == nil, fitsView: $fitsView, offset: $offset) {

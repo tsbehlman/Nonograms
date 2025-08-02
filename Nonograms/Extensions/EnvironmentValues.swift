@@ -9,4 +9,5 @@ import SwiftUI
 
 extension EnvironmentValues {
     @Entry var puzzleColor: Color = .accentColor
+    @Entry var puzzleMetrics = PuzzleMetrics()
 }
