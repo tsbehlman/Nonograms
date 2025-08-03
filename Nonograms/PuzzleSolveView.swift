@@ -29,9 +29,18 @@ struct PuzzleSolveView: View {
     @State var fitsView: Bool = false
     @State var offset: CGPoint = .zero
     @State var isSolved = false
+    @State var showSettings = false
 
     var body: some View {
         VStack(spacing: 16) {
+            HStack {
+                Spacer()
+                ControlButton(icon: "gearshape", active: false, disabled: false)
+                    .onTapGesture {
+                        showSettings = true
+                    }
+            }
+                .padding(.horizontal, 16)
             Spacer()
             PuzzleMetricsProvider(puzzle: puzzle) {
                 PuzzleGridView(puzzle: $puzzle, mode: $mode, fitsView: $fitsView, offset: $offset) { row, column, state in
@@ -49,6 +58,9 @@ struct PuzzleSolveView: View {
                 .padding(.horizontal, 16)
             Spacer()
         }
+            .sheet(isPresented: $showSettings) {
+                SettingsView()
+            }
     }
 }
 

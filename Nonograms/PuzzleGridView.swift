@@ -14,9 +14,9 @@ struct PuzzleMetrics {
     let segmentFont: Font
     let segmentPadding: CGFloat
 
-    init(size: Int) {
+    init(size: Int, tileSize: CGFloat) {
         let majorTileCount = [5, 4, 3, 2].first { size.isMultiple(of: $0) } ?? size
-        tileSize = 42
+        self.tileSize = tileSize
         majorTileSize = tileSize * CGFloat(majorTileCount)
         segmentFontSize = tileSize / 2
         segmentFont = Font.system(size: segmentFontSize, weight: .bold, design: .monospaced)
@@ -28,9 +28,14 @@ struct PuzzleMetricsProvider<Content: View>: View {
     let puzzle: Puzzle
     @ViewBuilder let content: () -> Content
 
+    @AppStorage("tileSize") var tileSize = NonogramsDefaults.tileSize
+
     var body: some View {
         content()
-            .environment(\.puzzleMetrics, PuzzleMetrics(size: puzzle.size))
+            .environment(\.puzzleMetrics, PuzzleMetrics(
+                size: puzzle.size,
+                tileSize: CGFloat(tileSize)
+            ))
     }
 }
 
