@@ -10,6 +10,7 @@ import SwiftUI
 struct SegmentLabel: View {
     let segment: Segment
 
+    @Environment(\.colorScheme) var colorScheme
     @Environment(\.puzzleColor) var puzzleColor
     @Environment(\.puzzleMetrics) var puzzleMetrics
 
@@ -17,7 +18,7 @@ struct SegmentLabel: View {
         Text("\(segment.range.length)")
             .font(puzzleMetrics.segmentFont)
             .foregroundStyle(segment.state == .complete ? puzzleColor : Color.primary)
-            .stroke(.white, width: 0.625)
+            .stroke(Color.primary.forScheme(colorScheme.inverted), width: 0.625)
     }
 }
 
@@ -68,16 +69,18 @@ struct SegmentsView: View {
     let segmentSize: CGFloat
     let puzzleSize: CGFloat
 
+    @Environment(\.colorScheme) var colorScheme
     @Environment(\.puzzleColor) var puzzleColor
     @Environment(\.puzzleMetrics) var puzzleMetrics
 
     func makeGradient(axisOffset: CGFloat, overScroll: CGFloat) -> LinearGradient {
         let overscrollMultiplier = segmentSize / (segmentSize + overScroll)
+        let opacity = colorScheme == .dark ? 1.0 : 0.5
         return LinearGradient(
             stops: [
-                Gradient.Stop(color: puzzleColor.opacity(0.000), location: 0.000),
-                Gradient.Stop(color: puzzleColor.opacity(0.125), location: 0.375),
-                Gradient.Stop(color: puzzleColor.opacity(0.250), location: 1.000),
+                Gradient.Stop(color: puzzleColor.opacity(0.00 * opacity), location: 0.000),
+                Gradient.Stop(color: puzzleColor.opacity(0.25 * opacity), location: 0.375),
+                Gradient.Stop(color: puzzleColor.opacity(0.50 * opacity), location: 1.000),
             ],
             startPoint: UnitPoint(x: 0, y: 0),
             endPoint: axis == .horizontal

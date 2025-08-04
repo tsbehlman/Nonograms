@@ -28,7 +28,7 @@ struct ControlButton: View {
 
     var iconColor: Color {
         if active {
-            return Color(UIColor.label.onFill)
+            return Color.primary.forScheme(.dark)
         } else if disabled {
             return Color.primary.opacity(0.25)
         } else {

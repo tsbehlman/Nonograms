@@ -55,7 +55,7 @@ struct PuzzleSolveView: View {
                     }
                 }
             }
-            .environment(\.puzzleColor, isSolved ? .green.mix(with: .primary, by: 0.125) : .accentColor)
+            .environment(\.puzzleColor, isSolved ? .green.mix(with: .primary.forScheme(.light), by: 0.125) : .accentColor)
             ControlView(puzzle: $puzzle, solver: $solver, mode: $mode, fitsView: $fitsView, isSolved: $isSolved)
                 .padding(.horizontal, 16)
             Spacer()
