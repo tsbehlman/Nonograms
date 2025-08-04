@@ -58,6 +58,7 @@ struct SegmentLabels: View {
     let axis: Axis
     let index: Int
     let size: CGFloat
+    let offset: CGPoint
 
     @Environment(\.puzzleMetrics) var puzzleMetrics
 
@@ -67,12 +68,19 @@ struct SegmentLabels: View {
             : puzzle.segments(forColumn: index)
     }
 
+    var spacing: CGFloat {
+        if axis == .horizontal {
+            puzzleMetrics.segmentFontSize / 3
+        } else {
+            0
+        }
+    }
+
     var body: some View {
-        Stack(axis, spacing: 0) {
-            Spacer()
+        SqueezeStack(axis, reversed: true, offset: axis == .horizontal ? offset.x : offset.y, spacing: spacing) {
             ForEach(segments) { segment in
                 SegmentLabel(segment: segment)
-                    .frame(minWidth: puzzleMetrics.segmentFontSize, minHeight: puzzleMetrics.segmentFontSize, maxHeight: puzzleMetrics.segmentFontSize, alignment: .center)
+                    .frame(minHeight: puzzleMetrics.segmentFontSize, maxHeight: puzzleMetrics.segmentFontSize, alignment: .center)
             }
         }
         .frame(
@@ -80,7 +88,7 @@ struct SegmentLabels: View {
             height: axis == .horizontal ? puzzleMetrics.tileSize : size,
             alignment: axis == .horizontal ? .trailing : .bottom
         )
-        .padding(axis == .horizontal ? .trailing : .bottom, puzzleMetrics.segmentPadding)
+        .padding(axis == .horizontal ? .horizontal : .vertical, puzzleMetrics.segmentPadding)
     }
 }
 
@@ -97,9 +105,9 @@ struct SegmentsView: View {
 
     var body: some View {
         let axisOffset = axis == .horizontal ? offset.y : offset.x
-        let opacity = 0.5 + 0.5 * max(0, min(1.0 - axisOffset / segmentSize, 1))
+        let opacity = max(0, min(1.0 - axisOffset / segmentSize, 1))
         let overScroll = Swift.max(0.0, -axisOffset)
-        let size = labelSize + puzzleMetrics.segmentPadding
+        let size = labelSize + puzzleMetrics.segmentPadding * 2
         let overscrollMultiplier = size / (size + overScroll)
         let segmentGradient = Gradient(stops: [
             .init(color: puzzleColor.opacity(0.000 * opacity), location: 0.000 * overscrollMultiplier),
@@ -122,7 +130,7 @@ struct SegmentsView: View {
                                 endPoint: axis == .horizontal ? .bottom : .trailing
                             ))
                     }
-                    SegmentLabels(puzzle: puzzle, axis: axis.opposing, index: index, size: labelSize)
+                    SegmentLabels(puzzle: puzzle, axis: axis.opposing, index: index, size: labelSize, offset: offset)
                         .padding(axis == .horizontal ? .top : .leading, overScroll)
                 }
             }
@@ -250,7 +258,7 @@ struct PuzzleGridView: View {
     var body: some View {
         let maxSegments = (puzzle.size + 1) / 2
         let labelSize = puzzleMetrics.segmentFontSize * CGFloat(maxSegments)
-        let segmentSize = labelSize + puzzleMetrics.segmentPadding
+        let segmentSize = labelSize + puzzleMetrics.segmentPadding * 2
         let puzzleSize = puzzleMetrics.tileSize * CGFloat(puzzle.size)
 
         ZStack {
