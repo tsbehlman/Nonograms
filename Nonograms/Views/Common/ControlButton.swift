@@ -43,6 +43,7 @@ struct ControlButton: View {
                 .stroke(Color.primary.opacity(0.25))
             Image(systemName: icon)
                 .foregroundStyle(iconColor)
+                .imageScale(.large)
         }
             .frame(width: controlButtonSize, height: controlButtonSize, alignment: .center)
     }
