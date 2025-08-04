@@ -7,8 +7,22 @@
 
 import Foundation
 
-private let minTargetFillRate = 0.375
-private let maxTargetFillRate = 0.625
+enum PuzzleDifficulty: Int {
+    case easy
+    case medium
+    case hard
+
+    var fillRate: Range<Double> {
+        switch self {
+        case .easy:
+            return 0.625..<0.750
+        case .medium:
+            return 0.500..<0.625
+        case .hard:
+            return 0.375..<0.500
+        }
+    }
+}
 
 extension IndexSet {
     func randomIndex() -> Element {
@@ -23,12 +37,12 @@ extension IndexSet {
     }
 }
 
-func makeSolvablePuzzle(ofSize size: Int) -> Puzzle {
+func makeSolvablePuzzle(ofSize size: Int, difficulty: PuzzleDifficulty = .easy) -> Puzzle {
     let numTiles = size * size
     var tiles: [TileState] = Array(repeating: .blocked, count: numTiles)
     var indexSet = IndexSet(integersIn: tiles.indices)
 
-    let targetFillRate = Double.random(in: minTargetFillRate..<maxTargetFillRate)
+    let targetFillRate = Double.random(in: difficulty.fillRate)
 
     for _ in 0..<Int(Double(numTiles) * targetFillRate) {
         let index = indexSet.randomIndex()

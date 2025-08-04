@@ -31,6 +31,8 @@ struct ControlView: View {
     @Binding var fitsView: Bool
     @Binding var isSolved: Bool
 
+    @AppStorage("difficulty") var difficulty = NonogramsDefaults.difficulty
+
     var body: some View {
         HStack(spacing: 12) {
             Menu {
@@ -87,7 +89,7 @@ struct ControlView: View {
     }
 
     func generateNewPuzzle(ofSize size: Int = 5) {
-        puzzle = makeSolvablePuzzle(ofSize: size)
+        puzzle = makeSolvablePuzzle(ofSize: size, difficulty: difficulty)
         solver = Solver(
             rows: puzzle.rowIndices.map { puzzle.segmentRanges(forRow: $0).map { $0.length } },
             columns: puzzle.columnIndices.map { puzzle.segmentRanges(forColumn: $0).map { $0.length } }

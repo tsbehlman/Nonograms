@@ -9,12 +9,24 @@ import SwiftUI
 
 struct SettingsView: View {
     @Environment(\.dismiss) var dismiss
+    @AppStorage("difficulty") var difficulty = NonogramsDefaults.difficulty
     @AppStorage("tileSize") var tileSize = NonogramsDefaults.tileSize
     @AppStorage("validate") var validate = NonogramsDefaults.validate
 
     var body: some View {
         NavigationView {
             List {
+                Section(content: {
+                    Picker(selection: $difficulty, content: {
+                        Text("Easy").tag(PuzzleDifficulty.easy)
+                        Text("Medium").tag(PuzzleDifficulty.medium)
+                        Text("Hard").tag(PuzzleDifficulty.hard)
+                    }, label: {
+                        Text("Difficulty")
+                    })
+                }, footer: {
+                    Text("Applies to future puzzles. Larger puzzles are more difficult by nature.")
+                })
                 Picker(selection: $tileSize, content: {
                     Text("Extra small").tag(38)
                     Text("Small").tag(42)
