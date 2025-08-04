@@ -11,6 +11,6 @@ extension EnvironmentValues {
     @Entry var puzzleColor: Color = .accentColor
     @Entry var puzzleMetrics = PuzzleMetrics(
         size: 5,
-        tileSize: CGFloat(NonogramsDefaults.tileSize)
+        tileSize: NonogramsDefaults.tileSize
     )
 }

@@ -34,7 +34,7 @@ struct PuzzleMetricsProvider<Content: View>: View {
         content()
             .environment(\.puzzleMetrics, PuzzleMetrics(
                 size: puzzle.size,
-                tileSize: CGFloat(tileSize)
+                tileSize: tileSize
             ))
     }
 }

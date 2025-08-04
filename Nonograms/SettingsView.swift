@@ -27,14 +27,14 @@ struct SettingsView: View {
                 }, footer: {
                     Text("Applies to future puzzles. Larger puzzles are more difficult by nature.")
                 })
-                Picker(selection: $tileSize, content: {
-                    Text("Extra small").tag(38)
-                    Text("Small").tag(42)
-                    Text("Medium").tag(46)
-                    Text("Large").tag(50)
-                    Text("Extra large").tag(54)
-                }, label: {
-                    Text("Tile size")
+                Section("Grid size", content: {
+                    Slider(value: $tileSize, in: 38...54, step: 2, label: {
+                        Text("Tile size")
+                    }, minimumValueLabel: {
+                        Image(systemName: "square.grid.2x2").imageScale(.small)
+                    }, maximumValueLabel: {
+                        Image(systemName: "square.grid.2x2").imageScale(.large)
+                    })
                 })
                 Toggle(isOn: $validate, label: {
                     Text("Show errors")
