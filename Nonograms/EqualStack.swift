@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct EqualWidthVStackCache {
+struct EqualStackCache {
     let maxWidth: CGFloat
     let maxHeight: CGFloat
     let sizes: [CGSize]
@@ -40,7 +40,7 @@ struct EqualStack: Layout {
         }
     }
 
-    func makeCache(subviews: Subviews) -> EqualWidthVStackCache {
+    func makeCache(subviews: Subviews) -> EqualStackCache {
         var maxWidth: CGFloat = 0
         var maxHeight: CGFloat = 0
         var sizes: [CGSize] = []
@@ -54,10 +54,10 @@ struct EqualStack: Layout {
             maxHeight = max(maxHeight, size.height)
             sizes.append(size)
         }
-        return EqualWidthVStackCache(maxWidth: maxWidth, maxHeight: maxHeight, sizes: sizes)
+        return EqualStackCache(maxWidth: maxWidth, maxHeight: maxHeight, sizes: sizes)
     }
 
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout EqualWidthVStackCache) -> CGSize {
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout EqualStackCache) -> CGSize {
         let totalSpacing = spacing * CGFloat(subviews.count - 1)
 
         if axis == .horizontal {
@@ -69,7 +69,7 @@ struct EqualStack: Layout {
         }
     }
 
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout EqualWidthVStackCache) {
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout EqualStackCache) {
         var point = axis == .horizontal ?
             CGPoint(x: bounds.minX, y: bounds.maxY) :
             CGPoint(x: bounds.maxX, y: bounds.minY)
