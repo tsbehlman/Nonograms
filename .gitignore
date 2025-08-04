@@ -1,0 +1,11 @@
+*.DS_Store
+._*
+
+### Xcode ###
+build
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcworkspace/contents.xcworkspacedata
+*.xcworkspace/xcuserdata/
+/*.gcno
+DerivedData/
