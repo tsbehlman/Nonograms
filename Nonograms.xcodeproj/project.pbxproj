@@ -14,19 +14,11 @@
 			remoteGlobalIDString = ABF2212F2DEC26F1008F9E75;
 			remoteInfo = Nonograms;
 		};
-		ABF221482DEC26F3008F9E75 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = ABF221282DEC26F1008F9E75 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = ABF2212F2DEC26F1008F9E75;
-			remoteInfo = Nonograms;
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		ABF221302DEC26F1008F9E75 /* Nonograms.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Nonograms.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		ABF2213D2DEC26F3008F9E75 /* NonogramsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NonogramsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		ABF221472DEC26F3008F9E75 /* NonogramsUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NonogramsUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -38,11 +30,6 @@
 		ABF221402DEC26F3008F9E75 /* NonogramsTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = NonogramsTests;
-			sourceTree = "<group>";
-		};
-		ABF2214A2DEC26F3008F9E75 /* NonogramsUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = NonogramsUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -62,13 +49,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		ABF221442DEC26F3008F9E75 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -77,7 +57,6 @@
 			children = (
 				ABF221322DEC26F1008F9E75 /* Nonograms */,
 				ABF221402DEC26F3008F9E75 /* NonogramsTests */,
-				ABF2214A2DEC26F3008F9E75 /* NonogramsUITests */,
 				ABF221312DEC26F1008F9E75 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -87,7 +66,6 @@
 			children = (
 				ABF221302DEC26F1008F9E75 /* Nonograms.app */,
 				ABF2213D2DEC26F3008F9E75 /* NonogramsTests.xctest */,
-				ABF221472DEC26F3008F9E75 /* NonogramsUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -140,29 +118,6 @@
 			productReference = ABF2213D2DEC26F3008F9E75 /* NonogramsTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		ABF221462DEC26F3008F9E75 /* NonogramsUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = ABF221572DEC26F3008F9E75 /* Build configuration list for PBXNativeTarget "NonogramsUITests" */;
-			buildPhases = (
-				ABF221432DEC26F3008F9E75 /* Sources */,
-				ABF221442DEC26F3008F9E75 /* Frameworks */,
-				ABF221452DEC26F3008F9E75 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				ABF221492DEC26F3008F9E75 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				ABF2214A2DEC26F3008F9E75 /* NonogramsUITests */,
-			);
-			name = NonogramsUITests;
-			packageProductDependencies = (
-			);
-			productName = NonogramsUITests;
-			productReference = ABF221472DEC26F3008F9E75 /* NonogramsUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -177,10 +132,6 @@
 						CreatedOnToolsVersion = 16.3;
 					};
 					ABF2213C2DEC26F3008F9E75 = {
-						CreatedOnToolsVersion = 16.3;
-						TestTargetID = ABF2212F2DEC26F1008F9E75;
-					};
-					ABF221462DEC26F3008F9E75 = {
 						CreatedOnToolsVersion = 16.3;
 						TestTargetID = ABF2212F2DEC26F1008F9E75;
 					};
@@ -202,7 +153,6 @@
 			targets = (
 				ABF2212F2DEC26F1008F9E75 /* Nonograms */,
 				ABF2213C2DEC26F3008F9E75 /* NonogramsTests */,
-				ABF221462DEC26F3008F9E75 /* NonogramsUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -216,13 +166,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		ABF2213B2DEC26F3008F9E75 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		ABF221452DEC26F3008F9E75 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -246,13 +189,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		ABF221432DEC26F3008F9E75 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -260,11 +196,6 @@
 			isa = PBXTargetDependency;
 			target = ABF2212F2DEC26F1008F9E75 /* Nonograms */;
 			targetProxy = ABF2213E2DEC26F3008F9E75 /* PBXContainerItemProxy */;
-		};
-		ABF221492DEC26F3008F9E75 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = ABF2212F2DEC26F1008F9E75 /* Nonograms */;
-			targetProxy = ABF221482DEC26F3008F9E75 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -484,40 +415,6 @@
 			};
 			name = Release;
 		};
-		ABF221582DEC26F3008F9E75 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = VE6CSLGJ83;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.tbehlman.NonogramsUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Nonograms;
-			};
-			name = Debug;
-		};
-		ABF221592DEC26F3008F9E75 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = VE6CSLGJ83;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.tbehlman.NonogramsUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Nonograms;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -544,15 +441,6 @@
 			buildConfigurations = (
 				ABF221552DEC26F3008F9E75 /* Debug */,
 				ABF221562DEC26F3008F9E75 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		ABF221572DEC26F3008F9E75 /* Build configuration list for PBXNativeTarget "NonogramsUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				ABF221582DEC26F3008F9E75 /* Debug */,
-				ABF221592DEC26F3008F9E75 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
