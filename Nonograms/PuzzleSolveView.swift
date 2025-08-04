@@ -31,6 +31,8 @@ struct PuzzleSolveView: View {
     @State var isSolved = false
     @State var showSettings = false
 
+    @AppStorage("validate") var validate = NonogramsDefaults.validate
+
     var body: some View {
         VStack(spacing: 16) {
             HStack {
@@ -45,7 +47,7 @@ struct PuzzleSolveView: View {
             PuzzleMetricsProvider(puzzle: puzzle) {
                 PuzzleGridView(puzzle: $puzzle, mode: $mode, fitsView: $fitsView, offset: $offset) { row, column, state in
                     guard case let .fill(selectedState) = mode else { return }
-                    puzzle.set(row: row, column: column, to: state ?? selectedState, holding: state != nil)
+                    puzzle.set(row: row, column: column, to: state ?? selectedState, holding: state != nil, validate: validate)
                     solver.set(row: row, column: column, to: puzzle.tile(row: row, column: column))
                     if state ?? selectedState == .filled && puzzle.isSolved() {
                         isSolved = true

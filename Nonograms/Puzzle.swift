@@ -79,14 +79,14 @@ struct Puzzle {
         0..<size
     }
 
-    mutating func set(row: Int, column: Int, to newState: TileState, holding: Bool = false) {
+    mutating func set(row: Int, column: Int, to newState: TileState, holding: Bool = false, validate: Bool = true) {
         let tileIndex = row * size + column
         let currentState = tiles[tileIndex]
         switch (currentState, newState) {
         case (.blank, .blocked):
             tiles[row * size + column] = .blocked
         case (.blank, .filled):
-            if solution[tileIndex] == .filled {
+            if !validate || solution[tileIndex] == .filled {
                 tiles[tileIndex] = .filled
             } else {
                 tiles[tileIndex] = .error
@@ -97,6 +97,14 @@ struct Puzzle {
             }
         case (.blocked, .blank):
             tiles[tileIndex] = .blank
+        case (.filled, .blank):
+            if !validate {
+                tiles[tileIndex] = .blank
+            }
+        case (.filled, .filled):
+            if !validate && !holding {
+                tiles[tileIndex] = .blank
+            }
         case (_, .error):
             tiles[tileIndex] = .error
         case (.blocked, _):

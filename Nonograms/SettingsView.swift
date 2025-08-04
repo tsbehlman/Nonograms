@@ -10,6 +10,7 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(\.dismiss) var dismiss
     @AppStorage("tileSize") var tileSize = NonogramsDefaults.tileSize
+    @AppStorage("validate") var validate = NonogramsDefaults.validate
 
     var body: some View {
         NavigationView {
@@ -22,6 +23,9 @@ struct SettingsView: View {
                     Text("Extra large").tag(54)
                 }, label: {
                     Text("Tile size")
+                })
+                Toggle(isOn: $validate, label: {
+                    Text("Show errors")
                 })
             }
             .listStyle(.insetGrouped)
