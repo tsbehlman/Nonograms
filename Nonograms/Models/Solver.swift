@@ -5,6 +5,8 @@
 //  Created by Trevor Behlman on 6/20/25.
 //
 
+import SwiftUI
+
 struct SolverAttempt {
     var isRow: Bool
     var index: Int
@@ -12,6 +14,10 @@ struct SolverAttempt {
     var maxRanges: [Range<Int>]
     var oldStates: [TileState]
     var newStates: [TileState]
+
+    var axis: Axis {
+        isRow ? .horizontal : .vertical
+    }
 }
 
 struct Solver {

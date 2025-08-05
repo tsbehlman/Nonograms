@@ -9,15 +9,26 @@ import SwiftUI
 
 struct SegmentLabel: View {
     let segment: Segment
+    let isHighlighted: Bool
 
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.puzzleColor) var puzzleColor
     @Environment(\.puzzleMetrics) var puzzleMetrics
 
+    var color: Color {
+        if isHighlighted {
+            Color.yellow.mix(with: Color.orange, by: 0.25)
+        } else if segment.state == .complete {
+            puzzleColor
+        } else {
+            Color.primary
+        }
+    }
+
     var body: some View {
         Text("\(segment.range.length)")
             .font(puzzleMetrics.segmentFont)
-            .foregroundStyle(segment.state == .complete ? puzzleColor : Color.primary)
+            .foregroundStyle(color)
             .stroke(Color.primary.forScheme(colorScheme.inverted), width: 0.625)
     }
 }
@@ -28,6 +39,7 @@ struct SegmentLabels: View {
     let index: Int
     let size: CGFloat
     let offset: CGPoint
+    let isHighlighted: Bool
 
     @Environment(\.puzzleMetrics) var puzzleMetrics
 
@@ -48,7 +60,7 @@ struct SegmentLabels: View {
     var body: some View {
         SqueezeStack(axis, reversed: true, offset: axis == .horizontal ? offset.x : offset.y, spacing: spacing) {
             ForEach(segments) { segment in
-                SegmentLabel(segment: segment)
+                SegmentLabel(segment: segment, isHighlighted: isHighlighted)
                     .frame(minHeight: puzzleMetrics.segmentFontSize, maxHeight: puzzleMetrics.segmentFontSize, alignment: .center)
             }
         }
@@ -68,6 +80,7 @@ struct SegmentsView: View {
     let labelSize: CGFloat
     let segmentSize: CGFloat
     let puzzleSize: CGFloat
+    let hint: SolverAttempt?
 
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.puzzleColor) var puzzleColor
@@ -113,7 +126,7 @@ struct SegmentsView: View {
                 itemHeight: axis == .horizontal ? .flexible : .fixed(puzzleMetrics.tileSize)
             ) {
                 ForEach(0..<puzzle.size, id: \.self) { index in
-                    SegmentLabels(puzzle: puzzle, axis: axis.opposing, index: index, size: labelSize, offset: offset)
+                    SegmentLabels(puzzle: puzzle, axis: axis.opposing, index: index, size: labelSize, offset: offset, isHighlighted: hint?.axis == axis.opposing && hint?.index == index)
                 }
             }
                 .padding(axis == .horizontal ? .top : .leading, overScroll)

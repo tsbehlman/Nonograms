@@ -145,13 +145,13 @@ struct PuzzleGridView: View {
                 .frame(maxWidth: puzzleSize + segmentSize, maxHeight: puzzleSize + segmentSize)
             VStack(spacing: 0) {
                 OffsetView(axis: .horizontal, offset: offset) {
-                    SegmentsView(axis: .horizontal, puzzle: puzzle, offset: offset, labelSize: labelSize, segmentSize: segmentSize, puzzleSize: puzzleSize)
+                    SegmentsView(axis: .horizontal, puzzle: puzzle, offset: offset, labelSize: labelSize, segmentSize: segmentSize, puzzleSize: puzzleSize, hint: hint)
                         .padding(.leading, segmentSize)
                 }
                     .frame(maxWidth: puzzleSize + segmentSize, maxHeight: segmentSize)
                 HStack(alignment: .top, spacing: 0) {
                     OffsetView(axis: .vertical, offset: offset) {
-                        SegmentsView(axis: .vertical, puzzle: puzzle, offset: offset, labelSize: labelSize, segmentSize: segmentSize, puzzleSize: puzzleSize)
+                        SegmentsView(axis: .vertical, puzzle: puzzle, offset: offset, labelSize: labelSize, segmentSize: segmentSize, puzzleSize: puzzleSize, hint: hint)
                     }
                         .frame(maxWidth: segmentSize, maxHeight: puzzleSize)
                     Spacer()
