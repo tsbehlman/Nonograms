@@ -30,6 +30,7 @@ struct PuzzleSolveView: View {
     @State var offset: CGPoint = .zero
     @State var isSolved = false
     @State var showSettings = false
+    @State var hint: SolverAttempt?
 
     @AppStorage("validate") var validate = NonogramsDefaults.validate
 
@@ -45,8 +46,9 @@ struct PuzzleSolveView: View {
                 .padding(.horizontal, 16)
             Spacer()
             PuzzleMetricsProvider(puzzle: puzzle) {
-                PuzzleGridView(puzzle: $puzzle, mode: $mode, fitsView: $fitsView, offset: $offset) { row, column, state in
+                PuzzleGridView(puzzle: $puzzle, mode: $mode, fitsView: $fitsView, offset: $offset, hint: hint) { row, column, state in
                     guard case let .fill(selectedState) = mode else { return }
+                    hint = nil
                     puzzle.set(row: row, column: column, to: state ?? selectedState, holding: state != nil, validate: validate)
                     solver.set(row: row, column: column, to: puzzle.tile(row: row, column: column))
                     if state ?? selectedState == .filled && puzzle.isSolved() {
@@ -56,7 +58,7 @@ struct PuzzleSolveView: View {
                 }
             }
             .environment(\.puzzleColor, isSolved ? .green.mix(with: .primary.forScheme(.light), by: 0.125) : .accentColor)
-            ControlView(puzzle: $puzzle, solver: $solver, mode: $mode, fitsView: $fitsView, isSolved: $isSolved)
+            ControlView(puzzle: $puzzle, solver: $solver, mode: $mode, fitsView: $fitsView, isSolved: $isSolved, hint: $hint)
                 .padding(.horizontal, 16)
             Spacer()
         }

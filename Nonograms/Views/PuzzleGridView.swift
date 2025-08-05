@@ -120,6 +120,7 @@ struct PuzzleGridView: View {
     @Binding var mode: InteractionMode
     @Binding var fitsView: Bool
     @Binding var offset: CGPoint
+    let hint: SolverAttempt?
     let fill: (Int, Int, TileState?) -> Void
 
     @Environment(\.puzzleMetrics) var puzzleMetrics
@@ -132,7 +133,13 @@ struct PuzzleGridView: View {
 
         ZStack {
             PannableView(scrollEnabled: mode.tileState == nil, fitsView: $fitsView, offset: $offset) {
-                DraggablePuzzleTilesView(puzzle: $puzzle, mode: $mode, fill: fill)
+                ZStack {
+                    DraggablePuzzleTilesView(puzzle: $puzzle, mode: $mode, fill: fill)
+                    if let hint = hint {
+                        HintOverlayView(hint: hint)
+                            .allowsHitTesting(false)
+                    }
+                }
                     .padding([.leading, .top], segmentSize)
             }
                 .frame(maxWidth: puzzleSize + segmentSize, maxHeight: puzzleSize + segmentSize)
@@ -154,7 +161,7 @@ struct PuzzleGridView: View {
             }
                 .allowsHitTesting(false)
         }
-            .padding(1)
+            .padding(6)
             .clipped()
     }
 }
@@ -171,7 +178,7 @@ struct PuzzleGridView: View {
     @Previewable @State var fitsView: Bool = false
     @Previewable @State var offset: CGPoint = .zero
 
-    PuzzleGridView(puzzle: $puzzle, mode: $mode, fitsView: $fitsView, offset: $offset) { row, column, state in
+    PuzzleGridView(puzzle: $puzzle, mode: $mode, fitsView: $fitsView, offset: $offset, hint: nil) { row, column, state in
         puzzle.set(row: row, column: column, to: state ?? mode.tileState!, holding: state != nil)
     }
         .onAppear {

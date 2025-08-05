@@ -30,6 +30,7 @@ struct ControlView: View {
     @Binding var mode: InteractionMode
     @Binding var fitsView: Bool
     @Binding var isSolved: Bool
+    @Binding var hint: SolverAttempt?
 
     @AppStorage("difficulty") var difficulty = NonogramsDefaults.difficulty
 
@@ -56,9 +57,8 @@ struct ControlView: View {
             }
             ControlButton(icon: "questionmark", active: false, disabled: false)
                 .onTapGesture {
-                    solver.step()
-                    for (index, tile) in solver.tiles.enumerated() {
-                        puzzle.tiles[index] = tile
+                    if !isSolved {
+                        hint = solver.step()
                     }
                 }
             Spacer()
@@ -95,6 +95,7 @@ struct ControlView: View {
             columns: puzzle.columnIndices.map { puzzle.segmentRanges(forColumn: $0).map { $0.length } }
         )
         isSolved = false
+        hint = nil
     }
 }
 
@@ -104,6 +105,7 @@ struct ControlView: View {
     @Previewable @State var solver = Solver(rows: [], columns: [])
     @Previewable @State var fitsView: Bool = false
     @Previewable @State var isSolved: Bool = false
+    @Previewable @State var hint: SolverAttempt?
 
-    ControlView(puzzle: $puzzle, solver: $solver, mode: $mode, fitsView: $fitsView, isSolved: $isSolved)
+    ControlView(puzzle: $puzzle, solver: $solver, mode: $mode, fitsView: $fitsView, isSolved: $isSolved, hint: $hint)
 }
