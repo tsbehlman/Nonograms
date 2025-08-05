@@ -128,7 +128,14 @@ struct Solver {
     private mutating func attemptSolution(forLengths lengths: [Int], at indices: some Sequence<Int>) -> Bool {
         var foundPartialSolution = false
 
-        let oldStates = indices.map { tiles[$0] }
+        let oldStates = indices.map { index in
+            let state = tiles[index]
+            if state == .error {
+                return TileState.blocked
+            } else {
+                return state
+            }
+        }
         let newStates = makeAttempt(from: oldStates, forLengths: lengths)
 
         for (stateIndex, tileIndex) in indices.enumerated() {
