@@ -26,12 +26,22 @@ extension Range where Bound: Numeric {
         upperBound - lowerBound
     }
 
-    func moving(toAtLeast minIndex: Bound) -> Self {
+    func minimumLowerBound(_ minIndex: Bound) -> Self {
         let newLowerBound = Swift.min(lowerBound, minIndex)
         return newLowerBound..<(newLowerBound + length)
     }
 
-    func moving(toAtMost maxIndex: Bound) -> Self {
+    func maximumLowerBound(_ maxIndex: Bound) -> Self {
+        let newLowerBound = Swift.max(lowerBound, maxIndex)
+        return newLowerBound..<(newLowerBound + length)
+    }
+
+    func minimumUpperBound(_ minIndex: Bound) -> Self {
+        let newUpperBound = Swift.min(upperBound, minIndex)
+        return (newUpperBound - length)..<newUpperBound
+    }
+
+    func maximumUpperBound(_ maxIndex: Bound) -> Self {
         let newUpperBound = Swift.max(upperBound, maxIndex)
         return (newUpperBound - length)..<newUpperBound
     }

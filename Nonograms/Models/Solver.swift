@@ -100,15 +100,32 @@ struct Solver {
                 var minRange = minRanges[matchingIndex]
                 var maxRange = maxRanges[matchingIndex]
                 if filledRange.upperBound > minRange.upperBound {
-                    minRange = minRange.moving(toAtMost: filledRange.upperBound)
+                    minRange = minRange.maximumUpperBound(filledRange.upperBound)
                 }
                 if filledRange.lowerBound < maxRange.lowerBound {
-                    maxRange = maxRange.moving(toAtLeast: filledRange.lowerBound)
+                    maxRange = maxRange.minimumLowerBound(filledRange.lowerBound)
                 }
                 minRanges[matchingIndex] = minRange
                 maxRanges[matchingIndex] = maxRange
-                rangeBounds[matchingIndex] = minRange.lowerBound..<maxRange.upperBound
             }
+        }
+
+        index = 0
+        for (rangeIndex, minRange) in minRanges.enumerated() {
+            let newRange = minRange.maximumLowerBound(index)
+            minRanges[rangeIndex] = newRange
+            index = newRange.upperBound + 1
+        }
+
+        index = states.count
+        for (rangeIndex, maxRange) in maxRanges.enumerated().reversed() {
+            let newRange = maxRange.minimumUpperBound(index)
+            maxRanges[rangeIndex] = newRange
+            index = newRange.lowerBound - 1
+        }
+
+        rangeBounds = zip(minRanges, maxRanges).map { (minRange, maxRange) in
+            minRange.lowerBound..<maxRange.upperBound
         }
 
         index = 0

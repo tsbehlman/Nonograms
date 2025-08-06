@@ -53,6 +53,22 @@ final class SolverTests: XCTestCase {
         }
     }
 
+    func testAttemptCompleteness() {
+        let testCase = CanSolvePuzzleTestCase(
+            5,
+            0b11010,
+            0b10001,
+            0b11101,
+            0b11011,
+            0b11111
+        )
+        testCase.puzzle.set(row: 0, column: 3, to: .filled)
+        testCase.solver.set(row: 0, column: 3, to: .filled)
+        let attempt = testCase.solver.step()
+        XCTAssertEqual(attempt?.minRanges, [0..<2, 3..<4])
+        XCTAssertEqual(attempt?.maxRanges, [0..<2, 3..<4])
+    }
+
     func testSolverPerformance() throws {
         let testCase = CanSolvePuzzleTestCase(
             6,
