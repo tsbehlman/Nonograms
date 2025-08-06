@@ -73,21 +73,18 @@ struct SegmentLabels: View {
     }
 }
 
-struct SegmentsView: View {
+struct SegmentsBackground: View {
     let axis: Axis
     let puzzle: Puzzle
     let offset: CGPoint
-    let labelSize: CGFloat
     let segmentSize: CGFloat
-    let puzzleSize: CGFloat
-    let hint: SolverAttempt?
 
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.puzzleColor) var puzzleColor
     @Environment(\.puzzleMetrics) var puzzleMetrics
 
-    func makeGradient(axisOffset: CGFloat, overScroll: CGFloat) -> LinearGradient {
-        let overscrollMultiplier = segmentSize / (segmentSize + overScroll)
+    func makeGradient(axisOffset: CGFloat) -> LinearGradient {
+        let overscrollMultiplier = axisOffset / segmentSize
         let opacity = colorScheme == .dark ? 1.0 : 0.5
         return LinearGradient(
             stops: [
@@ -95,41 +92,58 @@ struct SegmentsView: View {
                 Gradient.Stop(color: puzzleColor.opacity(0.25 * opacity), location: 0.375),
                 Gradient.Stop(color: puzzleColor.opacity(0.50 * opacity), location: 1.000),
             ],
-            startPoint: UnitPoint(x: 0, y: 0),
-            endPoint: axis == .horizontal
+            startPoint: axis == .horizontal
                 ? UnitPoint(x: 0, y: overscrollMultiplier)
-                : UnitPoint(x: overscrollMultiplier, y: 0)
+                : UnitPoint(x: overscrollMultiplier, y: 0),
+            endPoint: axis == .horizontal
+                ? UnitPoint(x: 0, y: 1 + overscrollMultiplier)
+                : UnitPoint(x: 1 + overscrollMultiplier, y: 0)
         )
     }
 
     var body: some View {
         let axisOffset = axis == .horizontal ? offset.y : offset.x
-        let overScroll = Swift.max(0.0, -axisOffset)
+        let overScroll = Swift.min(0.0, axisOffset)
 
-        ZStack {
-            Rectangle()
-                .fill(makeGradient(axisOffset: axisOffset, overScroll: overScroll))
-                .mask {
-                    Path { path in
-                        for index in stride(from: 0, to: puzzle.size, by: 2) {
-                            if axis == .horizontal {
-                                path.addRect(CGRectMake(CGFloat(index) * puzzleMetrics.tileSize, 0, puzzleMetrics.tileSize, segmentSize - axisOffset))
-                            } else {
-                                path.addRect(CGRectMake(0, CGFloat(index) * puzzleMetrics.tileSize, segmentSize - axisOffset, puzzleMetrics.tileSize))
-                            }
+        Rectangle()
+            .fill(makeGradient(axisOffset: axisOffset))
+            .mask {
+                Path { path in
+                    for index in stride(from: 0, to: puzzle.size, by: 2) {
+                        if axis == .horizontal {
+                            path.addRect(CGRectMake(CGFloat(index) * puzzleMetrics.tileSize, overScroll, puzzleMetrics.tileSize, segmentSize - overScroll))
+                        } else {
+                            path.addRect(CGRectMake(overScroll, CGFloat(index) * puzzleMetrics.tileSize, segmentSize - overScroll, puzzleMetrics.tileSize))
                         }
                     }
                 }
-            EqualStack(
-                axis: axis,
-                itemWidth: axis == .horizontal ? .fixed(puzzleMetrics.tileSize) : .flexible,
-                itemHeight: axis == .horizontal ? .flexible : .fixed(puzzleMetrics.tileSize)
-            ) {
-                ForEach(0..<puzzle.size, id: \.self) { index in
-                    SegmentLabels(puzzle: puzzle, axis: axis.opposing, index: index, size: labelSize, offset: offset, isHighlighted: hint?.axis == axis.opposing && hint?.index == index)
-                }
             }
-                .padding(axis == .horizontal ? .top : .leading, overScroll)
+    }
+}
+
+struct SegmentsView: View {
+    let axis: Axis
+    let puzzle: Puzzle
+    let offset: CGPoint
+    let labelSize: CGFloat
+    let segmentSize: CGFloat
+    let hint: SolverAttempt?
+
+    @Environment(\.puzzleMetrics) var puzzleMetrics
+
+    var body: some View {
+        let axisOffset = axis == .horizontal ? offset.y : offset.x
+        let overScroll = Swift.max(0.0, -axisOffset)
+
+        EqualStack(
+            axis: axis,
+            itemWidth: axis == .horizontal ? .fixed(puzzleMetrics.tileSize) : .flexible,
+            itemHeight: axis == .horizontal ? .flexible : .fixed(puzzleMetrics.tileSize)
+        ) {
+            ForEach(0..<puzzle.size, id: \.self) { index in
+                SegmentLabels(puzzle: puzzle, axis: axis.opposing, index: index, size: labelSize, offset: offset, isHighlighted: hint?.axis == axis.opposing && hint?.index == index)
+            }
         }
+            .padding(axis == .horizontal ? .top : .leading, overScroll)
     }
 }

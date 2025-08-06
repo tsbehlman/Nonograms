@@ -110,7 +110,7 @@ struct PuzzleTilesView: View {
                     path.addLine(to: CGPointMake(edge, y))
                 }
             }
-            .stroke(Color.primary.opacity(1), style: StrokeStyle(lineWidth: 1, lineCap: .square), antialiased: false)
+                .stroke(Color.primary.opacity(1), style: StrokeStyle(lineWidth: 1, lineCap: .square), antialiased: false)
         }
     }
 }
@@ -133,25 +133,33 @@ struct PuzzleGridView: View {
 
         ZStack {
             PannableView(scrollEnabled: mode.tileState == nil, fitsView: $fitsView, offset: $offset) {
-                ZStack {
-                    DraggablePuzzleTilesView(puzzle: $puzzle, mode: $mode, fill: fill)
-                    if let hint = hint {
-                        HintOverlayView(hint: hint)
-                            .allowsHitTesting(false)
+                VStack(spacing: 0) {
+                    SegmentsBackground(axis: .horizontal, puzzle: puzzle, offset: offset, segmentSize: segmentSize)
+                        .frame(maxWidth: puzzleSize, maxHeight: segmentSize)
+                        .padding(.leading, segmentSize)
+                    HStack(alignment: .top, spacing: 0) {
+                        SegmentsBackground(axis: .vertical, puzzle: puzzle, offset: offset, segmentSize: segmentSize)
+                            .frame(maxWidth: segmentSize, maxHeight: puzzleSize)
+                        ZStack(alignment: .topLeading) {
+                            DraggablePuzzleTilesView(puzzle: $puzzle, mode: $mode, fill: fill)
+                            if let hint = hint {
+                                HintOverlayView(hint: hint)
+                                    .allowsHitTesting(false)
+                            }
+                        }
                     }
                 }
-                    .padding([.leading, .top], segmentSize)
+                    .frame(width: puzzleSize + segmentSize, height: puzzleSize + segmentSize)
             }
-                .frame(maxWidth: puzzleSize + segmentSize, maxHeight: puzzleSize + segmentSize)
             VStack(spacing: 0) {
                 OffsetView(axis: .horizontal, offset: offset) {
-                    SegmentsView(axis: .horizontal, puzzle: puzzle, offset: offset, labelSize: labelSize, segmentSize: segmentSize, puzzleSize: puzzleSize, hint: hint)
+                    SegmentsView(axis: .horizontal, puzzle: puzzle, offset: offset, labelSize: labelSize, segmentSize: segmentSize, hint: hint)
                         .padding(.leading, segmentSize)
                 }
                     .frame(maxWidth: puzzleSize + segmentSize, maxHeight: segmentSize)
                 HStack(alignment: .top, spacing: 0) {
                     OffsetView(axis: .vertical, offset: offset) {
-                        SegmentsView(axis: .vertical, puzzle: puzzle, offset: offset, labelSize: labelSize, segmentSize: segmentSize, puzzleSize: puzzleSize, hint: hint)
+                        SegmentsView(axis: .vertical, puzzle: puzzle, offset: offset, labelSize: labelSize, segmentSize: segmentSize, hint: hint)
                     }
                         .frame(maxWidth: segmentSize, maxHeight: puzzleSize)
                     Spacer()
