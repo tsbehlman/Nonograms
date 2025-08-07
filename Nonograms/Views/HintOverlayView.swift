@@ -9,9 +9,8 @@ import SwiftUI
 
 private let hintOutlineWidth: CGFloat = 1.5
 private let hintStrokeWidth: CGFloat = 2.5 + hintOutlineWidth
-private let hintSpacing: CGFloat = 4
+private let hintInset: CGFloat = -4
 private let hintCornerRadius: CGFloat = 4
-private let hintCornerSize = CGSize(width: hintCornerRadius, height: hintCornerRadius)
 
 struct HintOutlineView: View {
     let hint: SolverAttempt
@@ -31,27 +30,25 @@ struct HintOutlineView: View {
         }
     }
 
-    var body: some View {
+    var rect: CGRect {
         let crossAxisPosition = CGFloat(hint.index) * puzzleMetrics.tileSize
-        Path { path in
-            let size = CGFloat(minRange.length) * puzzleMetrics.tileSize
-            let position = CGFloat(minRange.lowerBound) * puzzleMetrics.tileSize
-            let rect: CGRect
-            if hint.isRow {
-                rect = CGRect(x: position, y: crossAxisPosition, width: size, height: puzzleMetrics.tileSize)
-            } else {
-                rect = CGRect(x: crossAxisPosition, y: position, width: puzzleMetrics.tileSize, height: size)
-            }
-            path.addRoundedRect(in: rect.expanding(by: hintSpacing), cornerSize: hintCornerSize)
-        }
+        let position = CGFloat(minRange.lowerBound) * puzzleMetrics.tileSize
+        let size = CGFloat(minRange.length) * puzzleMetrics.tileSize
+        let rect = hint.isRow
+            ? CGRect(x: position, y: crossAxisPosition, width: size, height: puzzleMetrics.tileSize)
+            : CGRect(x: crossAxisPosition, y: position, width: puzzleMetrics.tileSize, height: size)
+        return rect.insetBy(dx: hintInset, dy: hintInset)
+    }
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: hintCornerRadius)
+            .path(in: rect)
             .strokedPath(StrokeStyle(lineWidth: hintStrokeWidth))
             .fill(Color.yellow)
             .stroke(Color.white, style: StrokeStyle(lineWidth: hintOutlineWidth, lineJoin: .round))
             .offset(isAnimating ? destination : .zero)
             .animation(
-                isAnimating
-                    ? .easeInOut(duration: 1).repeatForever(autoreverses: true)
-                    : .default,
+                .easeInOut(duration: 1).repeatForever(autoreverses: true),
                 value: isAnimating
             )
             .onAppear {
@@ -86,9 +83,7 @@ struct HintTileView: View {
             .offset(offset)
             .opacity(isAnimating ? 1 : 0)
             .animation(
-                isAnimating
-                ? .easeInOut(duration: 0.5).repeatForever(autoreverses: true)
-                    : .default,
+                .easeInOut(duration: 0.5).repeatForever(autoreverses: true),
                 value: isAnimating
             )
             .onAppear {
@@ -102,12 +97,13 @@ struct HintOverlayView: View {
 
     var body: some View {
         ZStack(alignment: .topLeading) {
-            ForEach(Array(zip(hint.minRanges, hint.maxRanges).enumerated()), id: \.0) { (_, ranges) in
-                let (minRange, maxRange) = ranges
-                HintOutlineView(hint: hint, minRange: minRange, maxRange: maxRange)
+            ForEach(hint.minRanges.indices, id: \.self) { rangeIndex in
+                HintOutlineView(hint: hint, minRange: hint.minRanges[rangeIndex], maxRange: hint.maxRanges[rangeIndex])
             }
-            ForEach(Array(hint.newStates.indices.filter { hint.newStates[$0] != hint.oldStates[$0] }), id: \.self) { stateIndex in
-                HintTileView(hint: hint, stateIndex: stateIndex)
+            ForEach(hint.newStates.indices, id: \.self) { stateIndex in
+                if hint.newStates[stateIndex] != hint.oldStates[stateIndex] {
+                    HintTileView(hint: hint, stateIndex: stateIndex)
+                }
             }
         }
     }
