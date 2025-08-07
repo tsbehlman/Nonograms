@@ -50,7 +50,11 @@ struct PuzzleSolveView: View {
                     guard case let .fill(selectedState) = mode else { return }
                     hint = nil
                     puzzle.set(row: row, column: column, to: state ?? selectedState, holding: state != nil, validate: validate)
-                    solver.set(row: row, column: column, to: puzzle.tile(row: row, column: column))
+                    let tileIndex = puzzle.tileIndex(row: row, column: column)
+                    let newTile = puzzle.tiles[tileIndex]
+                    if newTile == puzzle.solution[tileIndex] || newTile == .error || newTile == .blank {
+                        solver.set(row: row, column: column, to: newTile)
+                    }
                     if state ?? selectedState == .filled && puzzle.isSolved() {
                         isSolved = true
                         puzzle.solve()

@@ -67,8 +67,12 @@ struct Puzzle {
         self.init(size: size, data: data)
     }
 
+    @inlinable func tileIndex(row: Int, column: Int) -> Int {
+        row * size + column
+    }
+
     func tile(row: Int, column: Int) -> TileState {
-        tiles[row * size + column]
+        tiles[tileIndex(row: row, column: column)]
     }
 
     var rowIndices: Range<Int> {
@@ -80,11 +84,11 @@ struct Puzzle {
     }
 
     mutating func set(row: Int, column: Int, to newState: TileState, holding: Bool = false, validate: Bool = true) {
-        let tileIndex = row * size + column
+        let tileIndex = tileIndex(row: row, column: column)
         let currentState = tiles[tileIndex]
         switch (currentState, newState) {
         case (.blank, .blocked):
-            tiles[row * size + column] = .blocked
+            tiles[tileIndex] = .blocked
         case (.blank, .filled):
             if !validate || solution[tileIndex] == .filled {
                 tiles[tileIndex] = .filled
