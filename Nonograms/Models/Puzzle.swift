@@ -159,7 +159,10 @@ struct Puzzle {
         }
 
         if segments.isEmpty {
-            segments.append(Segment(0..<0, state: .complete))
+            let state: SegmentState = tileIndices.allSatisfy { tiles[$0].isBlocked }
+                ? .complete
+                : .missing
+            segments.append(Segment(0..<0, state: state))
         }
 
         var tileIndices = ArraySlice(tileIndices)
