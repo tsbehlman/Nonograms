@@ -30,6 +30,7 @@ struct ControlView: View {
     @Binding var mode: InteractionMode
     @Binding var fitsView: Bool
     @Binding var isSolved: Bool
+    @Binding var isEmpty: Bool
     @Binding var hint: SolverAttempt?
 
     @AppStorage("difficulty") var difficulty = NonogramsDefaults.difficulty
@@ -54,8 +55,14 @@ struct ControlView: View {
                 }
             } label: {
                 ControlButton(icon: "arrow.2.circlepath", active: false, disabled: false)
+                    .when(isSolved) {
+                        $0.background(RippleView())
+                    }
             }
             ControlButton(icon: "questionmark", active: false, disabled: false)
+                .when(isEmpty) {
+                    $0.background(RippleView())
+                }
                 .onTapGesture {
                     if !isSolved {
                         hint = solver.step()
@@ -95,6 +102,7 @@ struct ControlView: View {
             columns: puzzle.columnIndices.map { puzzle.segmentRanges(forColumn: $0).map { $0.length } }
         )
         isSolved = false
+        isEmpty = true
         hint = nil
     }
 }
@@ -105,7 +113,8 @@ struct ControlView: View {
     @Previewable @State var solver = Solver(rows: [], columns: [])
     @Previewable @State var fitsView: Bool = false
     @Previewable @State var isSolved: Bool = false
+    @Previewable @State var isEmpty: Bool = true
     @Previewable @State var hint: SolverAttempt?
 
-    ControlView(puzzle: $puzzle, solver: $solver, mode: $mode, fitsView: $fitsView, isSolved: $isSolved, hint: $hint)
+    ControlView(puzzle: $puzzle, solver: $solver, mode: $mode, fitsView: $fitsView, isSolved: $isSolved, isEmpty: $isEmpty, hint: $hint)
 }

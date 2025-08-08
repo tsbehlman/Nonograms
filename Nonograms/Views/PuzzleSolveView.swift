@@ -28,6 +28,7 @@ struct PuzzleSolveView: View {
     @State var scrollEnabled: Bool = false
     @State var fitsView: Bool = false
     @State var offset: CGPoint = .zero
+    @State var isEmpty = true
     @State var isSolved = false
     @State var showSettings = false
     @State var hint: SolverAttempt?
@@ -59,10 +60,11 @@ struct PuzzleSolveView: View {
                         isSolved = true
                         puzzle.solve()
                     }
+                    isEmpty = false
                 }
             }
             .environment(\.puzzleColor, isSolved ? .green.mix(with: .primary.forScheme(.light), by: 0.125) : .accentColor)
-            ControlView(puzzle: $puzzle, solver: $solver, mode: $mode, fitsView: $fitsView, isSolved: $isSolved, hint: $hint)
+            ControlView(puzzle: $puzzle, solver: $solver, mode: $mode, fitsView: $fitsView, isSolved: $isSolved, isEmpty: $isEmpty, hint: $hint)
                 .padding(.horizontal, 16)
             Spacer()
         }

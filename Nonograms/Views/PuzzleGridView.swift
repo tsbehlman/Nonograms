@@ -10,7 +10,7 @@ import SwiftUI
 struct TileView: View {
     let status: TileState
 
-    @Environment(\.puzzleColor) var puzzleColor: Color
+    @Environment(\.puzzleColor) var puzzleColor
     @Environment(\.puzzleMetrics) var puzzleMetrics
 
     var body: some View {
