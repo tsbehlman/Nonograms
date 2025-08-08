@@ -130,6 +130,7 @@ struct PuzzleGridView: View {
         let labelSize = puzzleMetrics.segmentFontSize * CGFloat(maxSegments)
         let segmentSize = labelSize + puzzleMetrics.segmentPadding * 2
         let puzzleSize = puzzleMetrics.tileSize * CGFloat(puzzle.size)
+        let totalSize = puzzleSize + segmentSize
 
         ZStack {
             PannableView(scrollEnabled: mode.tileState == nil, fitsView: $fitsView, offset: $offset) {
@@ -149,8 +150,9 @@ struct PuzzleGridView: View {
                         }
                     }
                 }
-                    .frame(width: puzzleSize + segmentSize, height: puzzleSize + segmentSize)
+                    .frame(width: totalSize, height: totalSize)
             }
+                .frame(maxWidth: totalSize, maxHeight: totalSize)
             VStack(spacing: 0) {
                 OffsetView(axis: .horizontal, offset: offset) {
                     SegmentsView(axis: .horizontal, puzzle: puzzle, offset: offset, labelSize: labelSize, segmentSize: segmentSize, hint: hint)
