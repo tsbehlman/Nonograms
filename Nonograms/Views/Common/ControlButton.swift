@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-private let controlButtonSize: CGFloat = 52
+let controlButtonSize: CGFloat = 56
 
 struct ControlButton: View {
     let icon: String

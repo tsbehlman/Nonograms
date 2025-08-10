@@ -33,50 +33,65 @@ struct ControlView: View {
     @Binding var isEmpty: Bool
     @Binding var hint: SolverAttempt?
 
+    @State var showSettings = false
     @AppStorage("difficulty") var difficulty = NonogramsDefaults.difficulty
 
     var body: some View {
         HStack(spacing: 12) {
-            Menu {
-                Button {
-                    generateNewPuzzle(ofSize: 5)
+            StaggeredStack(angle: .degrees(45), spacing: 16) {
+                Menu {
+                    Button {
+                        generateNewPuzzle(ofSize: 5)
+                    } label: {
+                        Text("5x5")
+                    }
+                    Button {
+                        generateNewPuzzle(ofSize: 8)
+                    } label: {
+                        Text("8x8")
+                    }
+                    Button {
+                        generateNewPuzzle(ofSize: 10)
+                    } label: {
+                        Text("10x10")
+                    }
                 } label: {
-                    Text("5x5")
+                    ControlButton(icon: "arrow.2.circlepath", active: false, disabled: false)
+                        .when(isSolved) {
+                            $0.background(RippleView())
+                        }
                 }
-                Button {
-                    generateNewPuzzle(ofSize: 8)
-                } label: {
-                    Text("8x8")
-                }
-                Button {
-                    generateNewPuzzle(ofSize: 10)
-                } label: {
-                    Text("10x10")
-                }
-            } label: {
-                ControlButton(icon: "arrow.2.circlepath", active: false, disabled: false)
-                    .when(isSolved) {
+                ControlButton(icon: "gearshape", active: false, disabled: false)
+                    .onTapGesture {
+                        showSettings = true
+                    }
+                ControlButton(icon: "questionmark", active: false, disabled: false)
+                    .when(isEmpty) {
                         $0.background(RippleView())
                     }
+                    .onTapGesture {
+                        if !isSolved {
+                            hint = solver.step()
+                        }
+                    }
             }
-            ControlButton(icon: "questionmark", active: false, disabled: false)
-                .when(isEmpty) {
-                    $0.background(RippleView())
-                }
-                .onTapGesture {
-                    if !isSolved {
-                        hint = solver.step()
-                    }
-                }
             Spacer()
-            ControlButton(icon: "arrow.up.and.down.and.arrow.left.and.right", active: !fitsView && mode.tileState == nil, disabled: fitsView)
-                .onTapGesture {
-                    if !fitsView {
-                        mode = .move
-                    }
+            ZStack {
+                StaggeredStack(angle: .degrees(45), order: .even, spacing: 16) {
+                    ControlIconView(mode: $mode, control: .filled, icon: "square.fill", disabled: false)
+                    ControlButton(icon: "arrow.up.and.down.and.arrow.left.and.right", active: !fitsView && mode.tileState == nil, disabled: fitsView)
+                        .onTapGesture {
+                            if !fitsView {
+                                mode = .move
+                            }
+                        }
+                    ControlIconView(mode: $mode, control: .blocked, icon: "xmark", disabled: false)
+                }.background {
+                    StaggeredStackBackground(angle: .degrees(45), order: .even, spacing: 16)
+                        .fill(Color.primary)
+                        .opacity(0.2)
                 }
-            ControlIconView(mode: $mode, control: .filled, icon: "square.fill", disabled: false)
-            ControlIconView(mode: $mode, control: .blocked, icon: "xmark", disabled: false)
+            }
         }
         .onChange(of: keyboardObserver.modifiers.contains(.option)) { _, isOptionPressed in
             if isOptionPressed {
@@ -89,6 +104,9 @@ struct ControlView: View {
             if fitsView, case .move = mode {
                 mode = .fill(.blocked)
             }
+        }
+        .sheet(isPresented: $showSettings) {
+            SettingsView()
         }
         .onAppear {
             generateNewPuzzle()

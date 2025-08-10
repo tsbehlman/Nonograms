@@ -30,21 +30,13 @@ struct PuzzleSolveView: View {
     @State var offset: CGPoint = .zero
     @State var isEmpty = true
     @State var isSolved = false
-    @State var showSettings = false
     @State var hint: SolverAttempt?
 
     @AppStorage("validate") var validate = NonogramsDefaults.validate
 
     var body: some View {
         VStack(spacing: 16) {
-            HStack {
-                Spacer()
-                ControlButton(icon: "gearshape", active: false, disabled: false)
-                    .onTapGesture {
-                        showSettings = true
-                    }
-            }
-                .padding(.horizontal, 16)
+            Spacer()
             Spacer()
             PuzzleMetricsProvider(puzzle: puzzle) {
                 PuzzleGridView(puzzle: $puzzle, mode: $mode, fitsView: $fitsView, offset: $offset, hint: hint) { row, column, state in
@@ -63,14 +55,11 @@ struct PuzzleSolveView: View {
                     isEmpty = false
                 }
             }
-            .environment(\.puzzleColor, isSolved ? .green.mix(with: .primary.forScheme(.light), by: 0.125) : .accentColor)
+                .environment(\.puzzleColor, isSolved ? .green.mix(with: .primary.forScheme(.light), by: 0.125) : .accentColor)
             ControlView(puzzle: $puzzle, solver: $solver, mode: $mode, fitsView: $fitsView, isSolved: $isSolved, isEmpty: $isEmpty, hint: $hint)
                 .padding(.horizontal, 16)
             Spacer()
         }
-            .sheet(isPresented: $showSettings) {
-                SettingsView()
-            }
     }
 }
 
