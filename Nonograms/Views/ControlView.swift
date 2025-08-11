@@ -77,7 +77,7 @@ struct ControlView: View {
             }
             Spacer()
             ZStack {
-                StaggeredStack(angle: .degrees(45), order: .even, spacing: 16) {
+                StaggeredStack(angle: .degrees(-45), spacing: 16) {
                     ControlIconView(mode: $mode, control: .filled, icon: "square.fill", disabled: false)
                     ControlButton(icon: "arrow.up.and.down.and.arrow.left.and.right", active: !fitsView && mode.tileState == nil, disabled: fitsView)
                         .onTapGesture {
@@ -86,11 +86,8 @@ struct ControlView: View {
                             }
                         }
                     ControlIconView(mode: $mode, control: .blocked, icon: "xmark", disabled: false)
-                }.background {
-                    StaggeredStackBackground(angle: .degrees(45), order: .even, spacing: 16)
-                        .fill(Color.primary)
-                        .opacity(0.2)
                 }
+                    .traceBackground(padding: 8, curvature: 16, color: Color.primary.opacity(0.2))
             }
         }
         .onChange(of: keyboardObserver.modifiers.contains(.option)) { _, isOptionPressed in
@@ -135,4 +132,5 @@ struct ControlView: View {
     @Previewable @State var hint: SolverAttempt?
 
     ControlView(puzzle: $puzzle, solver: $solver, mode: $mode, fitsView: $fitsView, isSolved: $isSolved, isEmpty: $isEmpty, hint: $hint)
+        .padding()
 }
