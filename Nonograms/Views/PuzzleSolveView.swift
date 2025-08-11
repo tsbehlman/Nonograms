@@ -40,7 +40,7 @@ struct PuzzleSolveView: View {
             Spacer()
             PuzzleMetricsProvider(puzzle: puzzle) {
                 PuzzleGridView(puzzle: $puzzle, mode: $mode, fitsView: $fitsView, offset: $offset, hint: hint) { row, column, state in
-                    guard case let .fill(selectedState) = mode else { return }
+                    guard case let .fill(selectedState) = mode, !isSolved else { return }
                     hint = nil
                     puzzle.set(row: row, column: column, to: state ?? selectedState, holding: state != nil, validate: validate)
                     let tileIndex = puzzle.tileIndex(row: row, column: column)
@@ -55,11 +55,11 @@ struct PuzzleSolveView: View {
                     isEmpty = false
                 }
             }
-                .environment(\.puzzleColor, isSolved ? .green.mix(with: .primary.forScheme(.light), by: 0.125) : .accentColor)
             ControlView(puzzle: $puzzle, solver: $solver, mode: $mode, fitsView: $fitsView, isSolved: $isSolved, isEmpty: $isEmpty, hint: $hint)
                 .padding(.horizontal, 16)
             Spacer()
         }
+            .environment(\.puzzleColor, isSolved ? .green.mix(with: .primary.forScheme(.light), by: 0.125) : .accentColor)
     }
 }
 

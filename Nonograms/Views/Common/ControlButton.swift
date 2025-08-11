@@ -14,12 +14,14 @@ struct ControlButton: View {
     let active: Bool
     let disabled: Bool
 
+    @Environment(\.puzzleColor) var puzzleColor
+
     var fillColor: Color {
         if active {
             if disabled {
                 return Color.primary.opacity(0.5)
             } else {
-                return Color.accentColor
+                return puzzleColor
             }
         } else {
             return Color(UIColor.systemBackground)
