@@ -14,7 +14,7 @@ struct ControlIconView: View {
     let disabled: Bool
 
     var body: some View {
-        ControlButton(icon: icon, active: mode.tileState == control, disabled: disabled)
+        ControlButton(icon: icon, active: mode.tileState == control, disabled: disabled, bordered: false)
             .onTapGesture {
                 if !disabled {
                     mode = .fill(control)
@@ -56,16 +56,16 @@ struct ControlView: View {
                         Text("10x10")
                     }
                 } label: {
-                    ControlButton(icon: "arrow.2.circlepath", active: false, disabled: false)
+                    ControlButton(icon: "arrow.2.circlepath")
                         .when(isSolved) {
                             $0.background(RippleView())
                         }
                 }
-                ControlButton(icon: "gearshape", active: false, disabled: false)
+                ControlButton(icon: "gearshape")
                     .onTapGesture {
                         showSettings = true
                     }
-                ControlButton(icon: "questionmark", active: false, disabled: false)
+                ControlButton(icon: "questionmark")
                     .when(isEmpty) {
                         $0.background(RippleView())
                     }
@@ -76,19 +76,17 @@ struct ControlView: View {
                     }
             }
             Spacer()
-            ZStack {
-                StaggeredStack(angle: .degrees(-45), spacing: 16) {
-                    ControlIconView(mode: $mode, control: .filled, icon: "square.fill", disabled: false)
-                    ControlButton(icon: "arrow.up.and.down.and.arrow.left.and.right", active: !fitsView && mode.tileState == nil, disabled: fitsView)
-                        .onTapGesture {
-                            if !fitsView {
-                                mode = .move
-                            }
+            StaggeredStack(angle: .degrees(-45), spacing: 16) {
+                ControlIconView(mode: $mode, control: .filled, icon: "square.fill", disabled: false)
+                ControlButton(icon: "arrow.up.and.down.and.arrow.left.and.right", active: !fitsView && mode.tileState == nil, disabled: fitsView, bordered: false)
+                    .onTapGesture {
+                        if !fitsView {
+                            mode = .move
                         }
-                    ControlIconView(mode: $mode, control: .blocked, icon: "xmark", disabled: false)
-                }
-                    .traceBackground(padding: 8, curvature: 16, color: Color.primary.opacity(0.2))
+                    }
+                ControlIconView(mode: $mode, control: .blocked, icon: "xmark", disabled: false)
             }
+                .traceBackground(padding: 7, curvature: 21, color: Color.primary.opacity(0.25))
         }
         .onChange(of: keyboardObserver.modifiers.contains(.option)) { _, isOptionPressed in
             if isOptionPressed {

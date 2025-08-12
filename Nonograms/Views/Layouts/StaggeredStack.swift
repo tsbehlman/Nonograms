@@ -167,9 +167,9 @@ extension Path {
 
 #Preview {
     @ViewBuilder var items: any View {
-        ControlButton(icon: "square.fill", active: false, disabled: false)
-        ControlButton(icon: "arrow.up.and.down.and.arrow.left.and.right", active: false, disabled: false)
-        ControlButton(icon: "xmark", active: false, disabled: false)
+        ControlButton(icon: "square.fill")
+        ControlButton(icon: "arrow.up.and.down.and.arrow.left.and.right")
+        ControlButton(icon: "xmark")
     }
 
     VStack(spacing: 32) {

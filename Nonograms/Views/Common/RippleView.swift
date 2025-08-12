@@ -26,7 +26,7 @@ struct RippleView: View {
 
 #Preview {
     VStack(spacing: 16) {
-        ControlButton(icon: "questionmark", active: false, disabled: false)
+        ControlButton(icon: "questionmark")
             .background(RippleView())
     }
 }

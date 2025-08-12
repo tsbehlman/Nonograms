@@ -13,7 +13,16 @@ struct ControlButton: View {
     let icon: String
     let active: Bool
     let disabled: Bool
+    let bordered: Bool
 
+    init(icon: String, active: Bool = false, disabled: Bool = false, bordered: Bool = true) {
+        self.icon = icon
+        self.active = active
+        self.disabled = disabled
+        self.bordered = bordered
+    }
+
+    @Environment(\.colorScheme) var colorScheme
     @Environment(\.puzzleColor) var puzzleColor
 
     var fillColor: Color {
@@ -42,8 +51,9 @@ struct ControlButton: View {
         ZStack {
             Circle()
                 .fill(fillColor)
-                .stroke(Color.primary.opacity(0.25))
+                .when(bordered || active) { $0.strokeBorder(Color.primary.opacity(0.375)) }
             Image(systemName: icon)
+                .fontWeight(.semibold)
                 .foregroundStyle(iconColor)
                 .imageScale(.large)
         }
@@ -53,9 +63,9 @@ struct ControlButton: View {
 
 #Preview {
     HStack {
-        ControlButton(icon: "questionmark", active: false, disabled: false)
-        ControlButton(icon: "arrow.up.and.down.and.arrow.left.and.right", active: false, disabled: true)
+        ControlButton(icon: "questionmark")
+        ControlButton(icon: "arrow.up.and.down.and.arrow.left.and.right", disabled: true)
         ControlButton(icon: "square.fill", active: true, disabled: true)
-        ControlButton(icon: "xmark", active: true, disabled: false)
+        ControlButton(icon: "xmark", active: true)
     }
 }
