@@ -31,9 +31,9 @@ struct SettingsView: View {
                     Slider(value: $tileSize, in: 38...54, step: 2, label: {
                         Text("Tile size")
                     }, minimumValueLabel: {
-                        Image(systemName: "square.grid.2x2").imageScale(.small)
+                        Image(systemName: "squareshape.split.3x3").imageScale(.medium)
                     }, maximumValueLabel: {
-                        Image(systemName: "square.grid.2x2").imageScale(.large)
+                        Image(systemName: "squareshape.split.2x2").imageScale(.large)
                     })
                 })
                 Toggle(isOn: $validate, label: {
