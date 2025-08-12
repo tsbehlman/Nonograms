@@ -78,7 +78,7 @@ struct HintTileView: View {
     var body: some View {
         Image(systemName: hint.newStates[stateIndex] == .blocked ? "xmark" : "square.fill")
             .font(.system(size: puzzleMetrics.tileSize * 0.75, weight: .light))
-            .foregroundStyle(Color.yellow)
+            .foregroundStyle(Color.yellow.mix(with: Color.orange, by: 0.25))
             .frame(width: puzzleMetrics.tileSize, height: puzzleMetrics.tileSize)
             .offset(offset)
             .opacity(isAnimating ? 1 : 0)
