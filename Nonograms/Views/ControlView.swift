@@ -34,7 +34,11 @@ struct ControlView: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            StaggeredStack(angle: .degrees(45), spacing: 16) {
+            StaggeredStack(angle: .degrees(-45), spacing: 16) {
+                ControlButton(icon: "gearshape")
+                    .onTapGesture {
+                        showSettings = true
+                    }
                 Menu {
                     Button {
                         generateNewPuzzle(ofSize: 5)
@@ -57,10 +61,6 @@ struct ControlView: View {
                             $0.background(RippleView())
                         }
                 }
-                ControlButton(icon: "gearshape")
-                    .onTapGesture {
-                        showSettings = true
-                    }
                 ControlButton(icon: "questionmark")
                     .when(gameState.isEmpty) {
                         $0.background(RippleView())
@@ -70,15 +70,15 @@ struct ControlView: View {
                     }
             }
             Spacer()
-            StaggeredStack(angle: .degrees(-45), spacing: 16) {
+            StaggeredStack(angle: .degrees(45), spacing: 16) {
                 ControlIconView(mode: $gameState.mode, control: .filled, icon: "square.fill", disabled: false)
+                ControlIconView(mode: $gameState.mode, control: .blocked, icon: "xmark", disabled: false)
                 ControlButton(icon: "arrow.up.and.down.and.arrow.left.and.right", active: !fitsView && gameState.mode.tileState == nil, disabled: fitsView, bordered: false)
                     .onTapGesture {
                         if !fitsView {
                             gameState.mode = .move
                         }
                     }
-                ControlIconView(mode: $gameState.mode, control: .blocked, icon: "xmark", disabled: false)
             }
                 .traceBackground(padding: 7, curvature: 21) {
                     $0.stroke(Color.primary.opacity(0.375)).fill(Color.primary.opacity(0.25))
