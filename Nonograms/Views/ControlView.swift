@@ -25,16 +25,12 @@ struct ControlIconView: View {
 
 struct ControlView: View {
     @StateObject var keyboardObserver = KeyboardObserver()
-    @Binding var puzzle: Puzzle
-    @Binding var solver: Solver
-    @Binding var mode: InteractionMode
-    @Binding var fitsView: Bool
-    @Binding var isSolved: Bool
-    @Binding var isEmpty: Bool
-    @Binding var hint: SolverAttempt?
+    @Binding var gameState: GameState
+    let fitsView: Bool
 
     @State var showSettings = false
     @AppStorage("difficulty") var difficulty = NonogramsDefaults.difficulty
+    @AppStorage("validate") var validate = NonogramsDefaults.validate
 
     var body: some View {
         HStack(spacing: 12) {
@@ -57,7 +53,7 @@ struct ControlView: View {
                     }
                 } label: {
                     ControlButton(icon: "arrow.2.circlepath")
-                        .when(isSolved) {
+                        .when(gameState.isSolved) {
                             $0.background(RippleView())
                         }
                 }
@@ -66,25 +62,23 @@ struct ControlView: View {
                         showSettings = true
                     }
                 ControlButton(icon: "questionmark")
-                    .when(isEmpty) {
+                    .when(gameState.isEmpty) {
                         $0.background(RippleView())
                     }
                     .onTapGesture {
-                        if !isSolved {
-                            hint = solver.step()
-                        }
+                        gameState.showHint()
                     }
             }
             Spacer()
             StaggeredStack(angle: .degrees(-45), spacing: 16) {
-                ControlIconView(mode: $mode, control: .filled, icon: "square.fill", disabled: false)
-                ControlButton(icon: "arrow.up.and.down.and.arrow.left.and.right", active: !fitsView && mode.tileState == nil, disabled: fitsView, bordered: false)
+                ControlIconView(mode: $gameState.mode, control: .filled, icon: "square.fill", disabled: false)
+                ControlButton(icon: "arrow.up.and.down.and.arrow.left.and.right", active: !fitsView && gameState.mode.tileState == nil, disabled: fitsView, bordered: false)
                     .onTapGesture {
                         if !fitsView {
-                            mode = .move
+                            gameState.mode = .move
                         }
                     }
-                ControlIconView(mode: $mode, control: .blocked, icon: "xmark", disabled: false)
+                ControlIconView(mode: $gameState.mode, control: .blocked, icon: "xmark", disabled: false)
             }
                 .traceBackground(padding: 7, curvature: 21) {
                     $0.stroke(Color.primary.opacity(0.375)).fill(Color.primary.opacity(0.25))
@@ -92,14 +86,14 @@ struct ControlView: View {
         }
         .onChange(of: keyboardObserver.modifiers.contains(.option)) { _, isOptionPressed in
             if isOptionPressed {
-                mode = .fill(.blocked)
+                gameState.mode = .fill(.blocked)
             } else {
-                mode = .fill(.filled)
+                gameState.mode = .fill(.filled)
             }
         }
         .onChange(of: fitsView) { _, fitsView in
-            if fitsView, case .move = mode {
-                mode = .fill(.blocked)
+            if fitsView, case .move = gameState.mode {
+                gameState.mode = .fill(.blocked)
             }
         }
         .sheet(isPresented: $showSettings) {
@@ -111,26 +105,13 @@ struct ControlView: View {
     }
 
     func generateNewPuzzle(ofSize size: Int = 5) {
-        puzzle = makeSolvablePuzzle(ofSize: size, difficulty: difficulty)
-        solver = Solver(
-            rows: puzzle.rowIndices.map { puzzle.segmentRanges(forRow: $0).map { $0.length } },
-            columns: puzzle.columnIndices.map { puzzle.segmentRanges(forColumn: $0).map { $0.length } }
-        )
-        isSolved = false
-        isEmpty = true
-        hint = nil
+        gameState = GameState(size: size, difficulty: difficulty, validate: validate)
     }
 }
 
 #Preview {
-    @Previewable @State var mode: InteractionMode = .fill(.filled)
-    @Previewable @State var puzzle = Puzzle(size: 1, data: 0b0)
-    @Previewable @State var solver = Solver(rows: [], columns: [])
-    @Previewable @State var fitsView: Bool = false
-    @Previewable @State var isSolved: Bool = false
-    @Previewable @State var isEmpty: Bool = true
-    @Previewable @State var hint: SolverAttempt?
+    @Previewable @State var gameState = GameState()
 
-    ControlView(puzzle: $puzzle, solver: $solver, mode: $mode, fitsView: $fitsView, isSolved: $isSolved, isEmpty: $isEmpty, hint: $hint)
+    ControlView(gameState: $gameState, fitsView: false)
         .padding()
 }

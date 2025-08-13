@@ -12,7 +12,7 @@ struct SegmentLabel: View {
     let isHighlighted: Bool
 
     @Environment(\.colorScheme) var colorScheme
-    @Environment(\.puzzleColor) var puzzleColor
+    @Environment(\.gameState.puzzleColor) var puzzleColor
     @Environment(\.puzzleMetrics) var puzzleMetrics
 
     var color: Color {
@@ -80,7 +80,7 @@ struct SegmentsBackground: View {
     let segmentSize: CGFloat
 
     @Environment(\.colorScheme) var colorScheme
-    @Environment(\.puzzleColor) var puzzleColor
+    @Environment(\.gameState.puzzleColor) var puzzleColor
     @Environment(\.puzzleMetrics) var puzzleMetrics
 
     func makeGradient(axisOffset: CGFloat) -> LinearGradient {
@@ -127,9 +127,9 @@ struct SegmentsView: View {
     let offset: CGPoint
     let labelSize: CGFloat
     let segmentSize: CGFloat
-    let hint: SolverAttempt?
 
     @Environment(\.puzzleMetrics) var puzzleMetrics
+    @Environment(\.gameState.hint) var hint
 
     var body: some View {
         let axisOffset = axis == .horizontal ? offset.y : offset.x

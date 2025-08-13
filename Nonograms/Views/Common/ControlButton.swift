@@ -23,7 +23,7 @@ struct ControlButton: View {
     }
 
     @Environment(\.colorScheme) var colorScheme
-    @Environment(\.puzzleColor) var puzzleColor
+    @Environment(\.gameState.puzzleColor) var puzzleColor
 
     var fillColor: Color {
         if active {

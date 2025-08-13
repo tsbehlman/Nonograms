@@ -10,7 +10,7 @@ import SwiftUI
 struct TileView: View {
     let status: TileState
 
-    @Environment(\.puzzleColor) var puzzleColor
+    @Environment(\.gameState.puzzleColor) var puzzleColor
     @Environment(\.puzzleMetrics) var puzzleMetrics
 
     var body: some View {
@@ -29,8 +29,8 @@ struct TileView: View {
 }
 
 struct DraggablePuzzleTilesView: View {
-    @Binding var puzzle: Puzzle
-    @Binding var mode: InteractionMode
+    let puzzle: Puzzle
+    let mode: InteractionMode
     let fill: (Int, Int, TileState?) -> Void
 
     enum DragState: Equatable {
@@ -54,7 +54,7 @@ struct DraggablePuzzleTilesView: View {
                 }
                 state = .dragging(row: row, column: column, state: tileState)
             }
-        PuzzleTilesView(puzzle: $puzzle, fill: fill)
+        PuzzleTilesView(puzzle: puzzle, fill: fill)
             .highPriorityGesture(gesture, isEnabled: mode.tileState != nil)
             .onChange(of: dragState) {
                 guard case let .dragging(row, column, state) = dragState,
@@ -66,7 +66,7 @@ struct DraggablePuzzleTilesView: View {
 }
 
 struct PuzzleTilesView: View {
-    @Binding var puzzle: Puzzle
+    let puzzle: Puzzle
     let fill: (Int, Int, TileState?) -> Void
 
     @Environment(\.puzzleMetrics) var puzzleMetrics
@@ -116,16 +116,14 @@ struct PuzzleTilesView: View {
 }
 
 struct PuzzleGridView: View {
-    @Binding var puzzle: Puzzle
-    @Binding var mode: InteractionMode
     @Binding var fitsView: Bool
-    @Binding var offset: CGPoint
-    let hint: SolverAttempt?
-    let fill: (Int, Int, TileState?) -> Void
+    @State var offset: CGPoint = .zero
 
     @Environment(\.puzzleMetrics) var puzzleMetrics
+    @Environment(\.gameState) var gameState
 
     var body: some View {
+        let puzzle = gameState.puzzle
         let maxSegments = (puzzle.size + 1) / 2
         let labelSize = puzzleMetrics.segmentFontSize * CGFloat(maxSegments)
         let segmentSize = labelSize + puzzleMetrics.segmentPadding * 2
@@ -133,7 +131,7 @@ struct PuzzleGridView: View {
         let totalSize = puzzleSize + segmentSize
 
         ZStack {
-            PannableView(scrollEnabled: mode.tileState == nil, fitsView: $fitsView, offset: $offset) {
+            PannableView(scrollEnabled: gameState.mode.tileState == nil, fitsView: $fitsView, offset: $offset) {
                 VStack(spacing: 0) {
                     SegmentsBackground(axis: .horizontal, puzzle: puzzle, offset: offset, segmentSize: segmentSize)
                         .frame(maxWidth: puzzleSize, maxHeight: segmentSize)
@@ -142,8 +140,10 @@ struct PuzzleGridView: View {
                         SegmentsBackground(axis: .vertical, puzzle: puzzle, offset: offset, segmentSize: segmentSize)
                             .frame(maxWidth: segmentSize, maxHeight: puzzleSize)
                         ZStack(alignment: .topLeading) {
-                            DraggablePuzzleTilesView(puzzle: $puzzle, mode: $mode, fill: fill)
-                            if let hint = hint {
+                            DraggablePuzzleTilesView(puzzle: puzzle, mode: gameState.mode)  { row, column, state in
+                                gameState.fill(row: row, column: column, state: state)
+                            }
+                            if let hint = gameState.hint {
                                 HintOverlayView(hint: hint)
                                     .allowsHitTesting(false)
                             }
@@ -155,13 +155,13 @@ struct PuzzleGridView: View {
                 .frame(maxWidth: totalSize, maxHeight: totalSize)
             VStack(spacing: 0) {
                 OffsetView(axis: .horizontal, offset: offset) {
-                    SegmentsView(axis: .horizontal, puzzle: puzzle, offset: offset, labelSize: labelSize, segmentSize: segmentSize, hint: hint)
+                    SegmentsView(axis: .horizontal, puzzle: puzzle, offset: offset, labelSize: labelSize, segmentSize: segmentSize)
                         .padding(.leading, segmentSize)
                 }
                     .frame(maxWidth: puzzleSize + segmentSize, maxHeight: segmentSize)
                 HStack(alignment: .top, spacing: 0) {
                     OffsetView(axis: .vertical, offset: offset) {
-                        SegmentsView(axis: .vertical, puzzle: puzzle, offset: offset, labelSize: labelSize, segmentSize: segmentSize, hint: hint)
+                        SegmentsView(axis: .vertical, puzzle: puzzle, offset: offset, labelSize: labelSize, segmentSize: segmentSize)
                     }
                         .frame(maxWidth: segmentSize, maxHeight: puzzleSize)
                     Spacer()
@@ -177,21 +177,12 @@ struct PuzzleGridView: View {
 }
 
 #Preview {
-    @Previewable @State var puzzle = Puzzle(size: 5, data:
-                                   0b11111,
-                                   0b10001,
-                                   0b10101,
-                                   0b10001,
-                                   0b11111
-    )
-    @Previewable @State var mode: InteractionMode = .fill(.filled)
+    @Previewable @State var gameState = GameState(size: 5, difficulty: .easy, validate: false)
     @Previewable @State var fitsView: Bool = false
-    @Previewable @State var offset: CGPoint = .zero
 
-    PuzzleGridView(puzzle: $puzzle, mode: $mode, fitsView: $fitsView, offset: $offset, hint: nil) { row, column, state in
-        puzzle.set(row: row, column: column, to: state ?? mode.tileState!, holding: state != nil)
-    }
+    PuzzleGridView(fitsView: $fitsView)
+        .environment(\.gameState, gameState)
         .onAppear {
-            puzzle.solve()
+            gameState.puzzle.solve()
         }
 }

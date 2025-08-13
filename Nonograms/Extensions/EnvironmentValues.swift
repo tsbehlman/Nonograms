@@ -8,7 +8,7 @@
 import SwiftUI
 
 extension EnvironmentValues {
-    @Entry var puzzleColor: Color = .accentColor
+    @Entry var gameState = GameState()
     @Entry var puzzleMetrics = PuzzleMetrics(
         size: 5,
         tileSize: NonogramsDefaults.tileSize
