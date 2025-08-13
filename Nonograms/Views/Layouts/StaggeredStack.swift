@@ -7,15 +7,6 @@
 
 import SwiftUI
 
-struct StaggeredStackCache {
-    let center: CGFloat
-    let xOffset: CGFloat
-    let yOffset: CGFloat
-    let totalWidth: CGFloat
-    let totalHeight: CGFloat
-    let sizes: [CGSize]
-}
-
 struct StaggeredStackLayout: Layout {
     let angle: Angle
     let spacing: CGFloat
@@ -25,7 +16,16 @@ struct StaggeredStackLayout: Layout {
         self.spacing = spacing
     }
 
-    func makeCache(subviews: Subviews) -> StaggeredStackCache {
+    struct Cache {
+        let center: CGFloat
+        let xOffset: CGFloat
+        let yOffset: CGFloat
+        let totalWidth: CGFloat
+        let totalHeight: CGFloat
+        let sizes: [CGSize]
+    }
+
+    func makeCache(subviews: Subviews) -> Cache {
         var maxSize: CGFloat = 0
         var sizes: [CGSize] = []
         for subview in subviews {
@@ -37,7 +37,7 @@ struct StaggeredStackLayout: Layout {
         let theta = abs(angle.radians)
         let xOffset = radius * cos(theta)
         let yOffset = radius * sin(theta)
-        return StaggeredStackCache(
+        return Cache(
             center: maxSize / 2,
             xOffset: xOffset,
             yOffset: yOffset,
@@ -47,11 +47,11 @@ struct StaggeredStackLayout: Layout {
         )
     }
 
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout StaggeredStackCache) -> CGSize {
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout Cache) -> CGSize {
         CGSize(width: cache.totalWidth, height: cache.totalHeight)
     }
 
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout StaggeredStackCache) {
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout Cache) {
         var point = CGPoint(x: bounds.minX + cache.center, y: 0)
         var isLower = angle.radians < 0
 
@@ -62,11 +62,7 @@ struct StaggeredStackLayout: Layout {
                 point.y = bounds.minY + cache.center
             }
             isLower = !isLower
-            let size = cache.sizes[index]
-            let proposal = ProposedViewSize(
-                width: size.width,
-                height: size.height
-            )
+            let proposal = ProposedViewSize(cache.sizes[index])
             subviews[index].place(at: point, anchor: .center, proposal: proposal)
             point.x += cache.xOffset
         }

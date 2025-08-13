@@ -7,12 +7,6 @@
 
 import SwiftUI
 
-struct EqualStackCache {
-    let maxWidth: CGFloat
-    let maxHeight: CGFloat
-    let sizes: [CGSize]
-}
-
 struct EqualStack: Layout {
     let axis: Axis
     let spacing: CGFloat
@@ -24,6 +18,14 @@ struct EqualStack: Layout {
         self.spacing = spacing
         self.itemWidth = itemWidth
         self.itemHeight = itemHeight
+    }
+
+    struct Cache {
+        let maxWidth: CGFloat
+        let maxHeight: CGFloat
+        let totalWidth: CGFloat
+        let totalHeight: CGFloat
+        let sizes: [CGSize]
     }
 
     enum Sizing {
@@ -40,9 +42,11 @@ struct EqualStack: Layout {
         }
     }
 
-    func makeCache(subviews: Subviews) -> EqualStackCache {
+    func makeCache(subviews: Subviews) -> Cache {
         var maxWidth: CGFloat = 0
         var maxHeight: CGFloat = 0
+        var totalWidth: CGFloat = 0
+        var totalHeight: CGFloat = 0
         var sizes: [CGSize] = []
         for subview in subviews {
             let sizeThatFits = subview.sizeThatFits(.unspecified)
@@ -52,24 +56,24 @@ struct EqualStack: Layout {
             )
             maxWidth = max(maxWidth, size.width)
             maxHeight = max(maxHeight, size.height)
+            totalWidth += size.width
+            totalHeight += size.height
             sizes.append(size)
         }
-        return EqualStackCache(maxWidth: maxWidth, maxHeight: maxHeight, sizes: sizes)
+        return Cache(maxWidth: maxWidth, maxHeight: maxHeight, totalWidth: totalWidth, totalHeight: totalHeight, sizes: sizes)
     }
 
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout EqualStackCache) -> CGSize {
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout Cache) -> CGSize {
         let totalSpacing = spacing * CGFloat(subviews.count - 1)
 
         if axis == .horizontal {
-            let totalWidth = cache.sizes.reduce(0.0) { $0 + $1.width }
-            return CGSize(width: totalWidth + totalSpacing, height: cache.maxHeight)
+            return CGSize(width: cache.totalWidth + totalSpacing, height: cache.maxHeight)
         } else {
-            let totalHeight = cache.sizes.reduce(0.0) { $0 + $1.height }
-            return CGSize(width: cache.maxWidth, height: totalHeight + totalSpacing)
+            return CGSize(width: cache.maxWidth, height: cache.totalHeight + totalSpacing)
         }
     }
 
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout EqualStackCache) {
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout Cache) {
         var point = axis == .horizontal ?
             CGPoint(x: bounds.minX, y: bounds.maxY) :
             CGPoint(x: bounds.maxX, y: bounds.minY)

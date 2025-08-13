@@ -7,13 +7,6 @@
 
 import SwiftUI
 
-struct SqueezeStackCache {
-    let maxWidth: CGFloat
-    let maxHeight: CGFloat
-    let totalSize: CGFloat
-    let sizes: [CGFloat]
-}
-
 struct SqueezeStack: Layout {
     let axis: Axis
     let reversed: Bool
@@ -29,7 +22,14 @@ struct SqueezeStack: Layout {
         self.minSpacing = minSpacing ?? spacing
     }
 
-    func makeCache(subviews: Subviews) -> SqueezeStackCache {
+    struct Cache {
+        let maxWidth: CGFloat
+        let maxHeight: CGFloat
+        let totalSize: CGFloat
+        let sizes: [CGFloat]
+    }
+
+    func makeCache(subviews: Subviews) -> Cache {
         var maxWidth: CGFloat = 0
         var maxHeight: CGFloat = 0
         var totalSize: CGFloat = 0
@@ -46,10 +46,10 @@ struct SqueezeStack: Layout {
                 sizes.append(sizeThatFits.height)
             }
         }
-        return SqueezeStackCache(maxWidth: maxWidth, maxHeight: maxHeight, totalSize: totalSize, sizes: sizes)
+        return Cache(maxWidth: maxWidth, maxHeight: maxHeight, totalSize: totalSize, sizes: sizes)
     }
 
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout SqueezeStackCache) -> CGSize {
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout Cache) -> CGSize {
         let totalSpacing = spacing * CGFloat(max(0, subviews.count - 1))
         let size = cache.totalSize + totalSpacing
 
@@ -60,7 +60,7 @@ struct SqueezeStack: Layout {
         }
     }
     
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout SqueezeStackCache) {
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout Cache) {
         let fullSize: CGFloat
 
         if axis == .horizontal {
