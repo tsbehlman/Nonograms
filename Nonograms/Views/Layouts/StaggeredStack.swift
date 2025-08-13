@@ -84,15 +84,14 @@ struct StaggeredStack<Content: View>: View {
         StaggeredStackLayout(angle: angle, spacing: spacing).callAsFunction(content)
     }
 
-    func traceBackground(padding: CGFloat, curvature: CGFloat, color: Color) -> some View {
+    func traceBackground(padding: CGFloat, curvature: CGFloat, content: (StaggeredStackBackground) -> some View) -> some View {
         self.background {
-            StaggeredStackBackground(angle: angle, spacing: spacing, padding: padding, curvature: curvature)
-                .fill(color)
+            content(StaggeredStackBackground(angle: angle, spacing: spacing, padding: padding, curvature: curvature))
         }
     }
 }
 
-private struct StaggeredStackBackground: Shape {
+struct StaggeredStackBackground: Shape {
     let angle: Angle
     let spacing: CGFloat
     let padding: CGFloat
@@ -172,22 +171,32 @@ extension Path {
         StaggeredStack(angle: .degrees(60), spacing: 16) {
             AnyView(items)
         }
-            .traceBackground(padding: 8, curvature: 14, color: Color.primary.opacity(0.2))
+            .traceBackground(padding: 8, curvature: 14) {
+                $0.fill(Color.primary.opacity(0.2))
+            }
         StaggeredStack(angle: .degrees(45), spacing: 16) {
             AnyView(items)
         }
-            .traceBackground(padding: 8, curvature: 14, color: Color.primary.opacity(0.2))
+            .traceBackground(padding: 8, curvature: 14) {
+                $0.fill(Color.primary.opacity(0.2))
+            }
         StaggeredStack(angle: .degrees(0), spacing: 16) {
             AnyView(items)
         }
-            .traceBackground(padding: 8, curvature: 14, color: Color.primary.opacity(0.2))
+            .traceBackground(padding: 8, curvature: 14) {
+                $0.fill(Color.primary.opacity(0.2))
+            }
         StaggeredStack(angle: .degrees(-45), spacing: 16) {
             AnyView(items)
         }
-            .traceBackground(padding: 4, curvature: 64, color: Color.primary.opacity(0.2))
+            .traceBackground(padding: 4, curvature: 64) {
+                $0.fill(Color.primary.opacity(0.2))
+            }
         StaggeredStack(angle: .degrees(-60), spacing: 16) {
             AnyView(items)
         }
-            .traceBackground(padding: 16, curvature: 4, color: Color.primary.opacity(0.2))
+            .traceBackground(padding: 16, curvature: 4) {
+                $0.fill(Color.primary.opacity(0.2))
+            }
     }
 }

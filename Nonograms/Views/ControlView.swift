@@ -86,7 +86,9 @@ struct ControlView: View {
                     }
                 ControlIconView(mode: $mode, control: .blocked, icon: "xmark", disabled: false)
             }
-                .traceBackground(padding: 7, curvature: 21, color: Color.primary.opacity(0.25))
+                .traceBackground(padding: 7, curvature: 21) {
+                    $0.fill(Color.primary.opacity(0.25))
+                }
         }
         .onChange(of: keyboardObserver.modifiers.contains(.option)) { _, isOptionPressed in
             if isOptionPressed {
