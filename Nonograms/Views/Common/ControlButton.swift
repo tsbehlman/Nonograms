@@ -7,19 +7,28 @@
 
 import SwiftUI
 
-let controlButtonSize: CGFloat = 56
-
 struct ControlButton: View {
     let icon: String
     let active: Bool
     let disabled: Bool
     let bordered: Bool
+    let scale: Image.Scale
 
-    init(icon: String, active: Bool = false, disabled: Bool = false, bordered: Bool = true) {
+    var size: CGFloat {
+        switch scale {
+        case .small:
+            return 32
+        default:
+            return 56
+        }
+    }
+
+    init(icon: String, active: Bool = false, disabled: Bool = false, bordered: Bool = true, size: Image.Scale = .large) {
         self.icon = icon
         self.active = active
         self.disabled = disabled
         self.bordered = bordered
+        self.scale = size
     }
 
     @Environment(\.colorScheme) var colorScheme
@@ -55,9 +64,9 @@ struct ControlButton: View {
             Image(systemName: icon)
                 .fontWeight(.semibold)
                 .foregroundStyle(iconColor)
-                .imageScale(.large)
+                .imageScale(scale)
         }
-            .frame(width: controlButtonSize, height: controlButtonSize, alignment: .center)
+            .frame(width: size, height: size, alignment: .center)
     }
 }
 

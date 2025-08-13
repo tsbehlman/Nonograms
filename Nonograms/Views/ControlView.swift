@@ -83,6 +83,19 @@ struct ControlView: View {
                 .traceBackground(padding: 7, curvature: 21) {
                     $0.stroke(Color.primary.opacity(0.375)).fill(Color.primary.opacity(0.25))
                 }
+                .overlay(alignment: .bottom) {
+                    HStack {
+                        ControlButton(icon: "arrow.uturn.left", disabled: !gameState.hasUndo, size: .small)
+                            .onTapGesture {
+                                gameState.undo()
+                            }
+                        Spacer()
+                        ControlButton(icon: "arrow.uturn.right", disabled: !gameState.hasRedo, size: .small)
+                            .onTapGesture {
+                                gameState.redo()
+                            }
+                    }
+                }
         }
         .onChange(of: keyboardObserver.modifiers.contains(.option)) { _, isOptionPressed in
             if isOptionPressed {

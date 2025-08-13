@@ -16,6 +16,8 @@ class GameState {
     var isEmpty = true
     var isSolved = false
     var hint: SolverAttempt?
+    var history: [PuzzleTransaction] = []
+    var historyIndex = 0
 
     var puzzleColor: Color {
         isSolved
@@ -41,15 +43,22 @@ class GameState {
 
     func fill(row: Int, column: Int, state: TileState?) {
         guard case let .fill(selectedState) = mode, !isSolved else { return }
-        puzzle.set(row: row, column: column, to: state ?? selectedState, holding: state != nil, validate: validate)
+        let isHolding = state != nil
+        let desiredState = state ?? selectedState
         let tileIndex = puzzle.tileIndex(row: row, column: column)
-        let newTile = puzzle.tiles[tileIndex]
-        if newTile == puzzle.solution[tileIndex] || newTile == .error || newTile == .blank {
-            solver.set(row: row, column: column, to: newTile)
+        let oldState = puzzle.tiles[tileIndex]
+        puzzle.set(tileIndex, to: desiredState, holding: isHolding, validate: validate)
+        let newState = puzzle.tiles[tileIndex]
+        if newState == puzzle.solution[tileIndex] || newState == .error || newState == .blank {
+            solver.set(row: row, column: column, to: newState)
         }
-        if state ?? selectedState == .filled && puzzle.isSolved() {
+        if desiredState == .filled && puzzle.isSolved() {
             isSolved = true
             puzzle.solve()
+        } else {
+            history.append(PuzzleTransaction(tileIndex: tileIndex, oldState: oldState, newState: newState))
+            historyIndex += 1
+            history.removeSubrange(historyIndex...)
         }
         isEmpty = false
         hint = nil
@@ -58,5 +67,43 @@ class GameState {
     func showHint() {
         guard !isSolved else { return }
         hint = solver.step()
+    }
+
+    var hasUndo: Bool {
+        !isSolved && historyIndex > 0
+    }
+
+    var hasRedo: Bool {
+        !isSolved && historyIndex < history.count
+    }
+
+    func undo() {
+        guard hasUndo else { return }
+        historyIndex -= 1
+        history[historyIndex].applyUndo(self)
+    }
+
+    func redo() {
+        guard hasRedo else { return }
+        history[historyIndex].applyRedo(self)
+        historyIndex += 1
+    }
+}
+
+struct PuzzleTransaction {
+    let tileIndex: Int
+    let oldState: TileState
+    let newState: TileState
+
+    func applyUndo(_ gameState: GameState) {
+        gameState.puzzle.tiles[tileIndex] = oldState
+        gameState.solver.set(tileIndex, to: oldState)
+    }
+
+    func applyRedo(_ gameState: GameState) {
+        gameState.puzzle.tiles[tileIndex] = newState
+        if newState == gameState.puzzle.solution[tileIndex] || newState == .error || newState == .blank {
+            gameState.solver.set(tileIndex, to: newState)
+        }
     }
 }

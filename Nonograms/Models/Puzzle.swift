@@ -83,8 +83,7 @@ struct Puzzle {
         0..<size
     }
 
-    mutating func set(row: Int, column: Int, to newState: TileState, holding: Bool = false, validate: Bool = true) {
-        let tileIndex = tileIndex(row: row, column: column)
+    mutating func set(_ tileIndex: Int, to newState: TileState, holding: Bool = false, validate: Bool = true) {
         let currentState = tiles[tileIndex]
         switch (currentState, newState) {
         case (.blank, .blocked):
