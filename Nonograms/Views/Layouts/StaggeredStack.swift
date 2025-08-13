@@ -91,7 +91,7 @@ struct StaggeredStack<Content: View>: View {
     }
 }
 
-struct StaggeredStackBackground: Shape {
+struct StaggeredStackBackground: InsettableShape {
     let angle: Angle
     let spacing: CGFloat
     let padding: CGFloat
@@ -135,10 +135,12 @@ struct StaggeredStackBackground: Shape {
                 path.addSubpath(transform: CGAffineTransform(translationX: center.x, y: center.y).scaledBy(x: index == 0 ? 1 : -1, y: 1)) { subpath in
                     subpath.addArc(center: CGPoint(x: outerCutoutX, y: outerCutoutY), radius: cutoutRadius, startAngle: cutoutStartAngle, endAngle: .degrees(180) - outerCutoutAngle, clockwise: false)
                     subpath.addArc(center: CGPoint(x: innerCutoutX, y: -innerCutoutY), radius: cutoutRadius, startAngle: .degrees(180) + innerCutoutAngle, endAngle: max(-outerCutoutAngle, .degrees(-90)), clockwise: false)
-                    subpath.addLine(to: CGPoint(x: xOffset, y: -yOffset))
+                    subpath.addLine(to: CGPoint(x: itemDistance, y: -yOffset))
                 }
             }
-            path.addArc(center: center, radius: radius, startAngle: .degrees(0), endAngle: .degrees(360), clockwise: false)
+            path.addSubpath { subpath in
+                subpath.addArc(center: center, radius: radius, startAngle: .degrees(0), endAngle: .degrees(360), clockwise: false)
+            }
             isLower = !isLower
             center.x += xOffset
         }
@@ -149,9 +151,20 @@ struct StaggeredStackBackground: Shape {
             return path
         }
     }
+
+    func inset(by amount: CGFloat) -> StaggeredStackBackground {
+        StaggeredStackBackground(angle: angle, spacing: spacing, padding: padding - amount, curvature: curvature + amount)
+    }
 }
 
 extension Path {
+    mutating func addSubpath(_ builder: (_: inout Path) -> ()) {
+        var subpath = Path()
+        builder(&subpath)
+        self = union(subpath, eoFill: false)
+        closeSubpath()
+    }
+
     mutating func addSubpath(transform: CGAffineTransform, _ builder: (_: inout Path) -> ()) {
         var subpath = Path()
         builder(&subpath)
