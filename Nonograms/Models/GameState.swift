@@ -18,6 +18,7 @@ class GameState {
     var hint: SolverAttempt?
     var history: [PuzzleTransaction] = []
     var historyIndex = 0
+    var transactionGroup: PuzzleTransactionGroup?
 
     var puzzleColor: Color {
         isSolved
@@ -56,12 +57,31 @@ class GameState {
             isSolved = true
             puzzle.solve()
         } else if newState != oldState {
-            history.append(PuzzleTransaction(tileIndex: tileIndex, oldState: oldState, newState: newState))
-            historyIndex += 1
-            history.removeSubrange(historyIndex...)
+            let transaction = SinglePuzzleTransaction(tileIndex: tileIndex, oldState: oldState, newState: newState)
+            if transactionGroup != nil {
+                transactionGroup!.transactions.append(transaction)
+            } else {
+                history.append(transaction)
+                historyIndex += 1
+                history.removeSubrange(historyIndex...)
+            }
         }
         isEmpty = false
         hint = nil
+    }
+
+    func beginTransaction() {
+        guard transactionGroup == nil else { return }
+        transactionGroup = PuzzleTransactionGroup()
+    }
+
+    func endTransaction() {
+        guard let group = transactionGroup else { return }
+        if !group.transactions.isEmpty {
+            history.append(group)
+            historyIndex += 1
+        }
+        transactionGroup = nil
     }
 
     func showHint() {
@@ -93,7 +113,12 @@ class GameState {
     }
 }
 
-struct PuzzleTransaction {
+protocol PuzzleTransaction {
+    func applyUndo(_ gameState: GameState)
+    func applyRedo(_ gameState: GameState)
+}
+
+struct SinglePuzzleTransaction: PuzzleTransaction {
     let tileIndex: Int
     let oldState: TileState
     let newState: TileState
@@ -107,6 +132,22 @@ struct PuzzleTransaction {
         gameState.puzzle.tiles[tileIndex] = newState
         if newState == gameState.puzzle.solution[tileIndex] || newState == .error || newState == .blank {
             gameState.solver.set(tileIndex, to: newState)
+        }
+    }
+}
+
+struct PuzzleTransactionGroup: PuzzleTransaction {
+    var transactions: [SinglePuzzleTransaction] = []
+
+    func applyUndo(_ gameState: GameState) {
+        for transaction in transactions.reversed() {
+            transaction.applyUndo(gameState)
+        }
+    }
+
+    func applyRedo(_ gameState: GameState) {
+        for transaction in transactions {
+            transaction.applyRedo(gameState)
         }
     }
 }

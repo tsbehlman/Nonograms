@@ -29,10 +29,6 @@ struct TileView: View {
 }
 
 struct DraggablePuzzleTilesView: View {
-    let puzzle: Puzzle
-    let mode: InteractionMode
-    let fill: (Int, Int, TileState?) -> Void
-
     enum DragState: Equatable {
         case inactive
         case dragging(row: Int, column: Int, state: TileState)
@@ -40,8 +36,11 @@ struct DraggablePuzzleTilesView: View {
 
     @GestureState private var dragState: DragState = .inactive
     @Environment(\.puzzleMetrics) var puzzleMetrics
+    @Environment(\.gameState) var gameState
 
     var body: some View {
+        let puzzle = gameState.puzzle
+        let mode = gameState.mode
         let gesture = DragGesture(minimumDistance: 4, coordinateSpace: .local)
             .updating($dragState) { value, state, transaction in
                 guard var tileState = mode.tileState else { return }
@@ -54,24 +53,28 @@ struct DraggablePuzzleTilesView: View {
                 }
                 state = .dragging(row: row, column: column, state: tileState)
             }
-        PuzzleTilesView(puzzle: puzzle, fill: fill)
+        PuzzleTilesView()
             .highPriorityGesture(gesture, isEnabled: mode.tileState != nil)
             .onChange(of: dragState) {
+                if case .dragging = dragState {
+                    gameState.beginTransaction()
+                } else {
+                    gameState.endTransaction()
+                }
                 guard case let .dragging(row, column, state) = dragState,
                       puzzle.rowIndices.contains(row),
                       puzzle.columnIndices.contains(column) else { return }
-                fill(row, column, state)
+                gameState.fill(row: row, column: column, state: state)
             }
     }
 }
 
 struct PuzzleTilesView: View {
-    let puzzle: Puzzle
-    let fill: (Int, Int, TileState?) -> Void
-
     @Environment(\.puzzleMetrics) var puzzleMetrics
+    @Environment(\.gameState) var gameState
 
     var body: some View {
+        let puzzle = gameState.puzzle
         ZStack {
             Grid(horizontalSpacing: 0, verticalSpacing: 0) {
                 ForEach(0..<puzzle.size, id: \.self) { rowIndex in
@@ -79,7 +82,7 @@ struct PuzzleTilesView: View {
                         ForEach(0..<puzzle.size, id: \.self) { columnIndex in
                             TileView(status: puzzle.tile(row: rowIndex, column: columnIndex))
                                 .onTapGesture {
-                                    fill(rowIndex, columnIndex, nil)
+                                    gameState.fill(row: rowIndex, column: columnIndex, state: nil)
                                 }
                         }
                     }
@@ -133,16 +136,14 @@ struct PuzzleGridView: View {
         ZStack {
             PannableView(scrollEnabled: gameState.mode.tileState == nil, fitsView: $fitsView, offset: $offset) {
                 VStack(spacing: 0) {
-                    SegmentsBackground(axis: .horizontal, puzzle: puzzle, offset: offset, segmentSize: segmentSize)
+                    SegmentsBackground(axis: .horizontal, offset: offset, segmentSize: segmentSize)
                         .frame(maxWidth: puzzleSize, maxHeight: segmentSize)
                         .padding(.leading, segmentSize)
                     HStack(alignment: .top, spacing: 0) {
-                        SegmentsBackground(axis: .vertical, puzzle: puzzle, offset: offset, segmentSize: segmentSize)
+                        SegmentsBackground(axis: .vertical, offset: offset, segmentSize: segmentSize)
                             .frame(maxWidth: segmentSize, maxHeight: puzzleSize)
                         ZStack(alignment: .topLeading) {
-                            DraggablePuzzleTilesView(puzzle: puzzle, mode: gameState.mode)  { row, column, state in
-                                gameState.fill(row: row, column: column, state: state)
-                            }
+                            DraggablePuzzleTilesView()
                             if let hint = gameState.hint {
                                 HintOverlayView(hint: hint)
                                     .allowsHitTesting(false)

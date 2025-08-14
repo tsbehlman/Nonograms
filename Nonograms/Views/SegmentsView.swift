@@ -75,11 +75,11 @@ struct SegmentLabels: View {
 
 struct SegmentsBackground: View {
     let axis: Axis
-    let puzzle: Puzzle
     let offset: CGPoint
     let segmentSize: CGFloat
 
     @Environment(\.colorScheme) var colorScheme
+    @Environment(\.gameState.puzzle.size) var puzzleSize
     @Environment(\.gameState.puzzleColor) var puzzleColor
     @Environment(\.puzzleMetrics) var puzzleMetrics
 
@@ -109,7 +109,7 @@ struct SegmentsBackground: View {
             .fill(makeGradient(axisOffset: axisOffset))
             .mask {
                 Path { path in
-                    for index in stride(from: 0, to: puzzle.size, by: 2) {
+                    for index in stride(from: 0, to: puzzleSize, by: 2) {
                         if axis == .horizontal {
                             path.addRect(CGRectMake(CGFloat(index) * puzzleMetrics.tileSize, overScroll, puzzleMetrics.tileSize, segmentSize - overScroll))
                         } else {
