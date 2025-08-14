@@ -55,7 +55,7 @@ class GameState {
         if desiredState == .filled && puzzle.isSolved() {
             isSolved = true
             puzzle.solve()
-        } else {
+        } else if newState != oldState {
             history.append(PuzzleTransaction(tileIndex: tileIndex, oldState: oldState, newState: newState))
             historyIndex += 1
             history.removeSubrange(historyIndex...)
