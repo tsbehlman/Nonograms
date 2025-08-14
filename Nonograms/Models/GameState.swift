@@ -81,6 +81,9 @@ class GameState {
         guard hasUndo else { return }
         historyIndex -= 1
         history[historyIndex].applyUndo(self)
+        if historyIndex == 0 {
+            isEmpty = true
+        }
     }
 
     func redo() {
