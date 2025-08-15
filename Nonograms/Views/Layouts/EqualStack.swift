@@ -25,7 +25,7 @@ struct EqualStack: Layout {
         let maxHeight: CGFloat
         let totalWidth: CGFloat
         let totalHeight: CGFloat
-        let sizes: [CGSize]
+        let sizes: [CGFloat]
     }
 
     enum Sizing {
@@ -43,11 +43,12 @@ struct EqualStack: Layout {
     }
 
     func makeCache(subviews: Subviews) -> Cache {
+        let totalSpacing = spacing * CGFloat(max(0, subviews.count - 1))
         var maxWidth: CGFloat = 0
         var maxHeight: CGFloat = 0
-        var totalWidth: CGFloat = 0
-        var totalHeight: CGFloat = 0
-        var sizes: [CGSize] = []
+        var totalWidth: CGFloat = totalSpacing
+        var totalHeight: CGFloat = totalSpacing
+        var sizes: [CGFloat] = []
         for subview in subviews {
             let sizeThatFits = subview.sizeThatFits(.unspecified)
             let size = CGSize(
@@ -58,18 +59,20 @@ struct EqualStack: Layout {
             maxHeight = max(maxHeight, size.height)
             totalWidth += size.width
             totalHeight += size.height
-            sizes.append(size)
+            if axis == .horizontal {
+                sizes.append(size.width)
+            } else {
+                sizes.append(size.height)
+            }
         }
         return Cache(maxWidth: maxWidth, maxHeight: maxHeight, totalWidth: totalWidth, totalHeight: totalHeight, sizes: sizes)
     }
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout Cache) -> CGSize {
-        let totalSpacing = spacing * CGFloat(subviews.count - 1)
-
         if axis == .horizontal {
-            return CGSize(width: cache.totalWidth + totalSpacing, height: cache.maxHeight)
+            return CGSize(width: cache.totalWidth, height: cache.maxHeight)
         } else {
-            return CGSize(width: cache.maxWidth, height: cache.totalHeight + totalSpacing)
+            return CGSize(width: cache.maxWidth, height: cache.totalHeight)
         }
     }
 
@@ -82,16 +85,16 @@ struct EqualStack: Layout {
             let size = cache.sizes[index]
             let proposal: ProposedViewSize
             if axis == .horizontal {
-                point.x += size.width + spacing
+                point.x += size + spacing
                 proposal = ProposedViewSize(
-                    width: size.width,
+                    width: size,
                     height: cache.maxHeight
                 )
             } else {
-                point.y += size.height + spacing
+                point.y += size + spacing
                 proposal = ProposedViewSize(
                     width: cache.maxWidth,
-                    height: size.height
+                    height: size
                 )
             }
             subviews[index].place(at: point, anchor: .bottomTrailing, proposal: proposal)

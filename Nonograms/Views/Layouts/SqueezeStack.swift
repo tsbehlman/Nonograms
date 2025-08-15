@@ -27,6 +27,8 @@ struct SqueezeStack: Layout {
         let maxHeight: CGFloat
         let totalSize: CGFloat
         let sizes: [CGFloat]
+        let minSize: CGFloat
+        let maxSize: CGFloat
     }
 
     func makeCache(subviews: Subviews) -> Cache {
@@ -46,17 +48,17 @@ struct SqueezeStack: Layout {
                 sizes.append(sizeThatFits.height)
             }
         }
-        return Cache(maxWidth: maxWidth, maxHeight: maxHeight, totalSize: totalSize, sizes: sizes)
+        let numSpaces = CGFloat(max(0, subviews.count - 1))
+        let minSize = totalSize + minSpacing * numSpaces
+        let maxSize = totalSize + spacing * numSpaces
+        return Cache(maxWidth: maxWidth, maxHeight: maxHeight, totalSize: totalSize, sizes: sizes, minSize: minSize, maxSize: maxSize)
     }
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout Cache) -> CGSize {
-        let totalSpacing = spacing * CGFloat(max(0, subviews.count - 1))
-        let size = cache.totalSize + totalSpacing
-
         if axis == .horizontal {
-            return CGSize(width: max(proposal.width ?? 0, size), height: cache.maxHeight)
+            return CGSize(width: max(proposal.width ?? 0, cache.maxSize), height: cache.maxHeight)
         } else {
-            return CGSize(width: cache.maxWidth, height: max(proposal.height ?? 0, size))
+            return CGSize(width: cache.maxWidth, height: max(proposal.height ?? 0, cache.maxSize))
         }
     }
     
@@ -76,8 +78,7 @@ struct SqueezeStack: Layout {
         let origin = CGPoint(x: bounds.minX, y: bounds.minY)
         var idealPosition: CGFloat = 0
         var forcedPosition: CGFloat = max(0, offset)
-        let minimumSize = cache.totalSize + minSpacing * CGFloat(max(0, subviews.count - 1))
-        var remainingSize = fullSize - minimumSize
+        var remainingSize = fullSize - cache.minSize
 
         for index in indices {
             let size = cache.sizes[index]
@@ -87,15 +88,12 @@ struct SqueezeStack: Layout {
             }
 
             var point = origin
-            var proposal = ProposedViewSize(width: cache.maxWidth, height: cache.maxHeight)
             if axis == .horizontal {
                 point.x += position
-                proposal.width = size
             } else {
                 point.y += position
-                proposal.height = size
             }
-            subviews[index].place(at: point, anchor: .topLeading, proposal: proposal)
+            subviews[index].place(at: point, anchor: .topLeading, proposal: .unspecified)
 
             idealPosition += size + spacing
             forcedPosition += size + minSpacing

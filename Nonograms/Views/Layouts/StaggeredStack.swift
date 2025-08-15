@@ -17,53 +17,50 @@ struct StaggeredStackLayout: Layout {
     }
 
     struct Cache {
-        let center: CGFloat
+        let radius: CGFloat
         let xOffset: CGFloat
         let yOffset: CGFloat
-        let totalWidth: CGFloat
-        let totalHeight: CGFloat
-        let sizes: [CGSize]
+        let size: CGSize
     }
 
     func makeCache(subviews: Subviews) -> Cache {
-        var maxSize: CGFloat = 0
-        var sizes: [CGSize] = []
+        var diameter: CGFloat = 0
         for subview in subviews {
             let size = subview.sizeThatFits(.unspecified)
-            maxSize = max(maxSize, size.width, size.height)
-            sizes.append(size)
+            diameter = max(diameter, size.width, size.height)
         }
-        let radius = maxSize + spacing
+        let distance = diameter + spacing
         let theta = abs(angle.radians)
-        let xOffset = radius * cos(theta)
-        let yOffset = radius * sin(theta)
+        let xOffset = distance * cos(theta)
+        let yOffset = distance * sin(theta)
+        let totalWidth = diameter + xOffset * CGFloat(max(0, subviews.count - 1))
+        let totalHeight = diameter + yOffset * CGFloat(min(1, subviews.count - 1))
         return Cache(
-            center: maxSize / 2,
+            radius: diameter / 2,
             xOffset: xOffset,
             yOffset: yOffset,
-            totalWidth: maxSize + xOffset * CGFloat(max(0, subviews.count - 1)),
-            totalHeight: maxSize + yOffset * CGFloat(min(1, subviews.count - 1)),
-            sizes: sizes
+            size: CGSize(width: totalWidth, height: totalHeight)
         )
     }
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout Cache) -> CGSize {
-        CGSize(width: cache.totalWidth, height: cache.totalHeight)
+        cache.size
     }
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout Cache) {
-        var point = CGPoint(x: bounds.minX + cache.center, y: 0)
+        var point = CGPoint(x: bounds.minX + cache.radius, y: 0)
         var isLower = angle.radians < 0
+        let minY = bounds.maxY - cache.radius
+        let maxY = bounds.minY + cache.radius
 
         for index in subviews.indices {
             if isLower {
-                point.y = bounds.maxY - cache.center
+                point.y = minY
             } else {
-                point.y = bounds.minY + cache.center
+                point.y = maxY
             }
             isLower = !isLower
-            let proposal = ProposedViewSize(cache.sizes[index])
-            subviews[index].place(at: point, anchor: .center, proposal: proposal)
+            subviews[index].place(at: point, anchor: .center, proposal: .unspecified)
             point.x += cache.xOffset
         }
     }
