@@ -13,7 +13,7 @@ struct SegmentLabel: View {
 
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.gameState.puzzleColor) var puzzleColor
-    @Environment(\.puzzleMetrics) var puzzleMetrics
+    @Environment(\.puzzleMetrics.segmentFont) var segmentFont
 
     var color: Color {
         if isHighlighted {
@@ -27,7 +27,7 @@ struct SegmentLabel: View {
 
     var body: some View {
         Text("\(segment.range.length)")
-            .font(puzzleMetrics.segmentFont)
+            .font(segmentFont)
             .foregroundStyle(color)
             .stroke(Color.primary.forScheme(colorScheme.inverted), width: 0.625)
     }
@@ -37,11 +37,9 @@ struct SegmentLabels: View {
     let puzzle: Puzzle
     let axis: Axis
     let index: Int
-    let size: CGFloat
-    let offset: CGPoint
     let isHighlighted: Bool
 
-    @Environment(\.puzzleMetrics) var puzzleMetrics
+    @Environment(\.puzzleMetrics.segmentFontSize) var segmentFontSize
 
     var segments: [Segment] {
         axis == .horizontal
@@ -51,25 +49,19 @@ struct SegmentLabels: View {
 
     var spacing: CGFloat {
         if axis == .horizontal {
-            puzzleMetrics.segmentFontSize / 3
+            segmentFontSize / 3
         } else {
             0
         }
     }
 
     var body: some View {
-        SqueezeStack(axis, reversed: true, offset: axis == .horizontal ? offset.x : offset.y, spacing: spacing) {
+        Stack(axis: axis, spacing: spacing) {
             ForEach(segments) { segment in
                 SegmentLabel(segment: segment, isHighlighted: isHighlighted)
-                    .frame(minHeight: puzzleMetrics.segmentFontSize, maxHeight: puzzleMetrics.segmentFontSize, alignment: .center)
+                    .when(axis == .vertical) { $0.frame(maxHeight: segmentFontSize) }
             }
         }
-        .frame(
-            width: axis == .horizontal ? size : puzzleMetrics.tileSize,
-            height: axis == .horizontal ? puzzleMetrics.tileSize : size,
-            alignment: axis == .horizontal ? .trailing : .bottom
-        )
-        .padding(axis == .horizontal ? .horizontal : .vertical, puzzleMetrics.segmentPadding)
     }
 }
 
@@ -81,7 +73,7 @@ struct SegmentsBackground: View {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.gameState.puzzle.size) var puzzleSize
     @Environment(\.gameState.puzzleColor) var puzzleColor
-    @Environment(\.puzzleMetrics) var puzzleMetrics
+    @Environment(\.puzzleMetrics.tileSize) var tileSize
 
     func makeGradient(axisOffset: CGFloat) -> LinearGradient {
         let overscrollMultiplier = axisOffset / segmentSize
@@ -111,9 +103,9 @@ struct SegmentsBackground: View {
                 Path { path in
                     for index in stride(from: 0, to: puzzleSize, by: 2) {
                         if axis == .horizontal {
-                            path.addRect(CGRectMake(CGFloat(index) * puzzleMetrics.tileSize, overScroll, puzzleMetrics.tileSize, segmentSize - overScroll))
+                            path.addRect(CGRectMake(CGFloat(index) * tileSize, overScroll, tileSize, segmentSize - overScroll))
                         } else {
-                            path.addRect(CGRectMake(overScroll, CGFloat(index) * puzzleMetrics.tileSize, segmentSize - overScroll, puzzleMetrics.tileSize))
+                            path.addRect(CGRectMake(overScroll, CGFloat(index) * tileSize, segmentSize - overScroll, tileSize))
                         }
                     }
                 }
@@ -126,24 +118,22 @@ struct SegmentsView: View {
     let puzzle: Puzzle
     let offset: CGPoint
     let labelSize: CGFloat
-    let segmentSize: CGFloat
 
-    @Environment(\.puzzleMetrics) var puzzleMetrics
+    @Environment(\.puzzleMetrics.tileSize) var tileSize
+    @Environment(\.puzzleMetrics.segmentPadding) var segmentPadding
     @Environment(\.gameState.hint) var hint
 
     var body: some View {
-        let axisOffset = axis == .horizontal ? offset.y : offset.x
-        let overScroll = Swift.max(0.0, -axisOffset)
-
-        EqualStack(
+        SegmentsLayout(
             axis: axis,
-            itemWidth: axis == .horizontal ? .fixed(puzzleMetrics.tileSize) : .flexible,
-            itemHeight: axis == .horizontal ? .flexible : .fixed(puzzleMetrics.tileSize)
+            inlineSize: tileSize,
+            blockSize: labelSize,
+            offset: offset
         ) {
             ForEach(0..<puzzle.size, id: \.self) { index in
-                SegmentLabels(puzzle: puzzle, axis: axis.opposing, index: index, size: labelSize, offset: offset, isHighlighted: hint?.axis == axis.opposing && hint?.index == index)
+                SegmentLabels(puzzle: puzzle, axis: axis.opposing, index: index, isHighlighted: hint?.axis == axis.opposing && hint?.index == index)
             }
         }
-            .padding(axis == .horizontal ? .top : .leading, overScroll)
+            .padding(axis == .horizontal ? .vertical : .horizontal, segmentPadding)
     }
 }
