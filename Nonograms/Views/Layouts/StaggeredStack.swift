@@ -84,6 +84,7 @@ struct StaggeredStack<Content: View>: View {
     func traceBackground(padding: CGFloat, curvature: CGFloat, content: (StaggeredStackBackground) -> some View) -> some View {
         self.background {
             content(StaggeredStackBackground(angle: angle, spacing: spacing, padding: padding, curvature: curvature))
+                .allowsHitTesting(false)
         }
     }
 }
