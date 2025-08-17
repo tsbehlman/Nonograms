@@ -7,20 +7,6 @@
 
 import SwiftUI
 
-enum InteractionMode {
-    case move
-    case fill(TileState)
-
-    var tileState: TileState? {
-        switch self {
-        case .fill(let state):
-            return state
-        default:
-            return nil
-        }
-    }
-}
-
 struct PuzzleSolveView: View {
     @State var gameState = GameState()
     @State var fitsView: Bool = false

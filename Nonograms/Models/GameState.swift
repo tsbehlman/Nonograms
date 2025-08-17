@@ -7,6 +7,20 @@
 
 import SwiftUI
 
+enum InteractionMode: Equatable {
+    case move
+    case fill(TileState)
+
+    var tileState: TileState? {
+        switch self {
+        case .fill(let state):
+            return state
+        default:
+            return nil
+        }
+    }
+}
+
 @Observable
 class GameState {
     var puzzle: Puzzle
@@ -42,11 +56,11 @@ class GameState {
         self.validate = validate
     }
 
-    private func set(_ tileIndex: Int, to state: TileState, isHolding: Bool) -> TileState {
+    private func set(_ tileIndex: Int, to desiredState: TileState, isHolding: Bool) -> TileState {
         let currentState = puzzle.tiles[tileIndex]
         let expectedState = puzzle.solution[tileIndex]
-        var newState = state
-        switch (currentState, newState) {
+        var newState = currentState
+        switch (currentState, desiredState) {
         case (.blank, .blocked):
             newState = .blocked
         case (.blank, .filled):
@@ -60,9 +74,11 @@ class GameState {
                 newState = .blank
             }
         case (.blocked, .blank):
-            newState = .blank
+            if mode == .fill(.blocked) {
+                newState = .blank
+            }
         case (.filled, .blank):
-            if !validate {
+            if !validate && mode == .fill(.filled) {
                 newState = .blank
             }
         case (.filled, .filled):
