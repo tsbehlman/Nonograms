@@ -42,17 +42,60 @@ class GameState {
         self.validate = validate
     }
 
+    private func set(_ tileIndex: Int, to state: TileState, isHolding: Bool) -> TileState {
+        let currentState = puzzle.tiles[tileIndex]
+        let expectedState = puzzle.solution[tileIndex]
+        var newState = state
+        switch (currentState, newState) {
+        case (.blank, .blocked):
+            newState = .blocked
+        case (.blank, .filled):
+            if !validate || expectedState == .filled {
+                newState = .filled
+            } else {
+                newState = .error
+            }
+        case (.blocked, .blocked):
+            if !isHolding {
+                newState = .blank
+            }
+        case (.blocked, .blank):
+            newState = .blank
+        case (.filled, .blank):
+            if !validate {
+                newState = .blank
+            }
+        case (.filled, .filled):
+            if !validate && !isHolding {
+                newState = .blank
+            }
+        case (_, .error):
+            newState = .error
+        case (.blocked, _):
+            break
+        case (.error, _):
+            break
+        case (.filled, _):
+            break
+        case (_, .blank):
+            break
+        }
+
+        puzzle.tiles[tileIndex] = newState
+        if newState == puzzle.solution[tileIndex] || newState == .error || newState == .blank {
+            solver.set(tileIndex, to: newState)
+        }
+
+        return newState
+    }
+
     func fill(row: Int, column: Int, state: TileState?) {
         guard case let .fill(selectedState) = mode, !isSolved else { return }
         let isHolding = state != nil
         let desiredState = state ?? selectedState
         let tileIndex = puzzle.tileIndex(row: row, column: column)
         let oldState = puzzle.tiles[tileIndex]
-        puzzle.set(tileIndex, to: desiredState, holding: isHolding, validate: validate)
-        let newState = puzzle.tiles[tileIndex]
-        if newState == puzzle.solution[tileIndex] || newState == .error || newState == .blank {
-            solver.set(row: row, column: column, to: newState)
-        }
+        let newState = set(tileIndex, to: desiredState, isHolding: isHolding)
         if desiredState == .filled && puzzle.isSolved() {
             isSolved = true
             puzzle.solve()

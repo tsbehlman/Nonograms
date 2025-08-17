@@ -83,44 +83,6 @@ struct Puzzle {
         0..<size
     }
 
-    mutating func set(_ tileIndex: Int, to newState: TileState, holding: Bool = false, validate: Bool = true) {
-        let currentState = tiles[tileIndex]
-        switch (currentState, newState) {
-        case (.blank, .blocked):
-            tiles[tileIndex] = .blocked
-        case (.blank, .filled):
-            if !validate || solution[tileIndex] == .filled {
-                tiles[tileIndex] = .filled
-            } else {
-                tiles[tileIndex] = .error
-            }
-        case (.blocked, .blocked):
-            if !holding {
-                tiles[tileIndex] = .blank
-            }
-        case (.blocked, .blank):
-            tiles[tileIndex] = .blank
-        case (.filled, .blank):
-            if !validate {
-                tiles[tileIndex] = .blank
-            }
-        case (.filled, .filled):
-            if !validate && !holding {
-                tiles[tileIndex] = .blank
-            }
-        case (_, .error):
-            tiles[tileIndex] = .error
-        case (.blocked, _):
-            break
-        case (.error, _):
-            break
-        case (.filled, _):
-            break
-        case (_, .blank):
-            break
-        }
-    }
-
     private func segmentRanges(in tileIndices: some Sequence<Int>) -> [Range<Int>] {
         var ranges = [Range<Int>]()
         var startIndex = 0
