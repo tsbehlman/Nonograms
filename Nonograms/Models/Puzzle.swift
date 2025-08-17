@@ -208,7 +208,9 @@ struct Puzzle {
 
     func isSolved() -> Bool {
         zip(tiles, solution).allSatisfy { actual, expected in
-            expected != .filled || actual == .filled
+            let tileIsFilled = actual == .filled
+            let solutionIsFilled = expected == .filled
+            return tileIsFilled == solutionIsFilled
         }
     }
 
