@@ -173,7 +173,7 @@ struct PuzzleGridView: View {
 }
 
 #Preview {
-    @Previewable @State var gameState = GameState(size: 5, difficulty: .easy, validate: false)
+    @Previewable @State var gameState = GameState().newGame(ofSize: 5, difficulty: .easy)
     @Previewable @State var fitsView: Bool = false
 
     PuzzleGridView(fitsView: $fitsView)
