@@ -43,7 +43,7 @@ class GameState {
     init(puzzle: Puzzle = Puzzle(size: 1, solution: [.filled]), solver: Solver = Solver(rows: [[1]], columns: [[1]]), validate: Bool = false) {
         self.puzzle = puzzle
         self.solver = solver
-        self.validate = false
+        self.validate = validate
     }
 
     func newGame(ofSize size: Int, difficulty: PuzzleDifficulty, validate: Bool = false) -> GameState {
