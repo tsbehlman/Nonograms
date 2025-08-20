@@ -125,9 +125,11 @@ struct PuzzleGridView: View {
                     SegmentsBackground(axis: .horizontal, offset: offset, segmentSize: segmentSize)
                         .frame(width: puzzleSize, height: segmentSize)
                         .padding(.leading, segmentSize)
+                        .allowsHitTesting(false)
                     HStack(alignment: .top, spacing: 0) {
                         SegmentsBackground(axis: .vertical, offset: offset, segmentSize: segmentSize)
                             .frame(width: segmentSize, height: puzzleSize)
+                            .allowsHitTesting(false)
                         ZStack(alignment: .topLeading) {
                             DraggablePuzzleTilesView()
                             if let hint = gameState.hint {

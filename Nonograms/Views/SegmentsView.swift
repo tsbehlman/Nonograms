@@ -97,19 +97,16 @@ struct SegmentsBackground: View {
         let axisOffset = axis == .horizontal ? offset.y : offset.x
         let overScroll = Swift.min(0.0, axisOffset)
 
-        Rectangle()
-            .fill(makeGradient(axisOffset: axisOffset))
-            .mask {
-                Path { path in
-                    for index in stride(from: 0, to: puzzleSize, by: 2) {
-                        if axis == .horizontal {
-                            path.addRect(CGRectMake(CGFloat(index) * tileSize, overScroll, tileSize, segmentSize - overScroll))
-                        } else {
-                            path.addRect(CGRectMake(overScroll, CGFloat(index) * tileSize, segmentSize - overScroll, tileSize))
-                        }
-                    }
+        Path { path in
+            for index in stride(from: 0, to: puzzleSize, by: 2) {
+                if axis == .horizontal {
+                    path.addRect(CGRectMake(CGFloat(index) * tileSize, overScroll, tileSize, segmentSize - overScroll))
+                } else {
+                    path.addRect(CGRectMake(overScroll, CGFloat(index) * tileSize, segmentSize - overScroll, tileSize))
                 }
             }
+        }
+            .fill(makeGradient(axisOffset: axisOffset))
     }
 }
 
