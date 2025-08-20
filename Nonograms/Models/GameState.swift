@@ -40,14 +40,14 @@ class GameState {
             : .accentColor
     }
 
-    init(puzzle: Puzzle = Puzzle(size: 1, solution: [.filled]), solver: Solver = Solver(rows: [[1]], columns: [[1]]), validate: Bool = false) {
+    init(puzzle: Puzzle = Puzzle(width: 1, height: 1, solution: [.filled]), solver: Solver = Solver(rows: [[1]], columns: [[1]]), validate: Bool = false) {
         self.puzzle = puzzle
         self.solver = solver
         self.validate = validate
     }
 
-    func newGame(ofSize size: Int, difficulty: PuzzleDifficulty, validate: Bool = false) -> GameState {
-        let puzzle = makeSolvablePuzzle(ofSize: size, difficulty: difficulty)
+    func newGame(width: Int, height: Int, difficulty: PuzzleDifficulty, validate: Bool = false) -> GameState {
+        let puzzle = makeSolvablePuzzle(width: width, height: height, difficulty: difficulty)
         let solver = Solver(
             rows: puzzle.rowIndices.map { puzzle.segmentRanges(forRow: $0).map { $0.length } },
             columns: puzzle.columnIndices.map { puzzle.segmentRanges(forColumn: $0).map { $0.length } }

@@ -118,7 +118,7 @@ struct ControlView: View {
     }
 
     func generateNewPuzzle(ofSize size: Int = 5) {
-        gameState = gameState.newGame(ofSize: size, difficulty: difficulty, validate: validate)
+        gameState = gameState.newGame(width: size, height: size, difficulty: difficulty, validate: validate)
     }
 }
 

@@ -44,14 +44,16 @@ struct Segment: Identifiable, Equatable {
 }
 
 struct Puzzle {
-    let size: Int
+    let width: Int
+    let height: Int
     var tiles: [TileState]
     let solution: [TileState]
 
-    init(size: Int, solution: [TileState]) {
-        self.size = size
+    init(width: Int, height: Int, solution: [TileState]) {
+        self.width = width
+        self.height = height
         self.solution = solution
-        self.tiles = Array<TileState>(repeating: .blank, count: Int(size) * Int(size))
+        self.tiles = Array<TileState>(repeating: .blank, count: Int(width) * Int(height))
     }
 
     init(size: Int, data: [UInt]) {
@@ -60,7 +62,7 @@ struct Puzzle {
 
         var solution = Array<TileState>(repeating: .blank, count: Int(size) * Int(size))
         fillTiles(&solution, with: data, size: size)
-        self.init(size: size, solution: solution)
+        self.init(width: size, height: size, solution: solution)
     }
 
     init(size: Int, data: UInt...) {
@@ -68,7 +70,7 @@ struct Puzzle {
     }
 
     @inlinable func tileIndex(row: Int, column: Int) -> Int {
-        row * size + column
+        row * width + column
     }
 
     func tile(row: Int, column: Int) -> TileState {
@@ -76,11 +78,11 @@ struct Puzzle {
     }
 
     var rowIndices: Range<Int> {
-        0..<size
+        0..<height
     }
 
     var columnIndices: Range<Int> {
-        0..<size
+        0..<width
     }
 
     private func segmentRanges(in tileIndices: some Sequence<Int>) -> [Range<Int>] {
@@ -107,11 +109,11 @@ struct Puzzle {
     }
 
     func segmentRanges(forRow rowIndex: Int) -> [Range<Int>] {
-        segmentRanges(in: solution.gridIndices(forRow: rowIndex, width: size))
+        segmentRanges(in: solution.gridIndices(forRow: rowIndex, width: width))
     }
 
     func segmentRanges(forColumn columnIndex: Int) -> [Range<Int>] {
-        segmentRanges(in: solution.gridIndices(forColumn: columnIndex, width: size))
+        segmentRanges(in: solution.gridIndices(forColumn: columnIndex, width: width))
     }
 
     private func segments(in tileIndices: some Sequence<Int>) -> [Segment] {
@@ -161,11 +163,11 @@ struct Puzzle {
     }
 
     func segments(forRow rowIndex: Int) -> [Segment] {
-        segments(in: solution.gridIndices(forRow: rowIndex, width: size))
+        segments(in: solution.gridIndices(forRow: rowIndex, width: width))
     }
 
     func segments(forColumn columnIndex: Int) -> [Segment] {
-        segments(in: solution.gridIndices(forColumn: columnIndex, width: size))
+        segments(in: solution.gridIndices(forColumn: columnIndex, width: width))
     }
 
     func isSolved() -> Bool {
@@ -187,7 +189,7 @@ struct Puzzle {
     }
 
     mutating func fill(_ data: UInt...) {
-        fillTiles(&tiles, with: data, size: size)
+        fillTiles(&tiles, with: data, size: width)
     }
 }
 

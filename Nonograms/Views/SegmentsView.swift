@@ -71,7 +71,8 @@ struct SegmentsBackground: View {
     let segmentSize: CGFloat
 
     @Environment(\.colorScheme) var colorScheme
-    @Environment(\.gameState.puzzle.size) var puzzleSize
+    @Environment(\.gameState.puzzle.width) var puzzleWidth
+    @Environment(\.gameState.puzzle.height) var puzzleHeight
     @Environment(\.gameState.puzzleColor) var puzzleColor
     @Environment(\.puzzleMetrics.tileSize) var tileSize
 
@@ -98,7 +99,7 @@ struct SegmentsBackground: View {
         let overScroll = Swift.min(0.0, axisOffset)
 
         Path { path in
-            for index in stride(from: 0, to: puzzleSize, by: 2) {
+            for index in stride(from: 0, to: axis == .horizontal ? puzzleWidth : puzzleHeight, by: 2) {
                 if axis == .horizontal {
                     path.addRect(CGRectMake(CGFloat(index) * tileSize, overScroll, tileSize, segmentSize - overScroll))
                 } else {
@@ -127,7 +128,7 @@ struct SegmentsView: View {
             blockSize: labelSize,
             offset: offset
         ) {
-            ForEach(0..<puzzle.size, id: \.self) { index in
+            ForEach(axis == .horizontal ? puzzle.columnIndices : puzzle.rowIndices, id: \.self) { index in
                 SegmentLabels(puzzle: puzzle, axis: axis.opposing, index: index, isHighlighted: hint?.axis == axis.opposing && hint?.index == index)
             }
         }

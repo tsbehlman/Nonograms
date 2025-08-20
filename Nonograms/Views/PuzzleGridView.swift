@@ -18,8 +18,8 @@ struct DraggablePuzzleTilesView: View {
     @Environment(\.gameState) var gameState
 
     func location(at point: CGPoint) -> (Int, Int) {
-        let row = clamp(Int(point.y / puzzleMetrics.tileSize), min: 0, max: gameState.puzzle.size - 1)
-        let column = clamp(Int(point.x / puzzleMetrics.tileSize), min: 0, max: gameState.puzzle.size - 1)
+        let row = clamp(Int(point.y / puzzleMetrics.tileSize), min: 0, max: gameState.puzzle.height - 1)
+        let column = clamp(Int(point.x / puzzleMetrics.tileSize), min: 0, max: gameState.puzzle.width - 1)
         return (row, column)
     }
 
@@ -64,11 +64,12 @@ struct PuzzleTilesView: View {
 
     var body: some View {
         let puzzle = gameState.puzzle
+        let size = puzzleMetrics.puzzleSize
         ZStack {
             Grid(horizontalSpacing: 0, verticalSpacing: 0) {
-                ForEach(0..<puzzle.size, id: \.self) { rowIndex in
+                ForEach(puzzle.rowIndices, id: \.self) { rowIndex in
                     GridRow {
-                        ForEach(0..<puzzle.size, id: \.self) { columnIndex in
+                        ForEach(puzzle.columnIndices, id: \.self) { columnIndex in
                             TileView(status: puzzle.tile(row: rowIndex, column: columnIndex))
                         }
                     }
@@ -76,27 +77,25 @@ struct PuzzleTilesView: View {
             }
 
             Path { path in
-                let edge = CGFloat(puzzle.size) * puzzleMetrics.tileSize
-                for x in stride(from: 0, through: edge, by: puzzleMetrics.tileSize) {
+                for x in stride(from: 0, through: size.width, by: puzzleMetrics.tileSize) {
                     path.move(to: CGPointMake(x, 0))
-                    path.addLine(to: CGPointMake(x, edge))
+                    path.addLine(to: CGPointMake(x, size.height))
                 }
-                for y in stride(from: 0, through: edge, by: puzzleMetrics.tileSize) {
+                for y in stride(from: 0, through: size.height, by: puzzleMetrics.tileSize) {
                     path.move(to: CGPointMake(0, y))
-                    path.addLine(to: CGPointMake(edge, y))
+                    path.addLine(to: CGPointMake(size.width, y))
                 }
             }
                 .stroke(Color.primary.opacity(0.25), lineWidth: 1, antialiased: false)
 
             Path { path in
-                let edge = CGFloat(puzzle.size) * puzzleMetrics.tileSize
-                for x in stride(from: 0, through: edge, by: puzzleMetrics.majorTileSize) {
+                for x in stride(from: 0, through: size.width, by: puzzleMetrics.majorTileSize) {
                     path.move(to: CGPointMake(x, 0))
-                    path.addLine(to: CGPointMake(x, edge))
+                    path.addLine(to: CGPointMake(x, size.height))
                 }
-                for y in stride(from: 0, through: edge, by: puzzleMetrics.majorTileSize) {
+                for y in stride(from: 0, through: size.height, by: puzzleMetrics.majorTileSize) {
                     path.move(to: CGPointMake(0, y))
-                    path.addLine(to: CGPointMake(edge, y))
+                    path.addLine(to: CGPointMake(size.width, y))
                 }
             }
                 .stroke(Color.primary.opacity(1), style: StrokeStyle(lineWidth: 1, lineCap: .square), antialiased: false)
@@ -113,22 +112,17 @@ struct PuzzleGridView: View {
 
     var body: some View {
         let puzzle = gameState.puzzle
-        let maxSegments = (puzzle.size + 1) / 2
-        let labelSize = puzzleMetrics.segmentFontSize * CGFloat(maxSegments)
-        let segmentSize = labelSize + puzzleMetrics.segmentPadding * 2
-        let puzzleSize = puzzleMetrics.tileSize * CGFloat(puzzle.size)
-        let totalSize = puzzleSize + segmentSize
 
         ZStack {
             PannableView(scrollEnabled: gameState.mode.tileState == nil, fitsView: $fitsView, offset: $offset) {
                 VStack(spacing: 0) {
-                    SegmentsBackground(axis: .horizontal, offset: offset, segmentSize: segmentSize)
-                        .frame(width: puzzleSize, height: segmentSize)
-                        .padding(.leading, segmentSize)
+                    SegmentsBackground(axis: .horizontal, offset: offset, segmentSize: puzzleMetrics.segmentSize.height)
+                        .frame(width: puzzleMetrics.puzzleSize.width, height: puzzleMetrics.segmentSize.height)
+                        .padding(.leading, puzzleMetrics.segmentSize.width)
                         .allowsHitTesting(false)
                     HStack(alignment: .top, spacing: 0) {
-                        SegmentsBackground(axis: .vertical, offset: offset, segmentSize: segmentSize)
-                            .frame(width: segmentSize, height: puzzleSize)
+                        SegmentsBackground(axis: .vertical, offset: offset, segmentSize: puzzleMetrics.segmentSize.width)
+                            .frame(width: puzzleMetrics.segmentSize.width, height: puzzleMetrics.puzzleSize.height)
                             .allowsHitTesting(false)
                         ZStack(alignment: .topLeading) {
                             DraggablePuzzleTilesView()
@@ -142,26 +136,26 @@ struct PuzzleGridView: View {
             }
             GeometryReader { _ in
                 VStack(spacing: 0) {
-                    SegmentsView(axis: .horizontal, puzzle: puzzle, offset: offset, labelSize: labelSize)
-                        .padding(.leading, segmentSize)
+                    SegmentsView(axis: .horizontal, puzzle: puzzle, offset: offset, labelSize: puzzleMetrics.labelSize.height)
+                        .padding(.leading, puzzleMetrics.segmentSize.width)
                     HStack(alignment: .top, spacing: 0) {
-                        SegmentsView(axis: .vertical, puzzle: puzzle, offset: offset, labelSize: labelSize)
+                        SegmentsView(axis: .vertical, puzzle: puzzle, offset: offset, labelSize: puzzleMetrics.labelSize.width)
                         Spacer()
-                            .frame(width: puzzleSize, height: puzzleSize)
+                            .frame(width: puzzleMetrics.puzzleSize.width, height: puzzleMetrics.puzzleSize.height)
                     }
                     .clipped()
                 }
             }
                 .allowsHitTesting(false)
         }
-            .frame(maxWidth: totalSize, maxHeight: totalSize)
+            .frame(maxWidth: puzzleMetrics.totalSize.width, maxHeight: puzzleMetrics.totalSize.height)
             .padding(6)
             .clipped()
     }
 }
 
 #Preview {
-    @Previewable @State var gameState = GameState().newGame(ofSize: 5, difficulty: .easy)
+    @Previewable @State var gameState = GameState().newGame(width: 5, height: 5, difficulty: .easy)
     @Previewable @State var fitsView: Bool = false
 
     PuzzleGridView(fitsView: $fitsView)

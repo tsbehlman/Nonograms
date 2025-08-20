@@ -37,8 +37,8 @@ extension IndexSet {
     }
 }
 
-func makeSolvablePuzzle(ofSize size: Int, difficulty: PuzzleDifficulty = .easy) -> Puzzle {
-    let numTiles = size * size
+func makeSolvablePuzzle(width: Int, height: Int, difficulty: PuzzleDifficulty = .easy) -> Puzzle {
+    let numTiles = width * height
     var tiles: [TileState] = Array(repeating: .blocked, count: numTiles)
     var indexSet = IndexSet(integersIn: tiles.indices)
 
@@ -50,13 +50,13 @@ func makeSolvablePuzzle(ofSize size: Int, difficulty: PuzzleDifficulty = .easy) 
         tiles[index] = .filled
     }
 
-    var puzzle = Puzzle(size: size, solution: tiles)
+    var puzzle = Puzzle(width: width, height: height, solution: tiles)
 
     while !isSolvable(puzzle) {
         let index = indexSet.randomIndex()
         indexSet.remove(index)
         tiles[index] = .filled
-        puzzle = Puzzle(size: size, solution: tiles)
+        puzzle = Puzzle(width: width, height: height, solution: tiles)
     }
 
     return puzzle
@@ -64,8 +64,8 @@ func makeSolvablePuzzle(ofSize size: Int, difficulty: PuzzleDifficulty = .easy) 
 
 private func isSolvable(_ puzzle: Puzzle) -> Bool {
     var solver = Solver(
-        rows: (0..<puzzle.size).map { puzzle.segmentRanges(forRow: $0).map { $0.length } },
-        columns: (0..<puzzle.size).map { puzzle.segmentRanges(forColumn: $0).map { $0.length } }
+        rows: puzzle.rowIndices.map { puzzle.segmentRanges(forRow: $0).map { $0.length } },
+        columns: puzzle.columnIndices.map { puzzle.segmentRanges(forColumn: $0).map { $0.length } }
     )
     return solver.canSolvePuzzle()
 }
