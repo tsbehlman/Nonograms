@@ -19,12 +19,12 @@ struct TileView: View {
                 Image(systemName: "xmark")
                     .font(.system(size: puzzleMetrics.tileSize * 0.75, weight: .light))
                     .foregroundStyle(status == .error ? Color.red.opacity(0.75) : Color.secondary)
-            } else {
+            } else if status == .filled {
                 Rectangle()
-                    .fill(status == .filled ? puzzleColor : Color(UIColor.systemBackground))
+                    .fill(puzzleColor)
             }
         }
-        .frame(width: puzzleMetrics.tileSize, height: puzzleMetrics.tileSize, alignment: .center)
+            .frame(width: puzzleMetrics.tileSize, height: puzzleMetrics.tileSize, alignment: .center)
     }
 }
 
@@ -38,14 +38,19 @@ struct DraggablePuzzleTilesView: View {
     @Environment(\.puzzleMetrics) var puzzleMetrics
     @Environment(\.gameState) var gameState
 
+    func location(at point: CGPoint) -> (Int, Int) {
+        let row = clamp(Int(point.y / puzzleMetrics.tileSize), min: 0, max: gameState.puzzle.size - 1)
+        let column = clamp(Int(point.x / puzzleMetrics.tileSize), min: 0, max: gameState.puzzle.size - 1)
+        return (row, column)
+    }
+
     var body: some View {
         let puzzle = gameState.puzzle
         let mode = gameState.mode
         let gesture = DragGesture(minimumDistance: 4, coordinateSpace: .local)
             .updating($dragState) { value, state, transaction in
                 guard var tileState = mode.tileState else { return }
-                let row = clamp(Int(value.location.y / puzzleMetrics.tileSize), min: 0, max: puzzle.size - 1)
-                let column = clamp(Int(value.location.x / puzzleMetrics.tileSize), min: 0, max: puzzle.size - 1)
+                let (row, column) = location(at: value.location)
                 if case let .dragging(_, _, currentState) = state {
                     tileState = currentState
                 } else if puzzle.tile(row: row, column: column) == mode.tileState {
@@ -54,6 +59,7 @@ struct DraggablePuzzleTilesView: View {
                 state = .dragging(row: row, column: column, state: tileState)
             }
         PuzzleTilesView()
+            .contentShape(Rectangle())
             .highPriorityGesture(gesture, isEnabled: mode.tileState != nil)
             .onChange(of: dragState) {
                 if case .dragging = dragState {
@@ -65,6 +71,10 @@ struct DraggablePuzzleTilesView: View {
                       puzzle.rowIndices.contains(row),
                       puzzle.columnIndices.contains(column) else { return }
                 gameState.fill(row: row, column: column, state: state)
+            }
+            .onTapGesture { point in
+                let (row, column) = location(at: point)
+                gameState.fill(row: row, column: column, state: nil)
             }
     }
 }
@@ -81,9 +91,6 @@ struct PuzzleTilesView: View {
                     GridRow {
                         ForEach(0..<puzzle.size, id: \.self) { columnIndex in
                             TileView(status: puzzle.tile(row: rowIndex, column: columnIndex))
-                                .onTapGesture {
-                                    gameState.fill(row: rowIndex, column: columnIndex, state: nil)
-                                }
                         }
                     }
                 }
