@@ -15,7 +15,7 @@ struct PuzzleSolveView: View {
         VStack(spacing: 16) {
             Spacer()
             Spacer()
-            PuzzleMetricsProvider(puzzle: gameState.puzzle) {
+            PuzzleMetricsProvider {
                 PuzzleGridView(fitsView: $fitsView)
             }
             ControlView(gameState: $gameState, fitsView: fitsView)
