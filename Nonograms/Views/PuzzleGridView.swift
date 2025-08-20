@@ -7,27 +7,6 @@
 
 import SwiftUI
 
-struct TileView: View {
-    let status: TileState
-
-    @Environment(\.gameState.puzzleColor) var puzzleColor
-    @Environment(\.puzzleMetrics) var puzzleMetrics
-
-    var body: some View {
-        Group {
-            if status.isBlocked {
-                Image(systemName: "xmark")
-                    .font(.system(size: puzzleMetrics.tileSize * 0.75, weight: .light))
-                    .foregroundStyle(status == .error ? Color.red.opacity(0.75) : Color.secondary)
-            } else if status == .filled {
-                Rectangle()
-                    .fill(puzzleColor)
-            }
-        }
-            .frame(width: puzzleMetrics.tileSize, height: puzzleMetrics.tileSize, alignment: .center)
-    }
-}
-
 struct DraggablePuzzleTilesView: View {
     enum DragState: Equatable {
         case inactive
