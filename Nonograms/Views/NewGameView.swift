@@ -23,9 +23,10 @@ struct NewGameView: View {
     var body: some View {
         NavigationView {
             List {
-                Section("Puzzle size", content: {
+                Section {
                     PuzzleSizeControl()
-                })
+                        .listRowInsets(EdgeInsets(top: 10, leading: 10, bottom: 0, trailing: 10))
+                }
                 Section(content: {
                     Toggle(isOn: $validate, label: {
                         Text("Show errors")
@@ -42,6 +43,8 @@ struct NewGameView: View {
                 })
             }
                 .listStyle(.insetGrouped)
+                .listSectionSpacing(20)
+                .contentMargins(.top, 10)
                 .navigationTitle("New Game")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
@@ -75,10 +78,10 @@ struct PuzzleSizeControl: View {
     @AppStorage("square") var square = NonogramsDefaults.square
 
     var body: some View {
-        VStack {
+        VStack(spacing: 2) {
             Picker(selection: $square, content: {
                 Text("Square").tag(true)
-                Text("Rectangular").tag(false)
+                Text("Width \u{00D7} Height").tag(false)
             }, label: {
                 Text("Puzzle shape")
             })
@@ -107,7 +110,8 @@ struct PuzzleSizeControl: View {
                             Text("Width")
                         })
                             .pickerStyle(.wheel)
-                        Image(systemName: "xmark")
+                        Text("\u{00D7}")
+                            .font(.title3)
                         Picker(selection: $puzzleHeight, content: {
                             ForEach(validSizes, id: \.self) { size in
                                 Text("\(size)").tag(size)
