@@ -27,10 +27,8 @@ struct ControlView: View {
     @StateObject var keyboardObserver = KeyboardObserver()
     @Binding var gameState: GameState
     let fitsView: Bool
-
-    @State var showSettings = false
-    @AppStorage("difficulty") var difficulty = NonogramsDefaults.difficulty
-    @AppStorage("validate") var validate = NonogramsDefaults.validate
+    @Binding var showSettings: Bool
+    @Binding var showNewGame: Bool
 
     var body: some View {
         HStack(spacing: 12) {
@@ -39,28 +37,13 @@ struct ControlView: View {
                     .onTapGesture {
                         showSettings = true
                     }
-                Menu {
-                    Button {
-                        generateNewPuzzle(ofSize: 5)
-                    } label: {
-                        Text("5x5")
+                ControlButton(icon: "arrow.2.circlepath")
+                    .when(gameState.isSolved) {
+                        $0.background(RippleView())
                     }
-                    Button {
-                        generateNewPuzzle(ofSize: 8)
-                    } label: {
-                        Text("8x8")
+                    .onTapGesture {
+                        showNewGame = true
                     }
-                    Button {
-                        generateNewPuzzle(ofSize: 10)
-                    } label: {
-                        Text("10x10")
-                    }
-                } label: {
-                    ControlButton(icon: "arrow.2.circlepath")
-                        .when(gameState.isSolved) {
-                            $0.background(RippleView())
-                        }
-                }
                 ControlButton(icon: "questionmark")
                     .when(gameState.isEmpty) {
                         $0.background(RippleView())
@@ -109,22 +92,14 @@ struct ControlView: View {
                 gameState.mode = .fill(.blocked)
             }
         }
-        .sheet(isPresented: $showSettings) {
-            SettingsView()
-        }
-        .onAppear {
-            generateNewPuzzle()
-        }
-    }
-
-    func generateNewPuzzle(ofSize size: Int = 5) {
-        gameState = gameState.newGame(width: size, height: size, difficulty: difficulty, validate: validate)
     }
 }
 
 #Preview {
     @Previewable @State var gameState = GameState()
+    @Previewable @State var showSettings = false
+    @Previewable @State var showNewGame = false
 
-    ControlView(gameState: $gameState, fitsView: false)
+    ControlView(gameState: $gameState, fitsView: false, showSettings: $showSettings, showNewGame: $showNewGame)
         .padding()
 }

@@ -16,17 +16,6 @@ struct SettingsView: View {
     var body: some View {
         NavigationView {
             List {
-                Section(content: {
-                    Picker(selection: $difficulty, content: {
-                        Text("Easy").tag(PuzzleDifficulty.easy)
-                        Text("Medium").tag(PuzzleDifficulty.medium)
-                        Text("Hard").tag(PuzzleDifficulty.hard)
-                    }, label: {
-                        Text("Difficulty")
-                    })
-                }, footer: {
-                    Text("Applies to future puzzles. Larger puzzles are more difficult by nature.")
-                })
                 Section("Grid size", content: {
                     Slider(value: $tileSize, in: 38...54, step: 2, label: {
                         Text("Tile size")
@@ -35,9 +24,6 @@ struct SettingsView: View {
                     }, maximumValueLabel: {
                         Image(systemName: "squareshape.split.2x2").imageScale(.large)
                     })
-                })
-                Toggle(isOn: $validate, label: {
-                    Text("Show errors")
                 })
             }
             .listStyle(.insetGrouped)

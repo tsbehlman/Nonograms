@@ -20,7 +20,7 @@ struct PuzzleMetrics {
 
     init(width: Int, height: Int, tileSize: CGFloat) {
         let size = max(width, height)
-        let majorTileCount = [5, 4, 3, 2].first { size.isMultiple(of: $0) } ?? size
+        let majorTileCount = [7, 5, 4, 3, 2].first { size.isMultiple(of: $0) } ?? size
         self.tileSize = tileSize
         majorTileSize = tileSize * CGFloat(majorTileCount)
         segmentFontSize = tileSize / 2
