@@ -65,6 +65,7 @@ struct ControlButton: View {
                 .fontWeight(.semibold)
                 .foregroundStyle(iconColor)
                 .imageScale(scale)
+                .dynamicTypeSize(.large)
         }
             .frame(width: size, height: size, alignment: .center)
     }

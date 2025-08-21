@@ -112,6 +112,7 @@ struct PuzzleSizeControl: View {
                             .pickerStyle(.wheel)
                         Text("\u{00D7}")
                             .font(.title3)
+                            .dynamicTypeSize(.large)
                         Picker(selection: $puzzleHeight, content: {
                             ForEach(validSizes, id: \.self) { size in
                                 Text("\(size)").tag(size)
