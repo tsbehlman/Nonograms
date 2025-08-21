@@ -16,9 +16,9 @@ struct SettingsView: View {
     var body: some View {
         NavigationView {
             List {
-                Section("Grid size", content: {
+                Section("puzzleTileSizeSetting", content: {
                     Slider(value: $tileSize, in: 38...54, step: 2, label: {
-                        Text("Tile size")
+                        Text("puzzleTileSizeSetting")
                     }, minimumValueLabel: {
                         Image(systemName: "squareshape.split.3x3").imageScale(.medium)
                     }, maximumValueLabel: {
@@ -27,13 +27,13 @@ struct SettingsView: View {
                 })
             }
             .listStyle(.insetGrouped)
-            .navigationTitle("Settings")
+            .navigationTitle("settingsDialogTitle")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 Button(action: {
                     dismiss()
                 }, label: {
-                    Text("Close")
+                    Text("closeDialog")
                 })
             }
         }

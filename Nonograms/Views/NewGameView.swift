@@ -29,30 +29,30 @@ struct NewGameView: View {
                 }
                 Section(content: {
                     Toggle(isOn: $validate, label: {
-                        Text("Show errors")
+                        Text("validateSetting")
                     })
                     Picker(selection: $difficulty, content: {
-                        Text("Easy").tag(PuzzleDifficulty.easy)
-                        Text("Medium").tag(PuzzleDifficulty.medium)
-                        Text("Hard").tag(PuzzleDifficulty.hard)
+                        Text("difficultyOptionEasy").tag(PuzzleDifficulty.easy)
+                        Text("difficultyOptionMedium").tag(PuzzleDifficulty.medium)
+                        Text("difficultyOptionHard").tag(PuzzleDifficulty.hard)
                     }, label: {
-                        Text("Difficulty")
+                        Text("difficultySetting")
                     })
                 }, footer: {
-                    Text("Larger puzzles are more difficult by nature.")
+                    Text("difficultySettingInfo")
                 })
             }
                 .listStyle(.insetGrouped)
                 .listSectionSpacing(20)
                 .contentMargins(.top, 10)
-                .navigationTitle("New Game")
+                .navigationTitle("newGameDialogTitle")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
                         Button(action: {
                             dismiss()
                         }, label: {
-                            Text("Close")
+                            Text("closeDialog")
                         })
                     }
                     ToolbarItem(placement: .topBarTrailing) {
@@ -60,7 +60,7 @@ struct NewGameView: View {
                             generateNewPuzzle()
                             dismiss()
                         }, label: {
-                            Text("Play")
+                            Text("startGame")
                         })
                     }
                 }
@@ -80,10 +80,10 @@ struct PuzzleSizeControl: View {
     var body: some View {
         VStack(spacing: 2) {
             Picker(selection: $square, content: {
-                Text("Square").tag(true)
-                Text("Width \u{00D7} Height").tag(false)
+                Text("puzzleShapeSquare").tag(true)
+                Text("puzzleShapeRectangular").tag(false)
             }, label: {
-                Text("Puzzle shape")
+                Text("puzzleShapeSetting")
             })
                 .pickerStyle(.segmented)
                 .labelsHidden()
@@ -91,10 +91,10 @@ struct PuzzleSizeControl: View {
                 if square {
                     Picker(selection: $puzzleWidth, content: {
                         ForEach(validSizes, id: \.self) { size in
-                            Text("\(size) \u{00D7} \(size)").tag(size)
+                            Text(verbatim: "\(size) \u{00D7} \(size)").tag(size)
                         }
                     }, label: {
-                        Text("Size")
+                        Text("puzzleShapeSize")
                     })
                         .pickerStyle(.wheel)
                         .onChange(of: puzzleWidth) {
@@ -104,21 +104,21 @@ struct PuzzleSizeControl: View {
                     HStack {
                         Picker(selection: $puzzleWidth, content: {
                             ForEach(validSizes, id: \.self) { size in
-                                Text("\(size)").tag(size)
+                                Text(verbatim: "\(size)").tag(size)
                             }
                         }, label: {
-                            Text("Width")
+                            Text("puzzleShapeWidth")
                         })
                             .pickerStyle(.wheel)
-                        Text("\u{00D7}")
+                        Text(verbatim: "\u{00D7}")
                             .font(.title3)
                             .dynamicTypeSize(.large)
                         Picker(selection: $puzzleHeight, content: {
                             ForEach(validSizes, id: \.self) { size in
-                                Text("\(size)").tag(size)
+                                Text(verbatim: "\(size)").tag(size)
                             }
                         }, label: {
-                            Text("Height")
+                            Text("puzzleShapeHeight")
                         })
                             .pickerStyle(.wheel)
                     }

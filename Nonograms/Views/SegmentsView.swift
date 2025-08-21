@@ -26,7 +26,7 @@ struct SegmentLabel: View {
     }
 
     var body: some View {
-        Text("\(segment.range.length)")
+        Text(verbatim: "\(segment.range.length)")
             .font(segmentFont)
             .foregroundStyle(color)
             .stroke(Color.primary.forScheme(colorScheme.inverted), width: 0.625)
