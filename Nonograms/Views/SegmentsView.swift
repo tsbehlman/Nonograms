@@ -65,19 +65,36 @@ struct SegmentLabels: View {
     }
 }
 
+private struct StripedShape: Shape {
+    let axis: Axis
+    let size: CGFloat
+
+    func path(in rect: CGRect) -> Path {
+        Path { path in
+            for position in stride(from: 0, to: axis == .horizontal ? rect.width : rect.height, by: size * 2) {
+                if axis == .horizontal {
+                    path.addRect(CGRectMake(position, rect.minY, size, rect.height))
+                } else {
+                    path.addRect(CGRectMake(rect.minX, position, rect.width, size))
+                }
+            }
+        }
+    }
+}
+
 struct SegmentsBackground: View {
     let axis: Axis
     let offset: CGPoint
     let segmentSize: CGFloat
 
     @Environment(\.colorScheme) var colorScheme
-    @Environment(\.gameState.puzzle.width) var puzzleWidth
-    @Environment(\.gameState.puzzle.height) var puzzleHeight
     @Environment(\.gameState.puzzleColor) var puzzleColor
     @Environment(\.puzzleMetrics.tileSize) var tileSize
+    @Environment(\.puzzleMetrics.puzzleSize) var puzzleSize
 
     func makeGradient(axisOffset: CGFloat) -> LinearGradient {
         let overscrollMultiplier = axisOffset / segmentSize
+        let endPoint = 1 + overscrollMultiplier / 2
         let opacity = colorScheme == .dark ? 1.0 : 0.5
         return LinearGradient(
             stops: [
@@ -85,29 +102,24 @@ struct SegmentsBackground: View {
                 Gradient.Stop(color: puzzleColor.opacity(0.25 * opacity), location: 0.375),
                 Gradient.Stop(color: puzzleColor.opacity(0.50 * opacity), location: 1.000),
             ],
-            startPoint: axis == .horizontal
-                ? UnitPoint(x: 0, y: overscrollMultiplier)
-                : UnitPoint(x: overscrollMultiplier, y: 0),
+            startPoint: UnitPoint(x: 0, y: 0),
             endPoint: axis == .horizontal
-                ? UnitPoint(x: 0, y: 1 + overscrollMultiplier)
-                : UnitPoint(x: 1 + overscrollMultiplier, y: 0)
+                ? UnitPoint(x: 0, y: endPoint)
+                : UnitPoint(x: endPoint, y: 0)
         )
     }
 
     var body: some View {
         let axisOffset = axis == .horizontal ? offset.y : offset.x
-        let overScroll = Swift.min(0.0, axisOffset)
+        let length = max(0.0, segmentSize - axisOffset)
 
-        Path { path in
-            for index in stride(from: 0, to: axis == .horizontal ? puzzleWidth : puzzleHeight, by: 2) {
-                if axis == .horizontal {
-                    path.addRect(CGRectMake(CGFloat(index) * tileSize, overScroll, tileSize, segmentSize - overScroll))
-                } else {
-                    path.addRect(CGRectMake(overScroll, CGFloat(index) * tileSize, segmentSize - overScroll, tileSize))
-                }
-            }
-        }
+        StripedShape(axis: axis, size: tileSize)
             .fill(makeGradient(axisOffset: axisOffset))
+            .frame(
+                width: axis == .horizontal ? puzzleSize.width : length,
+                height: axis == .horizontal ? length : puzzleSize.height,
+            )
+            .drawingGroup()
     }
 }
 

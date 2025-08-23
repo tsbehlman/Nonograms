@@ -103,6 +103,8 @@ struct PuzzleTilesView: View {
     }
 }
 
+private let puzzlePadding: CGFloat = 6
+
 struct PuzzleGridView: View {
     @Binding var fitsView: Bool
     @State var offset: CGPoint = .zero
@@ -117,12 +119,12 @@ struct PuzzleGridView: View {
             PannableView(scrollEnabled: gameState.mode.tileState == nil, fitsView: $fitsView, offset: $offset) {
                 VStack(spacing: 0) {
                     SegmentsBackground(axis: .horizontal, offset: offset, segmentSize: puzzleMetrics.segmentSize.height)
-                        .frame(width: puzzleMetrics.puzzleSize.width, height: puzzleMetrics.segmentSize.height)
+                        .frame(width: puzzleMetrics.puzzleSize.width, height: puzzleMetrics.segmentSize.height, alignment: .bottom)
                         .padding(.leading, puzzleMetrics.segmentSize.width)
                         .allowsHitTesting(false)
-                    HStack(alignment: .top, spacing: 0) {
+                    HStack(spacing: 0) {
                         SegmentsBackground(axis: .vertical, offset: offset, segmentSize: puzzleMetrics.segmentSize.width)
-                            .frame(width: puzzleMetrics.segmentSize.width, height: puzzleMetrics.puzzleSize.height)
+                            .frame(width: puzzleMetrics.segmentSize.width, height: puzzleMetrics.puzzleSize.height, alignment: .trailing)
                             .allowsHitTesting(false)
                         ZStack(alignment: .topLeading) {
                             DraggablePuzzleTilesView()
@@ -133,6 +135,7 @@ struct PuzzleGridView: View {
                         }
                     }
                 }
+                    .padding(puzzlePadding)
             }
             GeometryReader { _ in
                 VStack(spacing: 0) {
@@ -143,13 +146,13 @@ struct PuzzleGridView: View {
                         Spacer()
                             .frame(width: puzzleMetrics.puzzleSize.width, height: puzzleMetrics.puzzleSize.height)
                     }
-                    .clipped()
+                        .clipped()
                 }
             }
+                .padding(puzzlePadding)
                 .allowsHitTesting(false)
         }
-            .frame(maxWidth: puzzleMetrics.totalSize.width, maxHeight: puzzleMetrics.totalSize.height)
-            .padding(6)
+            .frame(maxWidth: puzzleMetrics.totalSize.width + puzzlePadding * 2, maxHeight: puzzleMetrics.totalSize.height + puzzlePadding * 2)
             .clipped()
     }
 }
