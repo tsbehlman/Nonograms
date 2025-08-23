@@ -121,7 +121,7 @@ class GameState {
             if transactionGroup != nil {
                 transactionGroup!.transactions.append(transaction)
             } else {
-                history.append(transaction)
+                history.insert(transaction, at: historyIndex)
                 historyIndex += 1
                 history.removeSubrange(historyIndex...)
             }
@@ -138,8 +138,9 @@ class GameState {
     func endTransaction() {
         guard let group = transactionGroup else { return }
         if !group.transactions.isEmpty {
-            history.append(group)
+            history.insert(group, at: historyIndex)
             historyIndex += 1
+            history.removeSubrange(historyIndex...)
         }
         transactionGroup = nil
     }
