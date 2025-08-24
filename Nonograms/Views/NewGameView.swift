@@ -25,7 +25,7 @@ struct NewGameView: View {
             List {
                 Section {
                     PuzzleSizeControl()
-                        .listRowInsets(EdgeInsets(top: 10, leading: 10, bottom: 0, trailing: 10))
+                        .listRowInsets(EdgeInsets(.zero))
                 }
                 Section(content: {
                     Toggle(isOn: $validate, label: {
@@ -89,6 +89,7 @@ struct PuzzleSizeControl: View {
             })
                 .pickerStyle(.segmented)
                 .labelsHidden()
+                .padding([.horizontal, .top], 9)
             Group {
                 if square {
                     Picker(selection: $puzzleWidth, content: {
@@ -126,7 +127,7 @@ struct PuzzleSizeControl: View {
                     }
                 }
             }
-                .frame(height: 128)
+                .frame(height: 150)
         }
     }
 }
