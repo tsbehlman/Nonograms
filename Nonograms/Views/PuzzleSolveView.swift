@@ -35,8 +35,7 @@ struct PuzzleSolveView: View {
                     .presentationDetents([.medium])
             }
             .sheet(isPresented: $showNewGame) {
-                NewGameView(gameState: $gameState)
-                    .presentationDetents([.medium])
+                NewGameSheetView(gameState: $gameState)
             }
             .onAppear {
                 gameState = gameState.newGame(width: puzzleWidth, height: puzzleHeight, difficulty: difficulty, validate: validate)

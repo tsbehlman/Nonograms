@@ -42,6 +42,8 @@ struct NewGameView: View {
                     Text("difficultySettingInfo")
                 })
             }
+                .scrollDisabled(true)
+
                 .listStyle(.insetGrouped)
                 .listSectionSpacing(20)
                 .contentMargins(.top, 10)
@@ -126,6 +128,21 @@ struct PuzzleSizeControl: View {
             }
                 .frame(height: 128)
         }
+    }
+}
+
+struct NewGameSheetView: View {
+    @Binding var gameState: GameState
+    @State var height: CGFloat = 0
+
+    var body: some View {
+        NewGameView(gameState: $gameState)
+            .onScrollGeometryChange(for: CGFloat.self, of: { geometry in
+                geometry.contentSize.height + geometry.contentInsets.top
+            }) {
+                height = $1
+            }
+            .presentationDetents([.height(height), .large])
     }
 }
 
