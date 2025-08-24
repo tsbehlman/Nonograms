@@ -129,6 +129,21 @@ struct PuzzleSizeControl: View {
     }
 }
 
+struct NewGameSheetView: View {
+    @Binding var gameState: GameState
+    @State var height: CGFloat = 0
+
+    var body: some View {
+        NewGameView(gameState: $gameState)
+            .onScrollGeometryChange(for: CGFloat.self, of: { geometry in
+                geometry.contentSize.height + geometry.contentInsets.top + geometry.contentInsets.bottom
+            }) {
+                height = $1
+            }
+            .presentationDetents([.height(height), .large])
+    }
+}
+
 #Preview {
     @Previewable @State var gameState = GameState()
 
