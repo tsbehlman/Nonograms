@@ -93,8 +93,8 @@ struct SegmentsBackground: View {
     @Environment(\.puzzleMetrics.puzzleSize) var puzzleSize
 
     func makeGradient(axisOffset: CGFloat) -> LinearGradient {
-        let overscrollMultiplier = axisOffset / segmentSize
-        let endPoint = 1 + overscrollMultiplier / 2
+        let overscrollMultiplier = axisOffset / max(1, segmentSize - axisOffset)
+        let endPoint: CGFloat = 1 + overscrollMultiplier
         let opacity = colorScheme == .dark ? 1.0 : 0.5
         return LinearGradient(
             stops: [
