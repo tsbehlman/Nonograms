@@ -18,8 +18,8 @@ struct PannableView<Content: View>: View {
             content
         }
             .scrollDisabled(!scrollEnabled)
-            .onScrollGeometryChange(for: Bool.self, of: {
-                $0.contentSize.width <= $0.containerSize.width && $0.contentSize.height <= $0.containerSize.height
+            .onScrollGeometryChange(for: Bool.self, of: { geometry in
+                Int(geometry.contentSize.width) <= Int(geometry.containerSize.width) && Int(geometry.contentSize.height) <= Int(geometry.containerSize.height)
             }) {
                 fitsView = $1
             }
