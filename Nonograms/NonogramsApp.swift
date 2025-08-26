@@ -10,7 +10,26 @@ import SwiftUI
 struct NonogramsApp: App {
     var body: some Scene {
         WindowGroup {
-            PuzzleSolveView()
+            NonogramsAppView()
+        }
+    }
+}
+
+struct NonogramsAppView: View {
+    @SceneStorage("PuzzleSolveView.persistedGameState") var gameState: GameState?
+
+    @AppStorage("difficulty") var difficulty = NonogramsDefaults.difficulty
+    @AppStorage("validate") var validate = NonogramsDefaults.validate
+    @AppStorage("puzzleWidth") var puzzleWidth = NonogramsDefaults.puzzleWidth
+    @AppStorage("puzzleHeight") var puzzleHeight = NonogramsDefaults.puzzleHeight
+
+    var body: some View {
+        if let unwrapped = Binding($gameState) {
+            PuzzleSolveView(gameState: unwrapped)
+        } else {
+            Color.clear.task {
+                self.gameState = GameState().newGame(width: puzzleWidth, height: puzzleHeight, difficulty: difficulty, validate: validate)
+            }
         }
     }
 }

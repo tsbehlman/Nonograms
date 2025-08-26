@@ -8,15 +8,10 @@
 import SwiftUI
 
 struct PuzzleSolveView: View {
-    @State var gameState = GameState()
+    @Binding var gameState: GameState
     @State var fitsView: Bool = false
     @State var showSettings = false
     @State var showNewGame = false
-
-    @AppStorage("difficulty") var difficulty = NonogramsDefaults.difficulty
-    @AppStorage("validate") var validate = NonogramsDefaults.validate
-    @AppStorage("puzzleWidth") var puzzleWidth = NonogramsDefaults.puzzleWidth
-    @AppStorage("puzzleHeight") var puzzleHeight = NonogramsDefaults.puzzleHeight
 
     var body: some View {
         VStack(spacing: 16) {
@@ -37,12 +32,10 @@ struct PuzzleSolveView: View {
             .sheet(isPresented: $showNewGame) {
                 NewGameSheetView(gameState: $gameState)
             }
-            .onAppear {
-                gameState = gameState.newGame(width: puzzleWidth, height: puzzleHeight, difficulty: difficulty, validate: validate)
-            }
     }
 }
 
 #Preview {
-    PuzzleSolveView()
+    @Previewable @State var gameState = GameState().newGame(width: 5, height: 5, difficulty: .medium, validate: false)
+    PuzzleSolveView(gameState: $gameState)
 }

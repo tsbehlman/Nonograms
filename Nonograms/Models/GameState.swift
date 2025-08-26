@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-enum InteractionMode: Equatable {
+enum InteractionMode: Codable, Equatable {
     case move
     case fill(TileState)
 
@@ -22,7 +22,7 @@ enum InteractionMode: Equatable {
 }
 
 @Observable
-class GameState {
+final class GameState: RepresentableWithCoding {
     var puzzle: Puzzle
     var solver: Solver
     var mode: InteractionMode = .fill(.filled)
@@ -38,6 +38,33 @@ class GameState {
         isSolved
             ? .green.mix(with: .primary.forScheme(.light), by: 0.125)
             : .accentColor
+    }
+
+    private enum CodingKeys: CodingKey {
+        case puzzle, mode, validate, isEmpty, isSolved
+    }
+
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let puzzle = try container.decode(Puzzle.self, forKey: .puzzle)
+        self.puzzle = puzzle
+        solver = Solver(
+            rows: puzzle.rowIndices.map { puzzle.segmentRanges(forRow: $0).map { $0.length } },
+            columns: puzzle.columnIndices.map { puzzle.segmentRanges(forColumn: $0).map { $0.length } }
+        )
+        mode = try container.decode(InteractionMode.self, forKey: .mode)
+        validate = try container.decode(Bool.self, forKey: .validate)
+        isEmpty = try container.decode(Bool.self, forKey: .isEmpty)
+        isSolved = try container.decode(Bool.self, forKey: .isSolved)
+    }
+
+    func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(puzzle, forKey: .puzzle)
+        try container.encode(mode, forKey: .mode)
+        try container.encode(validate, forKey: .validate)
+        try container.encode(isEmpty, forKey: .isEmpty)
+        try container.encode(isSolved, forKey: .isSolved)
     }
 
     init(puzzle: Puzzle = Puzzle(width: 1, height: 1, solution: [.filled]), solver: Solver = Solver(rows: [[1]], columns: [[1]]), validate: Bool = false) {

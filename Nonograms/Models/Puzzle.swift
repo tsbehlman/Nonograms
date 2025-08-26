@@ -5,7 +5,7 @@
 //  Created by Trevor Behlman on 6/1/25.
 //
 
-enum TileState {
+enum TileState: Codable {
     case blank
     case filled
     case blocked
@@ -43,7 +43,7 @@ struct Segment: Identifiable, Equatable {
     }
 }
 
-struct Puzzle {
+struct Puzzle: Codable {
     let width: Int
     let height: Int
     var tiles: [TileState]
