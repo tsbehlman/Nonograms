@@ -23,7 +23,7 @@ struct HintOutlineView: View {
 
     var destination: CGSize {
         let travelDistance = CGFloat(maxRange.lowerBound - minRange.lowerBound) * puzzleMetrics.tileSize
-        if (hint.isRow) {
+        if (hint.axis == .horizontal) {
             return CGSize(width: travelDistance, height: 0)
         } else {
             return CGSize(width: 0, height: travelDistance)
@@ -34,7 +34,7 @@ struct HintOutlineView: View {
         let crossAxisPosition = CGFloat(hint.index) * puzzleMetrics.tileSize
         let position = CGFloat(minRange.lowerBound) * puzzleMetrics.tileSize
         let size = CGFloat(minRange.length) * puzzleMetrics.tileSize
-        let rect = hint.isRow
+        let rect = hint.axis == .horizontal
             ? CGRect(x: position, y: crossAxisPosition, width: size, height: puzzleMetrics.tileSize)
             : CGRect(x: crossAxisPosition, y: position, width: puzzleMetrics.tileSize, height: size)
         return rect.insetBy(dx: hintInset, dy: hintInset)
@@ -68,7 +68,7 @@ struct HintTileView: View {
     var offset: CGSize {
         let position = CGFloat(stateIndex) * puzzleMetrics.tileSize
         let crossAxisPosition = CGFloat(hint.index) * puzzleMetrics.tileSize
-        if (hint.isRow) {
+        if (hint.axis == .horizontal) {
             return CGSize(width: position, height: crossAxisPosition)
         } else {
             return CGSize(width: crossAxisPosition, height: position)

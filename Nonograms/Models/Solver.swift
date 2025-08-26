@@ -8,16 +8,12 @@
 import SwiftUI
 
 struct SolverAttempt {
-    var isRow: Bool
+    var axis: Axis
     var index: Int
     var minRanges: [Range<Int>]
     var maxRanges: [Range<Int>]
     var oldStates: [TileState]
     var newStates: [TileState]
-
-    var axis: Axis {
-        isRow ? .horizontal : .vertical
-    }
 }
 
 struct Solver {
@@ -198,15 +194,15 @@ struct Solver {
     }
 
     @discardableResult mutating func step() -> SolverAttempt? {
-        var attempt = SolverAttempt(isRow: true, index: 0, minRanges: [], maxRanges: [], oldStates: [], newStates: [])
+        var attempt = SolverAttempt(axis: .horizontal, index: 0, minRanges: [], maxRanges: [], oldStates: [], newStates: [])
         for tileIndex in (currentIndex..<tiles.count).concat(0..<currentIndex) where tiles[tileIndex] == .blank {
-            attempt.isRow = true
+            attempt.axis = .horizontal
             attempt.index = tileIndex / columns.count
             if check(attempt: &attempt, forLengths: rows[attempt.index], at: indices(forRow: attempt.index)) {
                 return attempt
             }
 
-            attempt.isRow = false
+            attempt.axis = .vertical
             attempt.index = tileIndex % columns.count
             if check(attempt: &attempt, forLengths: columns[attempt.index], at: indices(forColumn: attempt.index)) {
                 return attempt
@@ -217,7 +213,7 @@ struct Solver {
 
     mutating func canSolvePuzzle() -> Bool {
         while let nextAttempt = step() {
-            if nextAttempt.isRow {
+            if nextAttempt.axis == .horizontal {
                 applyAttempt(nextAttempt, at: indices(forRow: nextAttempt.index))
             } else {
                 applyAttempt(nextAttempt, at: indices(forColumn: nextAttempt.index))
