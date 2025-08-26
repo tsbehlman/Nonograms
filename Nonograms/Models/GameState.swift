@@ -41,30 +41,36 @@ final class GameState: RepresentableWithCoding {
     }
 
     private enum CodingKeys: CodingKey {
-        case puzzle, mode, validate, isEmpty, isSolved
+        case puzzle, solver, mode, validate, isEmpty, isSolved, hint, history, historyIndex
     }
 
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let puzzle = try container.decode(Puzzle.self, forKey: .puzzle)
         self.puzzle = puzzle
-        solver = Solver(
-            rows: puzzle.rowIndices.map { puzzle.segmentRanges(forRow: $0).map { $0.length } },
-            columns: puzzle.columnIndices.map { puzzle.segmentRanges(forColumn: $0).map { $0.length } }
-        )
+        solver = try container.decode(Solver.self, forKey: .solver)
         mode = try container.decode(InteractionMode.self, forKey: .mode)
         validate = try container.decode(Bool.self, forKey: .validate)
         isEmpty = try container.decode(Bool.self, forKey: .isEmpty)
         isSolved = try container.decode(Bool.self, forKey: .isSolved)
+        hint = try container.decodeIfPresent(SolverAttempt.self, forKey: .hint)
+        let codableHistory = try container.decode([CodableTransaction].self, forKey: .history)
+        history = codableHistory.map { $0.transaction }
+        historyIndex = try container.decode(Int.self, forKey: .historyIndex)
     }
 
     func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(puzzle, forKey: .puzzle)
+        try container.encode(solver, forKey: .solver)
         try container.encode(mode, forKey: .mode)
         try container.encode(validate, forKey: .validate)
         try container.encode(isEmpty, forKey: .isEmpty)
         try container.encode(isSolved, forKey: .isSolved)
+        try container.encodeIfPresent(hint, forKey: .hint)
+        let codableHistory = history.map(\.codable)
+        try container.encode(codableHistory, forKey: .history)
+        try container.encode(historyIndex, forKey: .historyIndex)
     }
 
     init(puzzle: Puzzle = Puzzle(width: 1, height: 1, solution: [.filled]), solver: Solver = Solver(rows: [[1]], columns: [[1]]), validate: Bool = false) {
@@ -201,9 +207,25 @@ final class GameState: RepresentableWithCoding {
     }
 }
 
-protocol PuzzleTransaction {
+protocol PuzzleTransaction: Codable {
     func applyUndo(_ gameState: GameState)
     func applyRedo(_ gameState: GameState)
+
+    var codable: CodableTransaction { get }
+}
+
+enum CodableTransaction: Codable {
+    case single(SinglePuzzleTransaction)
+    case group(PuzzleTransactionGroup)
+
+    var transaction: PuzzleTransaction {
+        switch self {
+        case .single(let transaction):
+            transaction
+        case .group(let transaction):
+            transaction
+        }
+    }
 }
 
 struct SinglePuzzleTransaction: PuzzleTransaction {
@@ -222,6 +244,8 @@ struct SinglePuzzleTransaction: PuzzleTransaction {
             gameState.solver.set(tileIndex, to: newState)
         }
     }
+
+    var codable: CodableTransaction { .single(self) }
 }
 
 struct PuzzleTransactionGroup: PuzzleTransaction {
@@ -238,4 +262,6 @@ struct PuzzleTransactionGroup: PuzzleTransaction {
             transaction.applyRedo(gameState)
         }
     }
+
+    var codable: CodableTransaction { .group(self) }
 }

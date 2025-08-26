@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct SolverAttempt {
+struct SolverAttempt: Codable {
     var axis: Axis
     var index: Int
     var minRanges: [Range<Int>]
@@ -16,7 +16,7 @@ struct SolverAttempt {
     var newStates: [TileState]
 }
 
-struct Solver {
+struct Solver: Codable {
     let rows: [[Int]]
     let columns: [[Int]]
     var tiles: [TileState]

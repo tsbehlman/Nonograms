@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-extension Axis {
+extension Axis: Codable {
     var opposing: Axis {
         switch self {
         case .vertical:
