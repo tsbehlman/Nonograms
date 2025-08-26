@@ -98,7 +98,7 @@ struct PuzzleSizeControl: View {
                         Text("puzzleShapeSize")
                     })
                         .pickerStyle(.wheel)
-                        .onChange(of: puzzleWidth) {
+                        .onChange(of: puzzleWidth, initial: true) {
                             puzzleHeight = puzzleWidth
                         }
                 } else {
