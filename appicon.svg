@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+    <style>
+        text {
+            font: 170px ui-monospace, monospace;
+            font-weight: 700;
+        }
+        text.shadow.outer {
+            font-size: 200px;
+            font-weight: 800;
+            fill: #fff;
+        }
+        text.shadow.inner {
+            font-size: 130px;
+            font-weight: 900;
+            fill: #fff;
+        }
+    </style>
+    <defs>
+        <mask id="mask">
+            <path fill="#fff" d="M121 0L391 0C433 0 448 4 464 13C479 21 491 33 499 48C508 64 512 79 512 121L512 391C512 433 508 448 499 464C491 479 479 491 464 499C448 508 433 512 391 512L121 512C79 512 64 508 48 499C33 491 21 479 13 464C4 448 0 433 0 391L0 121C0 79 4 64 13 48C21 33 33 21 48 13C64 4 79 0 121 0Z"/>
+        </mask>
+        <linearGradient id="gradient" x1="0%" x2="100%" y1="0%" y2="0%">
+            <stop offset="0%" stop-opacity="0.00" stop-color="#07f" />
+            <stop offset="100%" stop-opacity="0.50" stop-color="#07f" />
+        </linearGradient>
+    </defs>
+    <g mask="url(#mask)">
+        <rect x="0" y="0" width="512" height="512" fill="#fff" />
+        <rect x="-48" y="0" width="304" height="256" fill="url(#gradient)" />
+        <rect x="256" y="256" width="256" height="256" fill="#07f" />
+        <line x1="256" y1="0" x2="256" y2="512" stroke="#000" stroke-width="8" />
+        <path d="M380 132m64-64l-128 128m0-128l128 128" stroke="#888" stroke-width="16" stroke-linecap="round" />
+        <g transform="translate(134 128)">
+            <text x="0" y="0" alignment-baseline="central" text-anchor="middle" class="shadow outer">0</text>
+            <text x="0" y="0" alignment-baseline="central" text-anchor="middle" class="shadow inner">0</text>
+            <path fill="#fff" d="M-28 43v-42l55-35v42Z" />
+            <text x="0" y="0" alignment-baseline="central" text-anchor="middle">0</text>
+        </g>
+        <text x="134" y="380" alignment-baseline="central" text-anchor="middle">1</text>
+    </g>
+</svg>
