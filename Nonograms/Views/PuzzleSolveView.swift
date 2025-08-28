@@ -22,6 +22,7 @@ struct PuzzleSolveView: View {
             }
             ControlView(gameState: $gameState, fitsView: fitsView, showSettings: $showSettings, showNewGame: $showNewGame)
                 .padding(.horizontal, 16)
+                .frame(maxWidth: 512)
             Spacer()
         }
             .environment(\.gameState, gameState)
