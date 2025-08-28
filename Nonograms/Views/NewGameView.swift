@@ -122,7 +122,7 @@ struct NewGameSheetView: View {
     var body: some View {
         NewGameView(gameState: $gameState)
             .onScrollGeometryChange(for: CGFloat.self, of: { geometry in
-                geometry.contentSize.height + geometry.contentInsets.top + geometry.contentInsets.bottom
+                (geometry.contentSize.height + geometry.contentInsets.top).rounded()
             }) {
                 height = $1
             }
