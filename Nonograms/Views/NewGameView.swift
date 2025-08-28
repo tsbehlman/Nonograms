@@ -90,42 +90,27 @@ struct PuzzleSizeControl: View {
                 .padding([.horizontal, .top], 9)
             Group {
                 if square {
-                    Picker(selection: $puzzleWidth, content: {
-                        ForEach(validSizes, id: \.self) { size in
-                            Text(verbatim: "\(size) \u{00D7} \(size)").tag(size)
-                        }
-                    }, label: {
-                        Text("puzzleShapeSize")
+                    WheelPicker(selection: $puzzleWidth, items: validSizes.map { size in
+                        PickerItem(title: "\(size) \u{00D7} \(size)", value: size)
                     })
-                        .pickerStyle(.wheel)
                         .onChange(of: puzzleWidth, initial: true) {
                             puzzleHeight = puzzleWidth
                         }
                 } else {
                     HStack {
-                        Picker(selection: $puzzleWidth, content: {
-                            ForEach(validSizes, id: \.self) { size in
-                                Text(verbatim: "\(size)").tag(size)
-                            }
-                        }, label: {
-                            Text("puzzleShapeWidth")
+                        WheelPicker(selection: $puzzleWidth, items: validSizes.map { size in
+                            PickerItem(title: "\(size)", value: size)
                         })
-                            .pickerStyle(.wheel)
                         Text(verbatim: "\u{00D7}")
                             .font(.title3)
-                            .dynamicTypeSize(.large)
-                        Picker(selection: $puzzleHeight, content: {
-                            ForEach(validSizes, id: \.self) { size in
-                                Text(verbatim: "\(size)").tag(size)
-                            }
-                        }, label: {
-                            Text("puzzleShapeHeight")
+                        WheelPicker(selection: $puzzleHeight, items: validSizes.map { size in
+                            PickerItem(title: "\(size)", value: size)
                         })
-                            .pickerStyle(.wheel)
                     }
                 }
             }
                 .frame(height: 150)
+                .dynamicTypeSize(.large)
         }
     }
 }

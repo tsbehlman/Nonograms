@@ -78,17 +78,6 @@
         }
       }
     },
-    "puzzleShapeHeight" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Height"
-          }
-        }
-      }
-    },
     "puzzleShapeRectangular" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -111,17 +100,6 @@
         }
       }
     },
-    "puzzleShapeSize" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Size"
-          }
-        }
-      }
-    },
     "puzzleShapeSquare" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -129,17 +107,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Square"
-          }
-        }
-      }
-    },
-    "puzzleShapeWidth" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Width"
           }
         }
       }
