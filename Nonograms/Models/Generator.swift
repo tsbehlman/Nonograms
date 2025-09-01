@@ -15,11 +15,22 @@ enum PuzzleDifficulty: Int {
     var fillRate: Range<Double> {
         switch self {
         case .easy:
-            return 0.625..<0.750
+            return 0.65..<0.75
         case .medium:
-            return 0.500..<0.625
+            return 0.45..<0.65
         case .hard:
-            return 0.375..<0.500
+            return 0.35..<0.45
+        }
+    }
+
+    func minInferenceLength(forSize size: Int) -> Int {
+        switch self {
+        case .easy:
+            return max(1, Int((Double(size) / 4.0).rounded()))
+        case .medium:
+            return max(1, Int((Double(size) / 6.0).rounded()))
+        case .hard:
+            return 1
         }
     }
 }
@@ -52,7 +63,7 @@ func makeSolvablePuzzle(width: Int, height: Int, difficulty: PuzzleDifficulty = 
 
     var puzzle = Puzzle(width: width, height: height, solution: tiles)
 
-    while !isSolvable(puzzle) {
+    while !isSolvable(puzzle, withSkillLevel: difficulty) {
         let index = indexSet.randomIndex()
         indexSet.remove(index)
         tiles[index] = .filled
@@ -62,10 +73,11 @@ func makeSolvablePuzzle(width: Int, height: Int, difficulty: PuzzleDifficulty = 
     return puzzle
 }
 
-private func isSolvable(_ puzzle: Puzzle) -> Bool {
+private func isSolvable(_ puzzle: Puzzle, withSkillLevel skillLevel: PuzzleDifficulty) -> Bool {
     var solver = Solver(
         rows: puzzle.rowIndices.map { puzzle.segmentRanges(forRow: $0).map { $0.length } },
-        columns: puzzle.columnIndices.map { puzzle.segmentRanges(forColumn: $0).map { $0.length } }
+        columns: puzzle.columnIndices.map { puzzle.segmentRanges(forColumn: $0).map { $0.length } },
+        skillLevel: skillLevel
     )
     return solver.canSolvePuzzle()
 }

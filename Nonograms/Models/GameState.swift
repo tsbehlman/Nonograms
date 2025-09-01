@@ -83,7 +83,8 @@ final class GameState: RepresentableWithCoding {
         let puzzle = makeSolvablePuzzle(width: width, height: height, difficulty: difficulty)
         let solver = Solver(
             rows: puzzle.rowIndices.map { puzzle.segmentRanges(forRow: $0).map { $0.length } },
-            columns: puzzle.columnIndices.map { puzzle.segmentRanges(forColumn: $0).map { $0.length } }
+            columns: puzzle.columnIndices.map { puzzle.segmentRanges(forColumn: $0).map { $0.length } },
+            skillLevel: difficulty
         )
         let nextGame = GameState(puzzle: puzzle, solver: solver, validate: validate)
         nextGame.mode = mode

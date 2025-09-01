@@ -19,12 +19,14 @@ struct SolverAttempt: Codable {
 struct Solver: Codable {
     let rows: [[Int]]
     let columns: [[Int]]
+    let minInferenceLength: Int
     var tiles: [TileState]
     var currentIndex = 0
 
-    init(rows: [[Int]], columns: [[Int]]) {
+    init(rows: [[Int]], columns: [[Int]], skillLevel: PuzzleDifficulty = .hard) {
         self.rows = rows
         self.columns = columns
+        self.minInferenceLength = skillLevel.minInferenceLength(forSize: min(rows.count, columns.count))
         tiles = Array(repeating: .blank, count: rows.count * columns.count)
     }
 
@@ -142,7 +144,7 @@ struct Solver: Codable {
         }
 
         for (minRange, maxRange) in zip(minRanges, maxRanges) {
-            if let intersection = minRange.intersection(with: maxRange) {
+            if let intersection = minRange.intersection(with: maxRange), intersection.length >= minInferenceLength || minRange == maxRange {
                 for index in intersection {
                     states[index] = .filled
                 }
