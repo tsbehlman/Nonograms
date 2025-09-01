@@ -7,14 +7,22 @@
 
 import SwiftUI
 
-struct ControlIconView: View {
+struct ControlModeButton: View {
     @Binding var mode: InteractionMode
     let control: TileState
-    let icon: String
     let disabled: Bool
 
     var body: some View {
-        ControlButton(icon: icon, active: mode.tileState == control, disabled: disabled, bordered: false)
+        ControlButton(active: mode.tileState == control, disabled: disabled, bordered: false) {
+            Group {
+                if control == .blocked {
+                    BlockedTileIcon()
+                        .padding(2)
+                } else {
+                    FilledTileIcon()
+                }
+            }
+        }
             .onTapGesture {
                 if !disabled {
                     mode = .fill(control)
@@ -33,18 +41,18 @@ struct ControlView: View {
     var body: some View {
         HStack(spacing: 12) {
             StaggeredStack(angle: .degrees(-45), spacing: 16) {
-                ControlButton(icon: "gearshape")
+                ControlIconButton(icon: "gearshape")
                     .onTapGesture {
                         showSettings = true
                     }
-                ControlButton(icon: "arrow.2.circlepath")
+                ControlIconButton(icon: "arrow.2.circlepath")
                     .when(gameState.isSolved) {
                         $0.background(RippleView())
                     }
                     .onTapGesture {
                         showNewGame = true
                     }
-                ControlButton(icon: "questionmark")
+                ControlIconButton(icon: "questionmark")
                     .when(gameState.isEmpty) {
                         $0.background(RippleView())
                     }
@@ -54,9 +62,9 @@ struct ControlView: View {
             }
             Spacer()
             StaggeredStack(angle: .degrees(45), spacing: 16) {
-                ControlIconView(mode: $gameState.mode, control: .filled, icon: "square.fill", disabled: false)
-                ControlIconView(mode: $gameState.mode, control: .blocked, icon: "xmark", disabled: false)
-                ControlButton(icon: "arrow.up.and.down.and.arrow.left.and.right", active: !fitsView && gameState.mode.tileState == nil, disabled: fitsView, bordered: false)
+                ControlModeButton(mode: $gameState.mode, control: .filled, disabled: false)
+                ControlModeButton(mode: $gameState.mode, control: .blocked, disabled: false)
+                ControlIconButton(icon: "arrow.up.and.down.and.arrow.left.and.right", active: !fitsView && gameState.mode.tileState == nil, disabled: fitsView, bordered: false)
                     .onTapGesture {
                         if !fitsView {
                             gameState.mode = .move
@@ -68,12 +76,12 @@ struct ControlView: View {
                 }
                 .overlay(alignment: .bottom) {
                     HStack {
-                        ControlButton(icon: "arrow.uturn.left", disabled: !gameState.hasUndo, size: .small)
+                        ControlIconButton(icon: "arrow.uturn.left", disabled: !gameState.hasUndo, size: .small)
                             .onTapGesture {
                                 gameState.undo()
                             }
                         Spacer()
-                        ControlButton(icon: "arrow.uturn.right", disabled: !gameState.hasRedo, size: .small)
+                        ControlIconButton(icon: "arrow.uturn.right", disabled: !gameState.hasRedo, size: .small)
                             .onTapGesture {
                                 gameState.redo()
                             }

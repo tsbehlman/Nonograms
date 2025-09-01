@@ -11,6 +11,7 @@ private let hintOutlineWidth: CGFloat = 1.5
 private let hintStrokeWidth: CGFloat = 2.5 + hintOutlineWidth
 private let hintInset: CGFloat = -4
 private let hintCornerRadius: CGFloat = 4
+let hintFillColor = Color.yellow.mix(with: Color.orange, by: 0.25)
 
 struct HintOutlineView: View {
     let hint: SolverAttempt
@@ -63,11 +64,11 @@ struct HintTileView: View {
 
     @State var isAnimating = false
 
-    @Environment(\.puzzleMetrics) var puzzleMetrics
+    @Environment(\.puzzleMetrics.tileSize) var tileSize
 
     var offset: CGSize {
-        let position = CGFloat(stateIndex) * puzzleMetrics.tileSize
-        let crossAxisPosition = CGFloat(hint.index) * puzzleMetrics.tileSize
+        let position = CGFloat(stateIndex) * tileSize
+        let crossAxisPosition = CGFloat(hint.index) * tileSize
         if (hint.axis == .horizontal) {
             return CGSize(width: position, height: crossAxisPosition)
         } else {
@@ -76,10 +77,18 @@ struct HintTileView: View {
     }
 
     var body: some View {
-        Image(systemName: hint.newStates[stateIndex] == .blocked ? "xmark" : "square.fill")
-            .font(.system(size: puzzleMetrics.tileSize * 0.75, weight: .light))
-            .foregroundStyle(Color.yellow.mix(with: Color.orange, by: 0.25))
-            .frame(width: puzzleMetrics.tileSize, height: puzzleMetrics.tileSize)
+        let isBlocked = hint.newStates[stateIndex] == .blocked
+        Group {
+            if isBlocked {
+                BlockedTileIcon()
+                    .padding(tileSize * 0.3125)
+            } else {
+                FilledTileIcon()
+                    .padding(tileSize * 0.1875)
+            }
+        }
+            .foregroundStyle(hintFillColor)
+            .frame(width: tileSize, height: tileSize)
             .offset(offset)
             .opacity(isAnimating ? 1 : 0)
             .animation(
@@ -106,5 +115,14 @@ struct HintOverlayView: View {
                 }
             }
         }
+    }
+}
+
+#Preview {
+    VStack {
+        HintTileView(hint: SolverAttempt(axis: .horizontal, index: 0, minRanges: [], maxRanges: [], oldStates: [.filled], newStates: [.filled]), stateIndex: 0)
+            .border(Color.primary.opacity(0.25))
+        HintTileView(hint: SolverAttempt(axis: .horizontal, index: 0, minRanges: [], maxRanges: [], oldStates: [.blocked], newStates: [.blocked]), stateIndex: 0)
+            .border(Color.primary.opacity(0.25))
     }
 }

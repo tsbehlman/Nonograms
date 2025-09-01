@@ -58,7 +58,7 @@ func checkerboard(_ size: CGFloat, color: Color = .gray) -> Image {
                     scrollEnabled = false
                 }
             }
-        ControlButton(icon: "arrow.up.and.down.and.arrow.left.and.right", active: !fitsView && scrollEnabled, disabled: fitsView)
+        ControlIconButton(icon: "arrow.up.and.down.and.arrow.left.and.right", active: !fitsView && scrollEnabled, disabled: fitsView)
             .onTapGesture {
                 if !fitsView {
                     scrollEnabled = !scrollEnabled

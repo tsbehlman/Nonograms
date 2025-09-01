@@ -17,7 +17,7 @@ struct SegmentLabel: View {
 
     var color: Color {
         if isHighlighted {
-            Color.yellow.mix(with: Color.orange, by: 0.25)
+            hintFillColor
         } else if segment.state == .complete {
             puzzleColor
         } else {

@@ -7,12 +7,37 @@
 
 import SwiftUI
 
-struct ControlButton: View {
+struct ControlIconButton: View {
     let icon: String
     let active: Bool
     let disabled: Bool
     let bordered: Bool
     let scale: Image.Scale
+
+    init(icon: String, active: Bool = false, disabled: Bool = false, bordered: Bool = true, size: Image.Scale = .large) {
+        self.icon = icon
+        self.active = active
+        self.disabled = disabled
+        self.bordered = bordered
+        self.scale = size
+    }
+
+    var body: some View {
+        ControlButton(active: active, disabled: disabled, bordered: bordered, size: scale) {
+            Image(systemName: icon)
+                .fontWeight(.semibold)
+                .imageScale(scale)
+                .dynamicTypeSize(.large)
+        }
+    }
+}
+
+struct ControlButton<Content: View>: View {
+    let active: Bool
+    let disabled: Bool
+    let bordered: Bool
+    let scale: Image.Scale
+    let content: () -> Content
 
     var size: CGFloat {
         switch scale {
@@ -23,18 +48,18 @@ struct ControlButton: View {
         }
     }
 
-    init(icon: String, active: Bool = false, disabled: Bool = false, bordered: Bool = true, size: Image.Scale = .large) {
-        self.icon = icon
+    init(active: Bool = false, disabled: Bool = false, bordered: Bool = true, size: Image.Scale = .large, _ content: @escaping () -> Content) {
         self.active = active
         self.disabled = disabled
         self.bordered = bordered
         self.scale = size
+        self.content = content
     }
 
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.gameState.puzzleColor) var puzzleColor
 
-    var fillColor: Color {
+    var backgroundColor: Color {
         if active {
             if disabled {
                 return Color.primary.opacity(0.5)
@@ -46,7 +71,7 @@ struct ControlButton: View {
         }
     }
 
-    var iconColor: Color {
+    var fillColor: Color {
         if active {
             return Color.primary.forScheme(.dark)
         } else if disabled {
@@ -59,13 +84,11 @@ struct ControlButton: View {
     var body: some View {
         ZStack {
             Circle()
-                .fill(fillColor)
+                .fill(backgroundColor)
                 .when(bordered || active) { $0.strokeBorder(Color.primary.opacity(0.375)) }
-            Image(systemName: icon)
-                .fontWeight(.semibold)
-                .foregroundStyle(iconColor)
-                .imageScale(scale)
-                .dynamicTypeSize(.large)
+            content()
+                .foregroundStyle(fillColor)
+                .frame(maxWidth: size * 0.375, maxHeight: size * 0.375)
         }
             .frame(width: size, height: size, alignment: .center)
     }
@@ -73,9 +96,14 @@ struct ControlButton: View {
 
 #Preview {
     HStack {
-        ControlButton(icon: "questionmark")
-        ControlButton(icon: "arrow.up.and.down.and.arrow.left.and.right", disabled: true)
-        ControlButton(icon: "square.fill", active: true, disabled: true)
-        ControlButton(icon: "xmark", active: true)
+        ControlIconButton(icon: "questionmark")
+        ControlIconButton(icon: "arrow.up.and.down.and.arrow.left.and.right", disabled: true)
+        ControlButton(active: true, disabled: true) {
+            FilledTileIcon()
+        }
+        ControlButton(active: true) {
+            BlockedTileIcon()
+                .padding(2)
+        }
     }
 }
