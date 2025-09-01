@@ -49,6 +49,10 @@ extension IndexSet {
 }
 
 func makeSolvablePuzzle(width: Int, height: Int, difficulty: PuzzleDifficulty = .easy) -> Puzzle {
+    Signpost.begin("Generate puzzle")
+    defer {
+        Signpost.end("Generate puzzle")
+    }
     let numTiles = width * height
     var tiles: [TileState] = Array(repeating: .blocked, count: numTiles)
     var indexSet = IndexSet(integersIn: tiles.indices)
@@ -74,6 +78,10 @@ func makeSolvablePuzzle(width: Int, height: Int, difficulty: PuzzleDifficulty = 
 }
 
 private func isSolvable(_ puzzle: Puzzle, withSkillLevel skillLevel: PuzzleDifficulty) -> Bool {
+    Signpost.begin("Check solvability")
+    defer {
+        Signpost.end("Check solvability")
+    }
     var solver = Solver(
         rows: puzzle.rowIndices.map { puzzle.segmentRanges(forRow: $0).map { $0.length } },
         columns: puzzle.columnIndices.map { puzzle.segmentRanges(forColumn: $0).map { $0.length } },

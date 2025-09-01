@@ -14,6 +14,8 @@ struct SolverAttempt: Codable {
     var maxRanges: [Range<Int>]
     var oldStates: [TileState]
     var newStates: [TileState]
+    var madeProgress = false
+    var complete = false
 }
 
 struct Solver: Codable {
@@ -38,7 +40,7 @@ struct Solver: Codable {
         set(row * columns.count + column, to: newState)
     }
 
-    private mutating func make(attempt: inout SolverAttempt, forLengths lengths: [Int]) {
+    private func make(attempt: inout SolverAttempt, forLengths lengths: [Int]) {
         guard lengths.only != 0 else {
             attempt.minRanges = []
             attempt.maxRanges = []
@@ -164,7 +166,7 @@ struct Solver: Codable {
         attempt.newStates = states
     }
 
-    private mutating func check(attempt: inout SolverAttempt, forLengths lengths: [Int], at indices: some Sequence<Int>) -> Bool {
+    private func check(attempt: inout SolverAttempt, forLengths lengths: [Int], at indices: some Sequence<Int>) {
         attempt.oldStates = indices.map { index in
             let state = tiles[index]
             if state == .error {
@@ -174,39 +176,62 @@ struct Solver: Codable {
             }
         }
 
-        make(attempt: &attempt, forLengths: lengths)
-
-        for (oldState, newState) in zip(attempt.oldStates, attempt.newStates) {
-            if oldState != newState {
-                return true
+        let blankIndices = attempt.oldStates.enumerated().compactMap { (index, state) in
+            if state == .blank {
+                return index
+            } else {
+                return nil
             }
         }
 
-        return false
+        if blankIndices.isEmpty {
+            attempt.complete = true
+            return
+        }
+
+        make(attempt: &attempt, forLengths: lengths)
+
+        attempt.complete = true
+
+        for index in blankIndices {
+            if attempt.newStates[index] != .blank {
+                attempt.madeProgress = true
+            } else {
+                attempt.complete = false
+            }
+        }
+    }
+
+    private func check(row index: Int) -> SolverAttempt {
+        var attempt = SolverAttempt(axis: .horizontal, index: index, minRanges: [], maxRanges: [], oldStates: [], newStates: [])
+        check(attempt: &attempt, forLengths: rows[index], at: indices(forRow: index))
+        return attempt
+    }
+
+    private func check(column index: Int) -> SolverAttempt {
+        var attempt = SolverAttempt(axis: .vertical, index: index, minRanges: [], maxRanges: [], oldStates: [], newStates: [])
+        check(attempt: &attempt, forLengths: columns[index], at: indices(forColumn: index))
+        return attempt
     }
 
     private mutating func applyAttempt(_ attempt: SolverAttempt, at indices: some Sequence<Int>) {
-        for (stateIndex, tileIndex) in indices.enumerated() {
-            let oldState = tiles[tileIndex]
-            let newState = attempt.newStates[stateIndex]
-            if newState != oldState && oldState != .error {
-                tiles[tileIndex] = attempt.newStates[stateIndex]
+        for (tileIndex, newState) in zip(indices, attempt.newStates) {
+            if newState != .blank {
+                tiles[tileIndex] = newState
             }
         }
     }
 
-    @discardableResult mutating func step() -> SolverAttempt? {
-        var attempt = SolverAttempt(axis: .horizontal, index: 0, minRanges: [], maxRanges: [], oldStates: [], newStates: [])
+    mutating func step() -> SolverAttempt? {
+        var attempt: SolverAttempt
         for tileIndex in (currentIndex..<tiles.count).concat(0..<currentIndex) where tiles[tileIndex] == .blank {
-            attempt.axis = .horizontal
-            attempt.index = tileIndex / columns.count
-            if check(attempt: &attempt, forLengths: rows[attempt.index], at: indices(forRow: attempt.index)) {
+            attempt = check(row: tileIndex / columns.count)
+            if attempt.madeProgress {
                 return attempt
             }
 
-            attempt.axis = .vertical
-            attempt.index = tileIndex % columns.count
-            if check(attempt: &attempt, forLengths: columns[attempt.index], at: indices(forColumn: attempt.index)) {
+            attempt = check(column: tileIndex % columns.count)
+            if attempt.madeProgress {
                 return attempt
             }
         }
@@ -214,16 +239,39 @@ struct Solver: Codable {
     }
 
     mutating func canSolvePuzzle() -> Bool {
-        while let nextAttempt = step() {
-            if nextAttempt.axis == .horizontal {
-                applyAttempt(nextAttempt, at: indices(forRow: nextAttempt.index))
-            } else {
-                applyAttempt(nextAttempt, at: indices(forColumn: nextAttempt.index))
+        var progressMade = false
+        var rowIndices = IndexSet(integersIn: rows.indices)
+        var columnIndices = IndexSet(integersIn: columns.indices)
+        repeat {
+            progressMade = false
+            for rowIndex in rowIndices {
+                let attempt = check(row: rowIndex)
+                if attempt.madeProgress {
+                    progressMade = true
+                    applyAttempt(attempt, at: indices(forRow: attempt.index))
+                }
+                if attempt.complete {
+                    rowIndices.remove(attempt.index)
+                }
             }
-            if tiles.allSatisfy({ $0 != .blank }) {
+            if rowIndices.isEmpty {
                 return true
             }
-        }
+
+            for columnIndex in columnIndices {
+                let attempt = check(column: columnIndex)
+                if attempt.madeProgress {
+                    progressMade = true
+                    applyAttempt(attempt, at: indices(forColumn: attempt.index))
+                }
+                if attempt.complete {
+                    columnIndices.remove(attempt.index)
+                }
+            }
+            if columnIndices.isEmpty {
+                return true
+            }
+        } while progressMade
         return false
     }
 
