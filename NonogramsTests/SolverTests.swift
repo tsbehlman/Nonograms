@@ -12,6 +12,15 @@ class CanSolvePuzzleTestCase: TestCase {
     var puzzle: Puzzle
     var solver: Solver
 
+    init(puzzle: Puzzle, file: StaticString = #file, line: UInt = #line) {
+        self.puzzle = puzzle
+        self.solver = Solver(
+            rows: puzzle.rowIndices.map { puzzle.segmentRanges(forRow: $0).map { $0.length } },
+            columns: puzzle.columnIndices.map { puzzle.segmentRanges(forColumn: $0).map { $0.length } }
+        )
+        super.init(file, line)
+    }
+
     init(_ size: Int, _ solution: UInt..., file: StaticString = #file, line: UInt = #line) {
         let puzzle = Puzzle(size: size, data: solution)
         self.solver = Solver(
@@ -62,25 +71,19 @@ final class SolverTests: XCTestCase {
             0b11011,
             0b11111
         )
-        testCase.puzzle.set(row: 0, column: 3, to: .filled)
-        testCase.solver.set(row: 0, column: 3, to: .filled)
+        let tileIndex = testCase.puzzle.tileIndex(row: 0, column: 3)
+        testCase.puzzle.tiles[testCase.puzzle.tileIndex(row: 0, column: 3)] = .filled
+        testCase.solver.set(tileIndex, to: .filled)
         let attempt = testCase.solver.step()
         XCTAssertEqual(attempt?.minRanges, [0..<2, 3..<4])
         XCTAssertEqual(attempt?.maxRanges, [0..<2, 3..<4])
     }
 
     func testSolverPerformance() throws {
-        let testCase = CanSolvePuzzleTestCase(
-            6,
-            0b000000,
-            0b011111,
-            0b111100,
-            0b110110,
-            0b011101,
-            0b111111
-        )
-        self.measure {
-            let _ = testCase.solver.canSolvePuzzle()
+        let puzzle = makeSolvablePuzzle(width: 15, height: 15)
+        let testCase = CanSolvePuzzleTestCase(puzzle: puzzle)
+        measure {
+            XCTAssertTrue(testCase.solver.canSolvePuzzle())
         }
     }
 }
