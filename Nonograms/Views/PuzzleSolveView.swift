@@ -27,7 +27,7 @@ struct PuzzleSolveView: View {
         }
             .environment(\.gameState, gameState)
             .sheet(isPresented: $showSettings) {
-                SettingsView()
+                SettingsView(gameState: $gameState)
                     .presentationDetents([.medium])
             }
             .sheet(isPresented: $showNewGame) {

@@ -8,10 +8,12 @@
 import SwiftUI
 
 struct SettingsView: View {
+    @Binding var gameState: GameState
     @Environment(\.dismiss) var dismiss
     @AppStorage("difficulty") var difficulty = NonogramsDefaults.difficulty
     @AppStorage("tileSize") var tileSize = NonogramsDefaults.tileSize
     @AppStorage("validate") var validate = NonogramsDefaults.validate
+    @AppStorage("autofill") var autofill = NonogramsDefaults.autofill
 
     var body: some View {
         NavigationView {
@@ -25,6 +27,12 @@ struct SettingsView: View {
                         Image(systemName: "squareshape.split.2x2").imageScale(.large)
                     })
                 })
+                Toggle(isOn: $autofill, label: {
+                    Text("autofillSetting")
+                })
+                    .onChange(of: autofill) {
+                        gameState.autofill = autofill
+                    }
             }
             .listStyle(.insetGrouped)
             .navigationTitle("settingsDialogTitle")
@@ -41,5 +49,7 @@ struct SettingsView: View {
 }
 
 #Preview {
-    SettingsView()
+    @Previewable @State var gameState = GameState()
+
+    SettingsView(gameState: $gameState)
 }

@@ -1,6 +1,17 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "autofillSetting" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cross out tiles automatically"
+          }
+        }
+      }
+    },
     "closeDialog" : {
       "extractionState" : "manual",
       "localizations" : {

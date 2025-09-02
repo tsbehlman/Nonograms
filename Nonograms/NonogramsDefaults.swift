@@ -10,6 +10,7 @@ import CoreGraphics
 struct NonogramsDefaults {
     static let tileSize: CGFloat = 50
     static let validate = false
+    static let autofill = true
     static let difficulty = PuzzleDifficulty.easy
     static let puzzleWidth = 5
     static let puzzleHeight = 5

@@ -178,6 +178,22 @@ struct Puzzle: Codable {
         }
     }
 
+    func isSolved(forRow rowIndex: Int) -> Bool {
+        solution.gridIndices(forRow: rowIndex, width: width).allSatisfy { tileIndex in
+            let tileIsFilled = tiles[tileIndex] == .filled
+            let solutionIsFilled = solution[tileIndex] == .filled
+            return tileIsFilled == solutionIsFilled
+        }
+    }
+
+    func isSolved(forColumn columnIndex: Int) -> Bool {
+        solution.gridIndices(forColumn: columnIndex, width: width).allSatisfy { tileIndex in
+            let tileIsFilled = tiles[tileIndex] == .filled
+            let solutionIsFilled = solution[tileIndex] == .filled
+            return tileIsFilled == solutionIsFilled
+        }
+    }
+
     mutating func solve() {
         for (index, (current, solved)) in zip(tiles, solution).enumerated() {
             if solved == .filled {

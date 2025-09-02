@@ -33,6 +33,7 @@ final class GameState: RepresentableWithCoding {
     var history: [PuzzleTransaction] = []
     var historyIndex = 0
     var transactionGroup: PuzzleTransactionGroup?
+    var autofill: Bool
 
     var puzzleColor: Color {
         isSolved
@@ -41,7 +42,7 @@ final class GameState: RepresentableWithCoding {
     }
 
     private enum CodingKeys: CodingKey {
-        case puzzle, solver, mode, validate, isEmpty, isSolved, hint, history, historyIndex
+        case puzzle, solver, mode, validate, isEmpty, isSolved, hint, history, historyIndex, autofill
     }
 
     init(from decoder: any Decoder) throws {
@@ -57,6 +58,7 @@ final class GameState: RepresentableWithCoding {
         let codableHistory = try container.decode([CodableTransaction].self, forKey: .history)
         history = codableHistory.map { $0.transaction }
         historyIndex = try container.decode(Int.self, forKey: .historyIndex)
+        autofill = try container.decode(Bool.self, forKey: .autofill)
     }
 
     func encode(to encoder: any Encoder) throws {
@@ -71,15 +73,17 @@ final class GameState: RepresentableWithCoding {
         let codableHistory = history.map(\.codable)
         try container.encode(codableHistory, forKey: .history)
         try container.encode(historyIndex, forKey: .historyIndex)
+        try container.encode(autofill, forKey: .autofill)
     }
 
-    init(puzzle: Puzzle = Puzzle(width: 1, height: 1, solution: [.filled]), solver: Solver = Solver(rows: [[1]], columns: [[1]]), validate: Bool = false) {
+    init(puzzle: Puzzle = Puzzle(width: 1, height: 1, solution: [.filled]), solver: Solver = Solver(rows: [[1]], columns: [[1]]), validate: Bool = false, autofill: Bool = false) {
         self.puzzle = puzzle
         self.solver = solver
         self.validate = validate
+        self.autofill = autofill
     }
 
-    func newGame(width: Int, height: Int, difficulty: PuzzleDifficulty, validate: Bool = false) -> GameState {
+    func newGame(width: Int, height: Int, difficulty: PuzzleDifficulty, validate: Bool = false, autofill: Bool? = nil) -> GameState {
         let puzzle = makeSolvablePuzzle(width: width, height: height, difficulty: difficulty)
         let solver = Solver(
             rows: puzzle.rowIndices.map { puzzle.segmentRanges(forRow: $0).map { $0.length } },
@@ -88,6 +92,19 @@ final class GameState: RepresentableWithCoding {
         )
         let nextGame = GameState(puzzle: puzzle, solver: solver, validate: validate)
         nextGame.mode = mode
+        nextGame.autofill = autofill ?? self.autofill
+        if nextGame.autofill {
+            for (rowIndex, segments) in solver.rows.enumerated() where segments.isEmpty {
+                for tileIndex in puzzle.tiles.gridIndices(forRow: rowIndex, width: width) {
+                    nextGame.puzzle.tiles[tileIndex] = .blocked
+                }
+            }
+            for (columnIndex, segments) in solver.columns.enumerated() where segments.isEmpty {
+                for tileIndex in puzzle.tiles.gridIndices(forColumn: columnIndex, width: width) {
+                    nextGame.puzzle.tiles[tileIndex] = .blocked
+                }
+            }
+        }
         return nextGame
     }
 
@@ -147,14 +164,33 @@ final class GameState: RepresentableWithCoding {
         let tileIndex = puzzle.tileIndex(row: row, column: column)
         let oldState = puzzle.tiles[tileIndex]
         let newState = set(tileIndex, to: desiredState, isHolding: isHolding)
-        if desiredState == .filled && puzzle.isSolved() {
+        if newState == .filled && puzzle.isSolved() {
             isSolved = true
             puzzle.solve()
         } else if newState != oldState {
-            let transaction = SinglePuzzleTransaction(tileIndex: tileIndex, oldState: oldState, newState: newState)
+            var transactions = [SinglePuzzleTransaction(tileIndex: tileIndex, oldState: oldState, newState: newState)]
+            if autofill && newState == .filled && puzzle.isSolved(forRow: row) {
+                for tileIndex in puzzle.solution.gridIndices(forRow: row, width: puzzle.width) {
+                    let oldState = puzzle.tiles[tileIndex]
+                    let newState = set(tileIndex, to: puzzle.solution[tileIndex], isHolding: true)
+                    if newState != oldState {
+                        transactions.append(SinglePuzzleTransaction(tileIndex: tileIndex, oldState: oldState, newState: newState))
+                    }
+                }
+            }
+            if autofill && newState == .filled && puzzle.isSolved(forColumn: column) {
+                for tileIndex in puzzle.solution.gridIndices(forColumn: column, width: puzzle.width) {
+                    let oldState = puzzle.tiles[tileIndex]
+                    let newState = set(tileIndex, to: puzzle.solution[tileIndex], isHolding: true)
+                    if newState != oldState {
+                        transactions.append(SinglePuzzleTransaction(tileIndex: tileIndex, oldState: oldState, newState: newState))
+                    }
+                }
+            }
             if transactionGroup != nil {
-                transactionGroup!.transactions.append(transaction)
+                transactionGroup!.transactions.append(contentsOf: transactions)
             } else {
+                let transaction: PuzzleTransaction = transactions.only ?? PuzzleTransactionGroup(transactions: transactions)
                 history.insert(transaction, at: historyIndex)
                 historyIndex += 1
                 history.removeSubrange(historyIndex...)

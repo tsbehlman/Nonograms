@@ -20,6 +20,7 @@ struct NonogramsAppView: View {
 
     @AppStorage("difficulty") var difficulty = NonogramsDefaults.difficulty
     @AppStorage("validate") var validate = NonogramsDefaults.validate
+    @AppStorage("autofill") var autofill = NonogramsDefaults.autofill
     @AppStorage("puzzleWidth") var puzzleWidth = NonogramsDefaults.puzzleWidth
     @AppStorage("puzzleHeight") var puzzleHeight = NonogramsDefaults.puzzleHeight
 
@@ -28,7 +29,7 @@ struct NonogramsAppView: View {
             PuzzleSolveView(gameState: unwrapped)
         } else {
             Color.clear.task {
-                self.gameState = GameState().newGame(width: puzzleWidth, height: puzzleHeight, difficulty: difficulty, validate: validate)
+                self.gameState = GameState().newGame(width: puzzleWidth, height: puzzleHeight, difficulty: difficulty, validate: validate, autofill: autofill)
             }
         }
     }
