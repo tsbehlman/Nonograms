@@ -111,7 +111,7 @@ struct StaggeredStackBackground: InsettableShape {
         let outerCutoutAngle: Angle = cutoutAngle + delta
         let innerCutoutAngle: Angle = isBridged
             ? .radians(CoreGraphics.acos(xOffset / cutoutDistance))
-            : cutoutAngle - delta
+            : cutoutStartAngle
         let outerCutoutX = cutoutDistance * cos(outerCutoutAngle.radians)
         let outerCutoutY = -cutoutDistance * sin(outerCutoutAngle.radians)
         let innerCutoutX = cutoutDistance * cos(innerCutoutAngle.radians)
@@ -120,20 +120,20 @@ struct StaggeredStackBackground: InsettableShape {
 
         var path = Path()
 
-        var center = CGPoint(x: itemSize / 2, y: 0)
+        var center = CGPoint(x: itemRadius, y: 0)
         var isLower = true
 
         for index in 0..<numItems {
             if isLower {
-                center.y = itemSize / 2 + yOffset
+                center.y = itemRadius + yOffset
             } else {
-                center.y = itemSize / 2
+                center.y = itemRadius
             }
             if isLower {
                 path.addSubpath(transform: CGAffineTransform(translationX: center.x, y: center.y).scaledBy(x: index == 0 ? 1 : -1, y: 1)) { subpath in
                     subpath.addArc(center: CGPoint(x: outerCutoutX, y: outerCutoutY), radius: cutoutRadius, startAngle: cutoutStartAngle, endAngle: .degrees(180) - outerCutoutAngle, clockwise: false)
                     subpath.addArc(center: CGPoint(x: innerCutoutX, y: -innerCutoutY), radius: cutoutRadius, startAngle: .degrees(180) + innerCutoutAngle, endAngle: max(-outerCutoutAngle, .degrees(-90)), clockwise: false)
-                    subpath.addLine(to: CGPoint(x: itemDistance, y: -yOffset))
+                    subpath.addLine(to: CGPoint(x: xOffset + 1, y: -yOffset))
                 }
             }
             path.addSubpath { subpath in
