@@ -164,12 +164,12 @@ final class GameState: RepresentableWithCoding {
         let tileIndex = puzzle.tileIndex(row: row, column: column)
         let oldState = puzzle.tiles[tileIndex]
         let newState = set(tileIndex, to: desiredState, isHolding: isHolding)
-        if newState == .filled && puzzle.isSolved() {
+        if puzzle.isSolved() {
             isSolved = true
             puzzle.solve()
         } else if newState != oldState {
             var transactions = [SinglePuzzleTransaction(tileIndex: tileIndex, oldState: oldState, newState: newState)]
-            if autofill && newState == .filled && puzzle.isSolved(forRow: row) {
+            if autofill && puzzle.isSolved(forRow: row) {
                 for tileIndex in puzzle.solution.gridIndices(forRow: row, width: puzzle.width) {
                     let oldState = puzzle.tiles[tileIndex]
                     let newState = set(tileIndex, to: puzzle.solution[tileIndex], isHolding: true)
@@ -178,7 +178,7 @@ final class GameState: RepresentableWithCoding {
                     }
                 }
             }
-            if autofill && newState == .filled && puzzle.isSolved(forColumn: column) {
+            if autofill && puzzle.isSolved(forColumn: column) {
                 for tileIndex in puzzle.solution.gridIndices(forColumn: column, width: puzzle.width) {
                     let oldState = puzzle.tiles[tileIndex]
                     let newState = set(tileIndex, to: puzzle.solution[tileIndex], isHolding: true)
