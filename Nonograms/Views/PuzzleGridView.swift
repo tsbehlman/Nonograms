@@ -70,11 +70,12 @@ struct PuzzleTilesView: View {
                 ForEach(puzzle.rowIndices, id: \.self) { rowIndex in
                     GridRow {
                         ForEach(puzzle.columnIndices, id: \.self) { columnIndex in
-                            TileView(status: puzzle.tile(row: rowIndex, column: columnIndex))
+                            TileView(status: puzzle.tile(row: rowIndex, column: columnIndex), row: rowIndex, column: columnIndex, rippleTimer: gameState.isSolved ? rippleAnimationDuration : 0.0)
                         }
                     }
                 }
             }
+            .animation(.easeOut(duration: rippleAnimationDuration), value: gameState.isSolved)
 
             Path { path in
                 for x in stride(from: 0, through: size.width, by: puzzleMetrics.tileSize) {

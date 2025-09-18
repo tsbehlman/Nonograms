@@ -34,11 +34,15 @@ final class GameState: RepresentableWithCoding {
     var historyIndex = 0
     var transactionGroup: PuzzleTransactionGroup?
     var autofill: Bool
+    var lastFilledTile: (row: Int, column: Int)?
+
+    static let solvedColor: Color = .green.mix(with: .primary.forScheme(.light), by: 0.125)
+    static let unsolvedColor: Color = .accentColor
 
     var puzzleColor: Color {
         isSolved
-            ? .green.mix(with: .primary.forScheme(.light), by: 0.125)
-            : .accentColor
+            ? GameState.solvedColor
+            : GameState.unsolvedColor
     }
 
     private enum CodingKeys: CodingKey {
@@ -164,6 +168,7 @@ final class GameState: RepresentableWithCoding {
         let tileIndex = puzzle.tileIndex(row: row, column: column)
         let oldState = puzzle.tiles[tileIndex]
         let newState = set(tileIndex, to: desiredState, isHolding: isHolding)
+        lastFilledTile = (row: row, column: column)
         if puzzle.isSolved() {
             isSolved = true
             puzzle.solve()
