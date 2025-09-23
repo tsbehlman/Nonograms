@@ -74,7 +74,7 @@ struct TileView: View, Animatable {
                     )
                     .transition(isSolved
                         ? .identity
-                        : .opacity.animation(.easeOut(duration: 8 / 60)).combined(with: .asymmetric(
+                        : .opacity.animation(.easeOut(duration: 8 / 60).instant()).combined(with: .asymmetric(
                             insertion: .scale(scale: 1.5),
                             removal: .scale(scale: 0.5)
                         ).animation(.easeOut(duration: 10 / 60))
