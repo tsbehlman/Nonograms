@@ -168,8 +168,8 @@ final class GameState: RepresentableWithCoding {
         let tileIndex = puzzle.tileIndex(row: row, column: column)
         let oldState = puzzle.tiles[tileIndex]
         let newState = set(tileIndex, to: desiredState, isHolding: isHolding)
-        lastFilledTile = (row: row, column: column)
         if puzzle.isSolved() {
+            lastFilledTile = (row: row, column: column)
             isSolved = true
             puzzle.solve()
         } else if newState != oldState {
