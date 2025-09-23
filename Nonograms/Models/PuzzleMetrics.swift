@@ -17,6 +17,10 @@ struct PuzzleMetrics {
     let labelSize: CGSize
     let segmentSize: CGSize
     let totalSize: CGSize
+    let xmarkStrokeStyle: StrokeStyle
+    let hintOutlineWidth: CGFloat
+    let hintStrokeWidth: CGFloat
+    let hintInset: CGFloat
 
     init(width: Int, height: Int, tileSize: CGFloat) {
         let size = max(width, height)
@@ -39,6 +43,10 @@ struct PuzzleMetrics {
             width: puzzleSize.width + segmentSize.width,
             height: puzzleSize.height + segmentSize.height
         )
+        xmarkStrokeStyle = StrokeStyle(lineWidth: tileSize / 16.0, lineCap: .round)
+        hintOutlineWidth = tileSize / 15
+        hintStrokeWidth = hintOutlineWidth * 2
+        hintInset = -tileSize / 10
     }
 }
 

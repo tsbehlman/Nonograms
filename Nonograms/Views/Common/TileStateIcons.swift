@@ -16,6 +16,6 @@ struct FilledTileIcon: View {
 struct BlockedTileIcon: View {
     var body: some View {
         XMarkShape()
-            .stroke(style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
+            .stroke(style: StrokeStyle(lineWidth: 3.0, lineCap: .round))
     }
 }
