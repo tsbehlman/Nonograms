@@ -10,7 +10,7 @@ import SwiftUI
 struct DraggablePuzzleTilesView: View {
     enum DragState: Equatable {
         case inactive
-        case dragging(row: Int, column: Int, state: TileState)
+        case dragging(row: Int, column: Int, state: TileState, axis: Axis?)
     }
 
     @GestureState private var dragState: DragState = .inactive
@@ -23,20 +23,40 @@ struct DraggablePuzzleTilesView: View {
         return (row, column)
     }
 
+    func updateDragGesture(_ value: DragGesture.Value, _ state: inout DragState, _ transaction: inout Transaction) {
+        guard var tileState = gameState.mode.tileState else { return }
+        var (row, column) = location(at: value.location)
+        var axis: Axis?
+        if case let .dragging(lastRow, lastColumn, currentState, lastAxis) = state {
+            tileState = currentState
+            axis = lastAxis
+            if lastAxis == .vertical {
+                let distance = abs(value.location.x / puzzleMetrics.tileSize - (CGFloat(lastColumn) + 0.5))
+                if distance < 0.75 {
+                    column = lastColumn
+                }
+            } else if lastAxis == .horizontal {
+                let distance = abs(value.location.y / puzzleMetrics.tileSize - (CGFloat(lastRow) + 0.5))
+                if distance < 0.75 {
+                    row = lastRow
+                }
+            }
+            if row != lastRow && column == lastColumn {
+                axis = .vertical
+            } else if row == lastRow && column != lastColumn {
+                axis = .horizontal
+            }
+        } else if gameState.puzzle.tile(row: row, column: column) == tileState {
+            tileState = .blank
+        }
+        state = .dragging(row: row, column: column, state: tileState, axis: axis)
+    }
+
     var body: some View {
         let puzzle = gameState.puzzle
         let mode = gameState.mode
         let gesture = DragGesture(minimumDistance: 4, coordinateSpace: .local)
-            .updating($dragState) { value, state, transaction in
-                guard var tileState = mode.tileState else { return }
-                let (row, column) = location(at: value.location)
-                if case let .dragging(_, _, currentState) = state {
-                    tileState = currentState
-                } else if puzzle.tile(row: row, column: column) == mode.tileState {
-                    tileState = .blank
-                }
-                state = .dragging(row: row, column: column, state: tileState)
-            }
+            .updating($dragState, body: self.updateDragGesture)
         PuzzleTilesView()
             .contentShape(Rectangle())
             .highPriorityGesture(gesture, isEnabled: mode.tileState != nil)
@@ -46,7 +66,7 @@ struct DraggablePuzzleTilesView: View {
                 } else {
                     gameState.endTransaction()
                 }
-                guard case let .dragging(row, column, state) = dragState,
+                guard case let .dragging(row, column, state, _) = dragState,
                       puzzle.rowIndices.contains(row),
                       puzzle.columnIndices.contains(column) else { return }
                 gameState.fill(row: row, column: column, state: state)
