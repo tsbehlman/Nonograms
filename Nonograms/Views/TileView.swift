@@ -63,6 +63,18 @@ struct TileView: View, Animatable {
         }
     }
 
+    var xmarkTransition: AnyTransition {
+        AnyTransition(XMarkTransition(
+            strokeColor: status == .error ? Color.red.opacity(0.75) : Color.secondary,
+            strokeStyle: puzzleMetrics.xmarkStrokeStyle,
+            size: puzzleMetrics.tileSize * 0.45
+        )).animation(.keyframes {
+            LinearKeyframe(0.5, duration: 4 / 60)
+            LinearKeyframe(0.5, duration: 3 / 60)
+            LinearKeyframe(1.0, duration: 4 / 60)
+        }.instant())
+    }
+
     var body: some View {
         Group {
             if status == .filled {
@@ -84,22 +96,29 @@ struct TileView: View, Animatable {
                             ? scaleTimeline.value(time: rippleTimer)
                             : 1.0
                     )
+            } else if status.isBlocked {
+                Color.clear
+                    .transition(xmarkTransition)
             } else {
-                let marked = status.isBlocked
-                let trimValue = marked ? 1.0 : 0.0
-                XMarkShape()
-                    .trim(from: 0.0, to: trimValue)
-                    .stroke(status == .error ? Color.red.opacity(0.75) : Color.secondary, style: puzzleMetrics.xmarkStrokeStyle)
-                    .animation(.keyframes {
-                        let half = marked ? 0.4999 : 0.5001
-                        LinearKeyframe(half, duration: 4 / 60)
-                        LinearKeyframe(half, duration: 3 / 60)
-                        LinearKeyframe(1.0, duration: 4 / 60)
-                    }.instant(), value: trimValue)
-                    .frame(width: puzzleMetrics.tileSize * 0.45, height: puzzleMetrics.tileSize * 0.45)
+                Color.clear
             }
         }
             .frame(width: puzzleMetrics.tileSize, height: puzzleMetrics.tileSize, alignment: .center)
+    }
+}
+
+struct XMarkTransition: Transition {
+    let strokeColor: Color
+    let strokeStyle: StrokeStyle
+    let size: CGFloat
+
+    func body(content: Content, phase: TransitionPhase) -> some View {
+        content.background {
+            XMarkShape()
+                .trim(from: phase.isIdentity ? 0.0 : 0.0001, to: phase.isIdentity ? 0.9999 : 0.0)
+                .stroke(strokeColor, style: strokeStyle)
+                .frame(width: size, height: size)
+        }
     }
 }
 
