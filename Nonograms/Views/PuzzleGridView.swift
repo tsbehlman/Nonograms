@@ -6,6 +6,9 @@
 //
 
 import SwiftUI
+import simd
+
+private let minTileDistanceForAxisChange: CGFloat = 0.75
 
 struct DraggablePuzzleTilesView: View {
     enum DragState: Equatable {
@@ -29,22 +32,19 @@ struct DraggablePuzzleTilesView: View {
         var axis: Axis?
         if case let .dragging(lastRow, lastColumn, currentState, lastAxis) = state {
             tileState = currentState
-            axis = lastAxis
-            if lastAxis == .vertical {
-                let distance = abs(value.location.x / puzzleMetrics.tileSize - (CGFloat(lastColumn) + 0.5))
-                if distance < 0.75 {
-                    column = lastColumn
-                }
-            } else if lastAxis == .horizontal {
-                let distance = abs(value.location.y / puzzleMetrics.tileSize - (CGFloat(lastRow) + 0.5))
-                if distance < 0.75 {
-                    row = lastRow
-                }
+            let lastPosition = Vec2(lastColumn, lastRow) + 0.5
+            let distance = abs(Vec2(value.location) / puzzleMetrics.tileSize - lastPosition)
+            if lastAxis == .vertical && distance.x < minTileDistanceForAxisChange {
+                column = lastColumn
+            } else if lastAxis == .horizontal && distance.y < minTileDistanceForAxisChange {
+                row = lastRow
             }
             if row != lastRow && column == lastColumn {
                 axis = .vertical
             } else if row == lastRow && column != lastColumn {
                 axis = .horizontal
+            } else {
+                axis = lastAxis
             }
         } else if gameState.puzzle.tile(row: row, column: column) == tileState {
             tileState = .blank
