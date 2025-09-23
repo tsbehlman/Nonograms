@@ -90,12 +90,12 @@ struct TileView: View, Animatable {
                 XMarkShape()
                     .trim(from: 0.0, to: trimValue)
                     .stroke(status == .error ? Color.red.opacity(0.75) : Color.secondary, style: puzzleMetrics.xmarkStrokeStyle)
-                    .keyframeAnimation(trimValue) {
+                    .animation(.keyframes {
                         let half = marked ? 0.4999 : 0.5001
                         LinearKeyframe(half, duration: 4 / 60)
                         LinearKeyframe(half, duration: 3 / 60)
                         LinearKeyframe(1.0, duration: 4 / 60)
-                    }
+                    }.instant(), value: trimValue)
                     .frame(width: puzzleMetrics.tileSize * 0.45, height: puzzleMetrics.tileSize * 0.45)
             }
         }
