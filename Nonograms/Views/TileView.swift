@@ -23,22 +23,19 @@ struct TileView: View, Animatable {
         set { rippleTimer = newValue }
     }
 
-    @Environment(\.gameState.isSolved) var isSolved
-    @Environment(\.gameState.lastFilledTile) var lastFilledTile
-    @Environment(\.gameState.puzzle.width) var puzzleWidth
-    @Environment(\.gameState.puzzle.height) var puzzleHeight
+    @Environment(\.gameState) var gameState
     @Environment(\.puzzleMetrics) var puzzleMetrics
 
     var delay: TimeInterval {
-        let (lastRow, lastColumn) = lastFilledTile ?? (row, column)
-        let diagonal = hypot(Double(puzzleWidth), Double(puzzleHeight))
+        let (lastRow, lastColumn) = gameState.lastFilledTile ?? (row, column)
+        let diagonal = hypot(Double(gameState.puzzle.width), Double(gameState.puzzle.height))
         let length = hypot(
             Double(lastRow - row),
             Double(lastColumn - column)
         ) / diagonal
         let distanceToCenter = hypot(
-            Double(lastRow - puzzleWidth / 2),
-            Double(lastColumn - puzzleHeight / 2)
+            Double(lastRow - gameState.puzzle.width / 2),
+            Double(lastColumn - gameState.puzzle.height / 2)
         ) / diagonal * 2
         return min(1.0, length * (2.0 - distanceToCenter)) * maximumDelay
     }
@@ -76,6 +73,7 @@ struct TileView: View, Animatable {
     }
 
     var body: some View {
+        let isSolved = gameState.isSolved
         Group {
             if status == .filled {
                 Rectangle()

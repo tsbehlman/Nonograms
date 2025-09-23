@@ -53,15 +53,14 @@ struct PuzzleMetrics {
 struct PuzzleMetricsProvider<Content: View>: View {
     @ViewBuilder let content: () -> Content
 
-    @Environment(\.gameState.puzzle.width) var puzzleWidth
-    @Environment(\.gameState.puzzle.height) var puzzleHeight
+    @Environment(\.gameState) var gameState
     @AppStorage("tileSize") var tileSize = NonogramsDefaults.tileSize
 
     var body: some View {
         content()
             .environment(\.puzzleMetrics, PuzzleMetrics(
-                width: puzzleWidth,
-                height: puzzleHeight,
+                width: gameState.puzzle.width,
+                height: gameState.puzzle.height,
                 tileSize: tileSize
             ))
     }
