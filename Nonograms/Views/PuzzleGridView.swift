@@ -14,6 +14,16 @@ struct DraggablePuzzleTilesView: View {
     enum DragState: Equatable {
         case inactive
         case dragging(row: Int, column: Int, state: TileState, axis: Axis?)
+
+        func positions(since last: DragState) -> any Sequence<(Int, Int)> {
+            guard case let .dragging(nextRow, nextColumn, _, axis) = self else { return [] }
+            guard case let .dragging(lastRow, lastColumn, _, _) = last, let axis = axis else { return [(nextRow, nextColumn)] }
+            if axis == .horizontal {
+                return (min(lastColumn, nextColumn)...max(lastColumn, nextColumn)).lazy.map { (nextRow, $0) }
+            } else {
+                return (min(lastRow, nextRow)...max(lastRow, nextRow)).lazy.map { ($0, nextColumn) }
+            }
+        }
     }
 
     @GestureState private var dragState: DragState = .inactive
@@ -43,8 +53,10 @@ struct DraggablePuzzleTilesView: View {
                 axis = .vertical
             } else if row == lastRow && column != lastColumn {
                 axis = .horizontal
-            } else {
+            } else if row == lastRow && column == lastColumn {
                 axis = lastAxis
+            } else {
+                axis = nil
             }
         } else if gameState.puzzle.tile(row: row, column: column) == tileState {
             tileState = .blank
@@ -52,25 +64,25 @@ struct DraggablePuzzleTilesView: View {
         state = .dragging(row: row, column: column, state: tileState, axis: axis)
     }
 
+    func onDragStateChange(_ oldState: DragState, _ newState: DragState) {
+        guard case let .dragging(_, _, state, _) = newState else {
+            gameState.endTransaction()
+            return
+        }
+        gameState.beginTransaction()
+
+        for (row, column) in newState.positions(since: oldState) {
+            gameState.fill(row: row, column: column, state: state)
+        }
+    }
+
     var body: some View {
-        let puzzle = gameState.puzzle
-        let mode = gameState.mode
         let gesture = DragGesture(minimumDistance: 4, coordinateSpace: .local)
-            .updating($dragState, body: self.updateDragGesture)
+            .updating($dragState, body: updateDragGesture)
         PuzzleTilesView()
             .contentShape(Rectangle())
-            .highPriorityGesture(gesture, isEnabled: mode.tileState != nil)
-            .onChange(of: dragState) {
-                if case .dragging = dragState {
-                    gameState.beginTransaction()
-                } else {
-                    gameState.endTransaction()
-                }
-                guard case let .dragging(row, column, state, _) = dragState,
-                      puzzle.rowIndices.contains(row),
-                      puzzle.columnIndices.contains(column) else { return }
-                gameState.fill(row: row, column: column, state: state)
-            }
+            .highPriorityGesture(gesture, isEnabled: gameState.mode.tileState != nil)
+            .onChange(of: dragState, onDragStateChange)
             .onTapGesture { point in
                 let (row, column) = location(at: point)
                 gameState.fill(row: row, column: column, state: nil)
