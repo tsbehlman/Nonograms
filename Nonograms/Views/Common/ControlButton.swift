@@ -57,14 +57,14 @@ struct ControlButton<Content: View>: View {
     }
 
     @Environment(\.colorScheme) var colorScheme
-    @Environment(\.gameState.puzzleColor) var puzzleColor
+    @Environment(\.gameState) var gameState
 
     var backgroundColor: Color {
         if active {
             if disabled {
                 return Color.primary.opacity(0.5)
             } else {
-                return puzzleColor
+                return gameState.puzzleColor
             }
         } else {
             return Color(UIColor.systemBackground)

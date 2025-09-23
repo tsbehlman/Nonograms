@@ -12,14 +12,14 @@ struct SegmentLabel: View {
     let isHighlighted: Bool
 
     @Environment(\.colorScheme) var colorScheme
-    @Environment(\.gameState.puzzleColor) var puzzleColor
+    @Environment(\.gameState) var gameState
     @Environment(\.puzzleMetrics.segmentFont) var segmentFont
 
     var color: Color {
         if isHighlighted {
             hintFillColor
         } else if segment.state == .complete {
-            puzzleColor
+            gameState.puzzleColor
         } else {
             Color.primary
         }
@@ -88,7 +88,7 @@ struct SegmentsBackground: View {
     let segmentSize: CGFloat
 
     @Environment(\.colorScheme) var colorScheme
-    @Environment(\.gameState.puzzleColor) var puzzleColor
+    @Environment(\.gameState) var gameState
     @Environment(\.puzzleMetrics.tileSize) var tileSize
     @Environment(\.puzzleMetrics.puzzleSize) var puzzleSize
 
@@ -98,9 +98,9 @@ struct SegmentsBackground: View {
         let opacity = colorScheme == .dark ? 1.0 : 0.5
         return LinearGradient(
             stops: [
-                Gradient.Stop(color: puzzleColor.opacity(0.00 * opacity), location: 0.000),
-                Gradient.Stop(color: puzzleColor.opacity(0.25 * opacity), location: 0.375),
-                Gradient.Stop(color: puzzleColor.opacity(0.50 * opacity), location: 1.000),
+                Gradient.Stop(color: gameState.puzzleColor.opacity(0.00 * opacity), location: 0.000),
+                Gradient.Stop(color: gameState.puzzleColor.opacity(0.25 * opacity), location: 0.375),
+                Gradient.Stop(color: gameState.puzzleColor.opacity(0.50 * opacity), location: 1.000),
             ],
             startPoint: UnitPoint(x: 0, y: 0),
             endPoint: axis == .horizontal
@@ -131,7 +131,7 @@ struct SegmentsView: View {
 
     @Environment(\.puzzleMetrics.tileSize) var tileSize
     @Environment(\.puzzleMetrics.segmentPadding) var segmentPadding
-    @Environment(\.gameState.hint) var hint
+    @Environment(\.gameState) var gameState
 
     var body: some View {
         SegmentsLayout(
@@ -141,7 +141,7 @@ struct SegmentsView: View {
             offset: offset
         ) {
             ForEach(axis == .horizontal ? puzzle.columnIndices : puzzle.rowIndices, id: \.self) { index in
-                SegmentLabels(puzzle: puzzle, axis: axis.opposing, index: index, isHighlighted: hint?.axis == axis.opposing && hint?.index == index)
+                SegmentLabels(puzzle: puzzle, axis: axis.opposing, index: index, isHighlighted: gameState.hint?.axis == axis.opposing && gameState.hint?.index == index)
             }
         }
             .padding(axis == .horizontal ? .vertical : .horizontal, segmentPadding)
