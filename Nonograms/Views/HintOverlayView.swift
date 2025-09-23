@@ -7,9 +7,6 @@
 
 import SwiftUI
 
-private let hintOutlineWidth: CGFloat = 1.5
-private let hintStrokeWidth: CGFloat = 2.5 + hintOutlineWidth
-private let hintInset: CGFloat = -4
 private let hintCornerRadius: CGFloat = 4
 let hintFillColor = Color.yellow.mix(with: Color.orange, by: 0.25)
 
@@ -38,15 +35,14 @@ struct HintOutlineView: View {
         let rect = hint.axis == .horizontal
             ? CGRect(x: position, y: crossAxisPosition, width: size, height: puzzleMetrics.tileSize)
             : CGRect(x: crossAxisPosition, y: position, width: puzzleMetrics.tileSize, height: size)
-        return rect.insetBy(dx: hintInset, dy: hintInset)
+        return rect.insetBy(dx: puzzleMetrics.hintInset, dy: puzzleMetrics.hintInset)
     }
 
     var body: some View {
         RoundedRectangle(cornerRadius: hintCornerRadius)
             .path(in: rect)
-            .strokedPath(StrokeStyle(lineWidth: hintStrokeWidth))
-            .fill(Color.yellow)
-            .stroke(Color.white, style: StrokeStyle(lineWidth: hintOutlineWidth, lineJoin: .round))
+            .stroke(Color.white, style: StrokeStyle(lineWidth: puzzleMetrics.hintStrokeWidth))
+            .stroke(Color.yellow, style: StrokeStyle(lineWidth: puzzleMetrics.hintOutlineWidth))
             .offset(isAnimating ? destination : .zero)
             .animation(
                 .easeInOut(duration: 1).repeatForever(autoreverses: true),
