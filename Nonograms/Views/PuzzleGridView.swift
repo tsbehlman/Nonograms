@@ -171,10 +171,10 @@ struct PuzzleGridView: View {
             }
             GeometryReader { _ in
                 VStack(spacing: 0) {
-                    SegmentsView(axis: .horizontal, puzzle: puzzle, offset: offset, labelSize: puzzleMetrics.labelSize.height)
+                    SegmentsView(axis: .horizontal, offset: offset)
                         .padding(.leading, puzzleMetrics.segmentSize.width)
                     HStack(alignment: .top, spacing: 0) {
-                        SegmentsView(axis: .vertical, puzzle: puzzle, offset: offset, labelSize: puzzleMetrics.labelSize.width)
+                        SegmentsView(axis: .vertical, offset: offset)
                         Spacer()
                             .frame(width: puzzleMetrics.puzzleSize.width, height: puzzleMetrics.puzzleSize.height)
                     }
