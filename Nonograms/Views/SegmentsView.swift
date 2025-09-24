@@ -34,18 +34,12 @@ struct SegmentLabel: View {
 }
 
 struct SegmentLabels: View {
-    let puzzle: Puzzle
+    let segments: [Segment]
     let axis: Axis
     let index: Int
     let isHighlighted: Bool
 
     @Environment(\.puzzleMetrics.segmentFontSize) var segmentFontSize
-
-    var segments: [Segment] {
-        axis == .horizontal
-            ? puzzle.segments(forRow: index)
-            : puzzle.segments(forColumn: index)
-    }
 
     var spacing: CGFloat {
         if axis == .horizontal {
@@ -125,25 +119,30 @@ struct SegmentsBackground: View {
 
 struct SegmentsView: View {
     let axis: Axis
-    let puzzle: Puzzle
     let offset: CGPoint
-    let labelSize: CGFloat
 
-    @Environment(\.puzzleMetrics.tileSize) var tileSize
-    @Environment(\.puzzleMetrics.segmentPadding) var segmentPadding
+    @Environment(\.puzzleMetrics) var puzzleMetrics
     @Environment(\.gameState) var gameState
 
     var body: some View {
+        let segmentAxis = axis.opposing
+        let labelSize = segmentAxis == .horizontal
+            ? puzzleMetrics.labelSize.width
+            : puzzleMetrics.labelSize.height
         SegmentsLayout(
             axis: axis,
-            inlineSize: tileSize,
+            inlineSize: puzzleMetrics.tileSize,
             blockSize: labelSize,
             offset: offset
         ) {
-            ForEach(axis == .horizontal ? puzzle.columnIndices : puzzle.rowIndices, id: \.self) { index in
-                SegmentLabels(puzzle: puzzle, axis: axis.opposing, index: index, isHighlighted: gameState.hint?.axis == axis.opposing && gameState.hint?.index == index)
+            ForEach(axis == .horizontal ? gameState.puzzle.columnIndices : gameState.puzzle.rowIndices, id: \.self) { index in
+                let segments = segmentAxis == .horizontal
+                    ? gameState.puzzle.segments(forRow: index)
+                    : gameState.puzzle.segments(forColumn: index)
+                let isHighlighted = gameState.hint?.axis == segmentAxis && gameState.hint?.index == index
+                SegmentLabels(segments: segments, axis: segmentAxis, index: index, isHighlighted: isHighlighted)
             }
         }
-            .padding(axis == .horizontal ? .vertical : .horizontal, segmentPadding)
+            .padding(axis == .horizontal ? .vertical : .horizontal, puzzleMetrics.segmentPadding)
     }
 }
