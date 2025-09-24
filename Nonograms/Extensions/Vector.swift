@@ -19,8 +19,4 @@ extension Vec2 {
     init(_ cgPoint: CGPoint) {
         self.init(cgPoint.x, cgPoint.y)
     }
-
-    subscript(axis: Axis) -> Scalar {
-        axis == .horizontal ? x : y
-    }
 }
