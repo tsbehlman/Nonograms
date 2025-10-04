@@ -17,7 +17,7 @@ extension Range {
     }
 
     func contains(_ other: Range<Bound>) -> Bool {
-        return lowerBound <= other.lowerBound && upperBound >= other.upperBound
+        lowerBound <= other.lowerBound && upperBound >= other.upperBound
     }
 }
 

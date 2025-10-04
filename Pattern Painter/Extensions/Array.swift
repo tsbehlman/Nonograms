@@ -27,7 +27,7 @@ extension Array {
     }
 
     func gridIndices(forColumn columnIndex: Int, width: Int) -> StrideTo<Int> {
-        return stride(from: columnIndex, to: count, by: width)
+        stride(from: columnIndex, to: count, by: width)
     }
 
     func gridItems(forRow rowIndex: Int, width: Int) -> some Sequence<Element> {

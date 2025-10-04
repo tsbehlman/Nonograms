@@ -36,13 +36,13 @@ class KeyframeAnimation<Content>: CustomAnimation where Content: KeyframeTrackCo
         trackContent = content()
     }
 
-    func animate<V>(value: V, time: TimeInterval, context: inout AnimationContext<V>) -> V? where V : VectorArithmetic {
+    func animate<V>(value: V, time: TimeInterval, context: inout AnimationContext<V>) -> V? where V: VectorArithmetic {
         guard time < timeline.duration else { return nil }
         return value.scaled(by: timeline.value(time: time))
     }
 
     static func == (lhs: KeyframeAnimation, rhs: KeyframeAnimation) -> Bool {
-        return false
+        false
     }
 
     func hash(into hasher: inout Hasher) {}

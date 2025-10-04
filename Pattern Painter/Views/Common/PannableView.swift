@@ -20,9 +20,9 @@ struct PannableView<Content: View>: View {
             .scrollDisabled(!scrollEnabled)
             .onScrollGeometryChange(for: Bool.self, of: { geometry in
                 Int(geometry.contentSize.width) <= Int(geometry.containerSize.width) && Int(geometry.contentSize.height) <= Int(geometry.containerSize.height)
-            }) {
+            }, action: {
                 fitsView = $1
-            }
+            })
             .onScrollGeometryChange(for: CGPoint.self, of: \.contentOffset) {
                 offset = $1
             }
@@ -33,7 +33,7 @@ struct PannableView<Content: View>: View {
 #if DEBUG
 
 func checkerboard(_ size: CGFloat, color: Color = .gray) -> Image {
-    Image(size: CGSizeMake(size * 2, size * 2)) { context in
+    Image(size: CGSize(width: size * 2, height: size * 2)) { context in
         context.fill(Path(roundedRect: CGRect(x: 0, y: 0, width: size, height: size), cornerRadius: 0), with: .color(color))
         context.fill(Path(roundedRect: CGRect(x: size, y: size, width: size, height: size), cornerRadius: 0), with: .color(color))
     }

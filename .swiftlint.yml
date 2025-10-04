@@ -1,0 +1,24 @@
+disabled_rules:
+  - line_length
+  - file_length
+  - function_body_length
+  - type_body_length
+  - force_cast
+  - todo
+  - for_where
+opt_in_rules:
+  - implicit_return
+  - shorthand_optional_binding
+identifier_name:
+  min_length: 2
+  max_length: 128
+  excluded:
+    - x
+    - y
+force_try: warning
+type_name:
+  allowed_symbols: "_"
+trailing_comma:
+  mandatory_comma: true
+cyclomatic_complexity:
+  ignores_case_statements: true

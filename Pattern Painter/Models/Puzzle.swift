@@ -12,7 +12,7 @@ enum TileState: Codable {
     case error
 
     var isBlocked: Bool {
-        return self == .blocked || self == .error
+        self == .blocked || self == .error
     }
 }
 
@@ -53,14 +53,14 @@ struct Puzzle: Codable {
         self.width = width
         self.height = height
         self.solution = solution
-        self.tiles = Array<TileState>(repeating: .blank, count: Int(width) * Int(height))
+        self.tiles = [TileState](repeating: .blank, count: Int(width) * Int(height))
     }
 
     init(size: Int, data: [UInt]) {
         assert(size <= 32, "Puzzles larger than 32x32 are not supported")
         assert(data.count == size, "Puzzles must be square, you must provide data for each row")
 
-        var solution = Array<TileState>(repeating: .blank, count: Int(size) * Int(size))
+        var solution = [TileState](repeating: .blank, count: Int(size) * Int(size))
         fillTiles(&solution, with: data, size: size)
         self.init(width: size, height: size, solution: solution)
     }

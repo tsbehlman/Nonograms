@@ -21,7 +21,7 @@ struct ConcatenatedSequence<First: Sequence, Last: Sequence>: Sequence where Fir
     }
 
     func makeIterator() -> Iterator {
-        return Iterator(first, last)
+        Iterator(first, last)
     }
 
     struct Iterator: IteratorProtocol {
@@ -34,7 +34,7 @@ struct ConcatenatedSequence<First: Sequence, Last: Sequence>: Sequence where Fir
         }
 
         mutating func next() -> First.Element? {
-            return first.next() ?? last.next()
+            first.next() ?? last.next()
         }
     }
 }

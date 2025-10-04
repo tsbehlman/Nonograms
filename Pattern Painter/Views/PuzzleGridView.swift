@@ -17,7 +17,7 @@ struct DraggablePuzzleTilesView: View {
 
         func positions(since last: DragState) -> any Sequence<(Int, Int)> {
             guard case let .dragging(nextRow, nextColumn, _, axis) = self else { return [] }
-            guard case let .dragging(lastRow, lastColumn, _, _) = last, let axis = axis else { return [(nextRow, nextColumn)] }
+            guard case let .dragging(lastRow, lastColumn, _, _) = last, let axis else { return [(nextRow, nextColumn)] }
             if axis == .horizontal {
                 return (min(lastColumn, nextColumn)...max(lastColumn, nextColumn)).lazy.map { (nextRow, $0) }
             } else {
@@ -111,24 +111,24 @@ struct PuzzleTilesView: View {
 
             Path { path in
                 for x in stride(from: 0, through: size.width, by: puzzleMetrics.tileSize) {
-                    path.move(to: CGPointMake(x, 0))
-                    path.addLine(to: CGPointMake(x, size.height))
+                    path.move(to: CGPoint(x: x, y: 0))
+                    path.addLine(to: CGPoint(x: x, y: size.height))
                 }
                 for y in stride(from: 0, through: size.height, by: puzzleMetrics.tileSize) {
-                    path.move(to: CGPointMake(0, y))
-                    path.addLine(to: CGPointMake(size.width, y))
+                    path.move(to: CGPoint(x: 0, y: y))
+                    path.addLine(to: CGPoint(x: size.width, y: y))
                 }
             }
                 .stroke(Color.primary.opacity(0.25), lineWidth: 1, antialiased: false)
 
             Path { path in
                 for x in stride(from: 0, through: size.width, by: puzzleMetrics.majorTileSize) {
-                    path.move(to: CGPointMake(x, 0))
-                    path.addLine(to: CGPointMake(x, size.height))
+                    path.move(to: CGPoint(x: x, y: 0))
+                    path.addLine(to: CGPoint(x: x, y: size.height))
                 }
                 for y in stride(from: 0, through: size.height, by: puzzleMetrics.majorTileSize) {
-                    path.move(to: CGPointMake(0, y))
-                    path.addLine(to: CGPointMake(size.width, y))
+                    path.move(to: CGPoint(x: 0, y: y))
+                    path.addLine(to: CGPoint(x: size.width, y: y))
                 }
             }
                 .stroke(Color.primary.opacity(1), style: StrokeStyle(lineWidth: 1, lineCap: .square), antialiased: false)
@@ -144,7 +144,6 @@ struct PuzzleGridView: View {
     @Environment(\.gameState) var gameState
 
     var body: some View {
-        let puzzle = gameState.puzzle
         let puzzlePadding: CGFloat = puzzleMetrics.hintOutlineWidth - puzzleMetrics.hintInset
 
         ZStack {

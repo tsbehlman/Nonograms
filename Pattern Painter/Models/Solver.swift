@@ -40,6 +40,7 @@ struct Solver: Codable {
         set(row * columns.count + column, to: newState)
     }
 
+    // swiftlint:disable:next cyclomatic_complexity
     private func make(attempt: inout SolverAttempt, forLengths lengths: [Int]) {
         guard lengths.only != 0 else {
             attempt.minRanges = []

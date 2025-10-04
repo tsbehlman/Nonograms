@@ -6,6 +6,5 @@
 //
 
 func clamp<T: Comparable>(_ value: T, min: T, max: T) -> T {
-    return Swift.max(min, Swift.min(value, max))
+    Swift.max(min, Swift.min(value, max))
 }
-
