@@ -3,9 +3,7 @@
 
 ### Xcode ###
 build
-*.xcodeproj/*
-!*.xcodeproj/project.pbxproj
-!*.xcworkspace/contents.xcworkspacedata
-*.xcworkspace/xcuserdata/
+xcuserdata
+*.xcworkspace
 /*.gcno
 DerivedData/
