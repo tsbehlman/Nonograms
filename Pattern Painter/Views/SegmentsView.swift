@@ -67,9 +67,9 @@ private struct StripedShape: Shape {
         Path { path in
             for position in stride(from: 0, to: axis == .horizontal ? rect.width : rect.height, by: size * 2) {
                 if axis == .horizontal {
-                    path.addRect(CGRectMake(position, rect.minY, size, rect.height))
+                    path.addRect(CGRect(x: position, y: rect.minY, width: size, height: rect.height))
                 } else {
-                    path.addRect(CGRectMake(rect.minX, position, rect.width, size))
+                    path.addRect(CGRect(x: rect.minX, y: position, width: rect.width, height: size))
                 }
             }
         }

@@ -123,9 +123,9 @@ struct NewGameSheetView: View {
         NewGameView(gameState: $gameState)
             .onScrollGeometryChange(for: CGFloat.self, of: { geometry in
                 (geometry.contentSize.height + geometry.contentInsets.top).rounded()
-            }) {
+            }, action: {
                 height = $1
-            }
+            })
             .presentationDetents([.height(height), .large])
     }
 }

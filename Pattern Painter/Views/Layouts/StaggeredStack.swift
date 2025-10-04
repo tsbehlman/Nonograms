@@ -156,14 +156,14 @@ struct StaggeredStackBackground: InsettableShape {
 }
 
 extension Path {
-    mutating func addSubpath(_ builder: (_: inout Path) -> ()) {
+    mutating func addSubpath(_ builder: (_: inout Path) -> Void) {
         var subpath = Path()
         builder(&subpath)
         self = union(subpath, eoFill: false)
         closeSubpath()
     }
 
-    mutating func addSubpath(transform: CGAffineTransform, _ builder: (_: inout Path) -> ()) {
+    mutating func addSubpath(transform: CGAffineTransform, _ builder: (_: inout Path) -> Void) {
         var subpath = Path()
         builder(&subpath)
         self = union(subpath.applying(transform), eoFill: false)

@@ -41,7 +41,7 @@ final class SolverTests: XCTestCase {
             0b111100,
             0b110110,
             0b011101,
-            0b111111
+            0b111111,
         ),
         .init(
             5,
@@ -49,7 +49,7 @@ final class SolverTests: XCTestCase {
             0b10001,
             0b10101,
             0b10001,
-            0b11111
+            0b11111,
         )
     ]
     
@@ -69,7 +69,7 @@ final class SolverTests: XCTestCase {
             0b10001,
             0b11101,
             0b11011,
-            0b11111
+            0b11111,
         )
         let tileIndex = testCase.puzzle.tileIndex(row: 0, column: 3)
         testCase.puzzle.tiles[testCase.puzzle.tileIndex(row: 0, column: 3)] = .filled

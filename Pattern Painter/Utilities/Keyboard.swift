@@ -12,7 +12,7 @@ class KeyboardObserver: ObservableObject {
     @Published var keyboard: GCKeyboard?
     @Published var modifiers: EventModifiers = []
 
-    var observer: Any? = nil
+    var observer: Any?
 
     init() {
         observer = NotificationCenter.default.addObserver(
@@ -20,10 +20,10 @@ class KeyboardObserver: ObservableObject {
             object: nil,
             queue: .main
         ) { [weak self] notification in
-            guard let self = self else { return }
+            guard let self else { return }
 
             let keyboard = notification.object as? GCKeyboard
-            keyboard?.keyboardInput?.keyChangedHandler = { keyboardInput, _, keyCode, pressed in
+            keyboard?.keyboardInput?.keyChangedHandler = { _, _, keyCode, pressed in
                 var modifier: EventModifiers = []
                 if keyCode == .leftAlt || keyCode == .rightAlt {
                     modifier = .option

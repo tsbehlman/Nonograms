@@ -85,7 +85,7 @@ struct WheelPicker<Value: Equatable>: UIViewRepresentable {
     }
 
     func sizeThatFits(_ proposal: ProposedViewSize, uiView: Self.UIViewType, context: Self.Context) -> CGSize? {
-        return proposal.replacingUnspecifiedDimensions()
+        proposal.replacingUnspecifiedDimensions()
     }
 
     func makeCoordinator() -> Coordinator {
@@ -104,7 +104,7 @@ struct WheelPicker<Value: Equatable>: UIViewRepresentable {
         }
         return view
     }
-    
+
     func updateUIView(_ view: UIPickerView, context: Context) {}
 }
 
