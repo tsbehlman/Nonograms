@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+private let tileSizeRange = Double(AppDefaults.minTileSize)...Double(AppDefaults.maxTileSize)
+
 struct SettingsView: View {
     @Binding var gameState: GameState
     @Environment(\.dismiss) var dismiss
@@ -19,7 +21,7 @@ struct SettingsView: View {
         NavigationView {
             List {
                 Section("puzzleTileSizeSetting", content: {
-                    Slider(value: $tileSize, in: 38...54, step: 2, label: {
+                    Slider(value: $tileSize, in: tileSizeRange, step: 2, label: {
                         Text("puzzleTileSizeSetting")
                     }, minimumValueLabel: {
                         Image(systemName: "squareshape.split.3x3").imageScale(.medium)
