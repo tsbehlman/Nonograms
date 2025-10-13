@@ -145,7 +145,7 @@ struct PuzzleGridView: View {
 
     var body: some View {
         ZStack {
-            PannableView(scrollEnabled: gameState.mode.tileState == nil, fitsView: $fitsView, offset: $offset) {
+            ScrollZoomView(scrollEnabled: gameState.mode.tileState == nil, offset: $offset) {
                 VStack(spacing: 0) {
                     SegmentsBackground(axis: .horizontal, offset: offset, segmentSize: puzzleMetrics.segmentSize.height)
                         .frame(width: puzzleMetrics.puzzleSize.width, height: puzzleMetrics.segmentSize.height, alignment: .bottom)
@@ -166,7 +166,7 @@ struct PuzzleGridView: View {
                 }
                 .padding([.trailing, .bottom], puzzleMetrics.puzzlePadding)
             }
-            GeometryReader { _ in
+            GeometryReader { geometry in
                 VStack(spacing: 0) {
                     SegmentsView(axis: .horizontal, offset: offset)
                         .padding(.leading, puzzleMetrics.segmentSize.width)
@@ -179,6 +179,9 @@ struct PuzzleGridView: View {
                         .clipped()
                 }
                     .padding(.trailing, puzzleMetrics.puzzlePadding)
+                    .onChange(of: geometry.size) {
+                        fitsView = Int(puzzleMetrics.totalSize.width) <= Int(geometry.size.width) && Int(puzzleMetrics.totalSize.height) <= Int(geometry.size.height)
+                    }
             }
                 .allowsHitTesting(false)
         }
