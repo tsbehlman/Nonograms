@@ -14,4 +14,9 @@ extension EnvironmentValues {
         height: 5,
         tileSize: AppDefaults.tileSize
     )
+    @Entry var minPuzzleMetrics = PuzzleMetrics(
+        width: 5,
+        height: 5,
+        tileSize: AppDefaults.minTileSize
+    )
 }

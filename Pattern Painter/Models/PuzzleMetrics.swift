@@ -65,5 +65,10 @@ struct PuzzleMetricsProvider<Content: View>: View {
                 height: gameState.puzzle.height,
                 tileSize: tileSize
             ))
+            .environment(\.minPuzzleMetrics, PuzzleMetrics(
+                width: gameState.puzzle.width,
+                height: gameState.puzzle.height,
+                tileSize: AppDefaults.minTileSize
+            ))
     }
 }
