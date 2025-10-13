@@ -144,8 +144,6 @@ struct PuzzleGridView: View {
     @Environment(\.gameState) var gameState
 
     var body: some View {
-        let puzzlePadding: CGFloat = puzzleMetrics.hintOutlineWidth - puzzleMetrics.hintInset
-
         ZStack {
             PannableView(scrollEnabled: gameState.mode.tileState == nil, fitsView: $fitsView, offset: $offset) {
                 VStack(spacing: 0) {
@@ -166,7 +164,7 @@ struct PuzzleGridView: View {
                         }
                     }
                 }
-                .padding([.trailing, .bottom], puzzlePadding)
+                .padding([.trailing, .bottom], puzzleMetrics.puzzlePadding)
             }
             GeometryReader { _ in
                 VStack(spacing: 0) {
@@ -180,10 +178,10 @@ struct PuzzleGridView: View {
                         .clipped()
                 }
             }
-                .padding([.trailing, .bottom], puzzlePadding)
+                .padding([.trailing, .bottom], puzzleMetrics.puzzlePadding)
                 .allowsHitTesting(false)
         }
-            .frame(maxWidth: puzzleMetrics.totalSize.width + puzzlePadding, maxHeight: puzzleMetrics.totalSize.height + puzzlePadding)
+            .frame(maxWidth: puzzleMetrics.totalSize.width + puzzleMetrics.puzzlePadding, maxHeight: puzzleMetrics.totalSize.height + puzzleMetrics.puzzlePadding)
             .clipped()
     }
 }

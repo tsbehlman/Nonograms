@@ -21,6 +21,7 @@ struct PuzzleMetrics {
     let hintOutlineWidth: CGFloat
     let hintStrokeWidth: CGFloat
     let hintInset: CGFloat
+    let puzzlePadding: CGFloat
 
     init(width: Int, height: Int, tileSize: CGFloat) {
         let size = max(width, height)
@@ -47,6 +48,7 @@ struct PuzzleMetrics {
         hintOutlineWidth = tileSize / 15
         hintStrokeWidth = hintOutlineWidth * 2
         hintInset = -tileSize / 10
+        puzzlePadding = hintOutlineWidth - hintInset
     }
 }
 
