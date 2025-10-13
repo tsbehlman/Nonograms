@@ -40,15 +40,15 @@ struct PuzzleMetrics {
             width: labelSize.width + segmentPadding * 2,
             height: labelSize.height + segmentPadding * 2
         )
-        totalSize = CGSize(
-            width: puzzleSize.width + segmentSize.width,
-            height: puzzleSize.height + segmentSize.height
-        )
         xmarkStrokeStyle = StrokeStyle(lineWidth: tileSize / 16.0, lineCap: .round)
         hintOutlineWidth = tileSize / 15
         hintStrokeWidth = hintOutlineWidth * 2
         hintInset = -tileSize / 10
         puzzlePadding = hintOutlineWidth - hintInset
+        totalSize = CGSize(
+            width: puzzleSize.width + segmentSize.width + puzzlePadding,
+            height: puzzleSize.height + segmentSize.height + puzzlePadding
+        )
     }
 }
 
