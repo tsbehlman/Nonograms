@@ -175,10 +175,11 @@ struct PuzzleGridView: View {
                         Spacer()
                             .frame(width: puzzleMetrics.puzzleSize.width, height: puzzleMetrics.puzzleSize.height)
                     }
+                        .padding(.bottom, puzzleMetrics.puzzlePadding)
                         .clipped()
                 }
+                    .padding(.trailing, puzzleMetrics.puzzlePadding)
             }
-                .padding([.trailing, .bottom], puzzleMetrics.puzzlePadding)
                 .allowsHitTesting(false)
         }
             .frame(maxWidth: puzzleMetrics.totalSize.width + puzzleMetrics.puzzlePadding, maxHeight: puzzleMetrics.totalSize.height + puzzleMetrics.puzzlePadding)
