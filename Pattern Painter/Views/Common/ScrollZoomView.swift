@@ -21,6 +21,11 @@ struct ScrollZoomView<Content: View>: UIViewRepresentable {
         let viewToZoom = UIView()
         let widthConstraint: NSLayoutConstraint
         let heightConstraint: NSLayoutConstraint
+        var scrollView: UIScrollView?
+        var isAnimating = false
+        lazy var displayLink: CADisplayLink = {
+            CADisplayLink(target: self, selector: #selector(displayLinkCallback))
+        }()
 
         init(_ representative: ScrollZoomView, _ host: UIHostingController<Content>) {
             self.representative = representative
@@ -30,8 +35,26 @@ struct ScrollZoomView<Content: View>: UIViewRepresentable {
         }
 
         func scrollViewDidScroll(_ scrollView: UIScrollView) {
+            guard !isAnimating else { return }
             representative.offset = scrollView.contentOffset
             representative.tileSize = AppDefaults.minTileSize * scrollView.zoomScale
+        }
+
+        @objc func displayLinkCallback(_ target: CADisplayLink) {
+            let offset = scrollView?.layer.presentation()?.bounds.origin
+            if let offset, offset != representative.offset {
+                representative.offset = offset
+            } else {
+                displayLink.remove(from: .current, forMode: .common)
+                isAnimating = false
+            }
+        }
+
+        func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
+            isAnimating = true
+            self.scrollView = scrollView
+            displayLink.preferredFrameRateRange = CAFrameRateRange(minimum: 240, maximum: 240)
+            displayLink.add(to: .current, forMode: .common)
         }
 
         func viewForZooming(in scrollView: UIScrollView) -> UIView? {
