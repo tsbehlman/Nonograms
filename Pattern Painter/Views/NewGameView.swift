@@ -117,16 +117,18 @@ struct PuzzleSizeControl: View {
 
 struct NewGameSheetView: View {
     @Binding var gameState: GameState
-    @State var height: CGFloat = 0
+    @State var detents: Set<PresentationDetent> = [.large]
+    @State private var selectedDetent: PresentationDetent = .large
 
     var body: some View {
         NewGameView(gameState: $gameState)
             .onScrollGeometryChange(for: CGFloat.self, of: { geometry in
                 (geometry.contentSize.height + geometry.contentInsets.top).rounded()
             }, action: {
-                height = $1
+                selectedDetent = .height($1)
+                detents = [.large, selectedDetent]
             })
-            .presentationDetents([.height(height), .large])
+            .presentationDetents(detents, selection: $selectedDetent)
     }
 }
 
