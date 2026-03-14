@@ -6,7 +6,7 @@
 //
 
 import GameController
-import SwiftUICore
+import SwiftUI
 
 class KeyboardObserver: ObservableObject {
     @Published var keyboard: GCKeyboard?

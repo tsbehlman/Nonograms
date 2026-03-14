@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-extension Axis: Codable {
+extension Axis: @retroactive Codable {
     var opposing: Axis {
         switch self {
         case .vertical:
