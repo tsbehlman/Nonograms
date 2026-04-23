@@ -12,6 +12,9 @@
         }
       }
     },
+    "Cancel" : {
+
+    },
     "closeDialog" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -132,6 +135,12 @@
           }
         }
       }
+    },
+    "Reset" : {
+
+    },
+    "Reset the board?" : {
+
     },
     "settingsDialogTitle" : {
       "extractionState" : "manual",
