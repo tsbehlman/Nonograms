@@ -205,6 +205,20 @@ final class GameState: RepresentableWithCoding {
         hint = nil
     }
 
+    func clear() {
+        guard hasUndo, transactionGroup == nil else { return }
+        var transactions: [SinglePuzzleTransaction] = []
+        for (tileIndex, oldState) in puzzle.tiles.enumerated() where oldState != .blank {
+            transactions.append(SinglePuzzleTransaction(tileIndex: tileIndex, oldState: oldState, newState: .blank))
+            puzzle.tiles[tileIndex] = .blank
+        }
+        guard !transactions.isEmpty else { return }
+        let group = PuzzleTransactionGroup(transactions: transactions)
+        history.insert(group, at: historyIndex)
+        historyIndex += 1
+        history.removeSubrange(historyIndex...)
+    }
+
     func beginTransaction() {
         guard transactionGroup == nil else { return }
         transactionGroup = PuzzleTransactionGroup()

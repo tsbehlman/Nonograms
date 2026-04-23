@@ -37,6 +37,7 @@ struct ControlView: View {
     let fitsView: Bool
     @Binding var showSettings: Bool
     @Binding var showNewGame: Bool
+    @State var showClearDialog = false
 
     var body: some View {
         HStack(spacing: 12) {
@@ -80,6 +81,26 @@ struct ControlView: View {
                             .onTapGesture {
                                 gameState.undo()
                             }
+                            .onLongPressGesture {
+                                if gameState.hasUndo {
+                                    showClearDialog = true
+                                }
+                            }
+                            .confirmationDialog("Reset the board?", isPresented: $showClearDialog, actions: {
+                                Button(action: {
+                                    gameState.clear()
+                                    showClearDialog = false
+                                }, label: {
+                                    Text("Reset")
+                                })
+                                Button(action: {
+                                    showClearDialog = false
+                                }, label: {
+                                    Text("Cancel")
+                                })
+                            }, message: {
+                                Text("Reset the board?")
+                            })
                         Spacer()
                         ControlIconButton(icon: "arrow.uturn.right", disabled: !gameState.hasRedo, size: .small)
                             .onTapGesture {
