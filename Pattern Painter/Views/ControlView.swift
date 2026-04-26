@@ -10,10 +10,9 @@ import SwiftUI
 struct ControlModeButton: View {
     @Binding var mode: InteractionMode
     let control: TileState
-    let disabled: Bool
 
     var body: some View {
-        ControlButton(active: mode.tileState == control, disabled: disabled, bordered: false) {
+        ControlButton(active: mode.tileState == control, disabled: false, bordered: false) {
             Group {
                 if control == .blocked {
                     BlockedTileIcon()
@@ -24,9 +23,7 @@ struct ControlModeButton: View {
             }
         }
             .onTapGesture {
-                if !disabled {
-                    mode = .fill(control)
-                }
+                mode = .fill(control)
             }
     }
 }
@@ -63,13 +60,11 @@ struct ControlView: View {
             }
             Spacer()
             StaggeredStack(angle: .degrees(45), spacing: 16) {
-                ControlModeButton(mode: $gameState.mode, control: .filled, disabled: false)
-                ControlModeButton(mode: $gameState.mode, control: .blocked, disabled: false)
-                ControlIconButton(icon: "arrow.up.and.down.and.arrow.left.and.right", active: !fitsView && gameState.mode.tileState == nil, disabled: fitsView, bordered: false)
+                ControlModeButton(mode: $gameState.mode, control: .filled)
+                ControlModeButton(mode: $gameState.mode, control: .blocked)
+                ControlIconButton(icon: "arrow.up.and.down.and.arrow.left.and.right", active: gameState.mode.tileState == nil, bordered: false)
                     .onTapGesture {
-                        if !fitsView {
-                            gameState.mode = .move
-                        }
+                        gameState.mode = .move
                     }
             }
                 .traceBackground(padding: 7, curvature: 21) {
@@ -114,11 +109,6 @@ struct ControlView: View {
                 gameState.mode = .fill(.blocked)
             } else {
                 gameState.mode = .fill(.filled)
-            }
-        }
-        .onChange(of: fitsView) { _, fitsView in
-            if fitsView, case .move = gameState.mode {
-                gameState.mode = .fill(.blocked)
             }
         }
     }
