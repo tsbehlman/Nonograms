@@ -14,17 +14,27 @@ struct PuzzleSolveView: View {
     @State var showNewGame = false
 
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 0) {
             Spacer()
             Spacer()
-            PuzzleMetricsProvider {
-                PuzzleGridView(fitsView: $fitsView)
+            VStack(alignment: .center) {
+                PuzzleMetricsProvider {
+                    PuzzleGridView(fitsView: $fitsView)
+                }
             }
+                .frame(maxWidth: .infinity)
             ControlView(gameState: $gameState, fitsView: fitsView, showSettings: $showSettings, showNewGame: $showNewGame)
                 .padding(.horizontal, 16)
+                .padding(.vertical, 24)
                 .frame(maxWidth: 512)
+                .background(LinearGradient(colors: [
+                    Color(UIColor.systemBackground.withAlphaComponent(0)),
+                    Color(UIColor.systemBackground),
+                ], startPoint: UnitPoint(x: 0, y: 0), endPoint: UnitPoint(x: 0, y: 0.0625)))
             Spacer()
+                .background(Color(UIColor.systemBackground).containerRelativeFrame(.horizontal))
         }
+            .ignoresSafeArea(.all)
             .environment(\.gameState, gameState)
             .sheet(isPresented: $showSettings) {
                 SettingsView(gameState: $gameState)
