@@ -186,7 +186,6 @@ struct PuzzleGridView: View {
                 .allowsHitTesting(false)
         }
             .frame(maxWidth: puzzleMetrics.totalSize.width, maxHeight: puzzleMetrics.totalSize.height)
-            .clipped()
     }
 }
 
