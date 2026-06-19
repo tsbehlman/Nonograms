@@ -12,9 +12,6 @@
         }
       }
     },
-    "Cancel" : {
-
-    },
     "closeDialog" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -136,11 +133,35 @@
         }
       }
     },
-    "Reset" : {
-
+    "resetDialogCancel" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        }
+      }
     },
-    "Reset the board?" : {
-
+    "resetDialogConfirm" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reset"
+          }
+        }
+      }
+    },
+    "resetDialogTitle" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reset the board?"
+          }
+        }
+      }
     },
     "settingsDialogTitle" : {
       "extractionState" : "manual",

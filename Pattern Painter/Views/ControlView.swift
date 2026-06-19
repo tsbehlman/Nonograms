@@ -81,20 +81,20 @@ struct ControlView: View {
                                     showClearDialog = true
                                 }
                             }
-                            .confirmationDialog("Reset the board?", isPresented: $showClearDialog, actions: {
+                            .confirmationDialog("resetDialogTitle", isPresented: $showClearDialog, actions: {
                                 Button(action: {
                                     gameState.clear()
                                     showClearDialog = false
                                 }, label: {
-                                    Text("Reset")
+                                    Text("resetDialogConfirm")
                                 })
                                 Button(action: {
                                     showClearDialog = false
                                 }, label: {
-                                    Text("Cancel")
+                                    Text("resetDialogCancel")
                                 })
                             }, message: {
-                                Text("Reset the board?")
+                                Text("resetDialogTitle")
                             })
                         Spacer()
                         ControlIconButton(icon: "arrow.uturn.right", disabled: !gameState.hasRedo, size: .small)
